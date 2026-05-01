@@ -11,10 +11,6 @@ html, body, #__next {
   height: 100%;
 }
 
-body {
-  @apply bg-white text-slate-900;
-}
-
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-sans);
