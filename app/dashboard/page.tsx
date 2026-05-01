@@ -1,14 +1,30 @@
 import Link from 'next/link'
+import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { getRegistrations } from '@/lib/registrations'
 
 export const dynamic = 'force-dynamic'
 
-const statusStyles: Record<string, string> = {
-  pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  verified: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  rejected: 'bg-rose-50 text-rose-700 border-rose-200',
+const statusConfig: Record<string, { icon: any; color: string; label: string; bg: string }> = {
+  pending: {
+    icon: Clock,
+    color: 'text-amber-700',
+    label: 'Menunggu',
+    bg: 'bg-amber-50 border-amber-200',
+  },
+  verified: {
+    icon: CheckCircle2,
+    color: 'text-emerald-700',
+    label: 'Terverifikasi',
+    bg: 'bg-emerald-50 border-emerald-200',
+  },
+  rejected: {
+    icon: AlertCircle,
+    color: 'text-rose-700',
+    label: 'Ditolak',
+    bg: 'bg-rose-50 border-rose-200',
+  },
 }
 
 function getMemberLabel(teamMembers: Array<{ name?: string }> | undefined) {
@@ -20,81 +36,128 @@ export default async function DashboardPage() {
   const registrations = await getRegistrations()
 
   return (
-    <main className="min-h-screen px-6 py-12 sm:px-10 lg:px-12">
-      <section className="mx-auto w-full max-w-6xl space-y-10">
-        <div className="space-y-3">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">Dashboard</p>
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">Pusat registrasi peserta</h1>
-          <p className="max-w-2xl text-base leading-7 text-slate-600">
-            Ini adalah landing dashboard awal untuk flow registrasi lomba. Status final akan terisi otomatis saat auth dan RLS selesai disambungkan.
+    <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">
+      <section className="mx-auto w-full max-w-6xl space-y-12">
+        {/* Header */}
+        <div className="space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Dashboard</p>
+          <h1 className="text-5xl font-bold text-slate-900 sm:text-6xl">Pusat Registrasi Peserta</h1>
+          <p className="max-w-2xl text-lg text-slate-600">
+            Kelola semua pendaftaran kompetisi Anda di sini. Lihat status, detail tim, dan update registrasi.
           </p>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-3">
+        {/* Quick Steps */}
+        <div className="grid gap-4 md:grid-cols-3">
           {[
-            ['1', 'Pilih lomba', 'Masuk ke halaman kompetisi lalu pilih lomba yang ingin diikuti.'],
-            ['2', 'Isi form registrasi', 'Tambahkan anggota tim dan kirim data pendaftaran.'],
-            ['3', 'Cek status', 'Status pendaftaran akan ditampilkan setelah database siap.'],
-          ].map(([step, title, description]) => (
-            <article key={step} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-slate-400">Step {step}</p>
-              <h2 className="mt-2 text-xl font-semibold text-slate-950">{title}</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-            </article>
+            {
+              step: '1',
+              title: 'Pilih Kompetisi',
+              description: 'Jelajahi kompetisi yang tersedia dan pilih yang diminati.',
+              icon: ClipboardList,
+            },
+            {
+              step: '2',
+              title: 'Isi Form Registrasi',
+              description: 'Tambahkan anggota tim dan lengkapi data pendaftaran.',
+              icon: CheckCircle2,
+            },
+            {
+              step: '3',
+              title: 'Cek Status',
+              description: 'Pantau status pendaftaran secara real-time di dashboard.',
+              icon: Clock,
+            },
+          ].map(({ step, title, description, icon: Icon }) => (
+            <div key={step} className="rounded-2xl border border-slate-200 bg-white p-6">
+              <div className="flex items-start gap-4">
+                <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100">
+                  <Icon className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Step {step}</p>
+                  <h3 className="mt-1 font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{description}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
+        {/* CTA Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Button asChild className="rounded-full px-5">
-            <Link href="/competitions">Lihat kompetisi</Link>
+          <Button asChild size="lg" className="rounded-full bg-indigo-600 px-6 hover:bg-indigo-700">
+            <Link href="/competitions">
+              Lihat Kompetisi
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
-          <Button asChild variant="outline" className="rounded-full px-5">
-            <Link href="/competitions/robotika-challenge">Coba flow registrasi</Link>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-6">
+            <Link href="/competitions/robotika-challenge">Coba Registrasi</Link>
           </Button>
         </div>
 
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-2xl font-semibold text-slate-950">Registrasi terbaru</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Data ini akan otomatis menarik dari Supabase saat service role key sudah tersedia.
-              </p>
-            </div>
-            <span className="text-sm text-slate-500">Menampilkan {registrations.length} data</span>
+        {/* Registrations List */}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Registrasi Terbaru</h2>
+            <p className="mt-2 text-slate-600">
+              {registrations.length === 0
+                ? 'Belum ada registrasi. Mulai daftar kompetisi sekarang.'
+                : `${registrations.length} registrasi aktif`}
+            </p>
           </div>
 
-          <div className="grid gap-4">
-            {registrations.map((registration) => {
-              const statusClass = statusStyles[registration.status] || 'bg-slate-50 text-slate-700 border-slate-200'
+          {registrations.length > 0 ? (
+            <div className="space-y-4">
+              {registrations.map((reg) => {
+                const statusInfo = statusConfig[reg.status] || statusConfig.pending
+                const StatusIcon = statusInfo.icon
 
-              return (
-                <article key={registration.id} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-slate-500">{registration.competition_id}</p>
-                      <h3 className="mt-1 text-xl font-semibold text-slate-950">{registration.team_name}</h3>
-                      <p className="mt-2 text-sm text-slate-600">{getMemberLabel(registration.team_members)}</p>
-                    </div>
-
-                    <span className={`rounded-full border px-3 py-1 text-xs font-medium uppercase tracking-wide ${statusClass}`}>
-                      {registration.status}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {(registration.team_members || []).map((member, index) => (
-                      <div key={`${registration.id}-${member.email || index}`} className="rounded-2xl bg-slate-50 p-3 text-sm">
-                        <p className="font-medium text-slate-950">{member.name || `Member ${index + 1}`}</p>
-                        <p className="text-slate-500">{member.email || 'No email'}</p>
-                        <p className="text-slate-500">{member.institution || 'Unknown institution'}</p>
+                return (
+                  <div
+                    key={reg.id}
+                    className={`rounded-2xl border ${statusInfo.bg} p-6 transition-all duration-300 hover:shadow-md`}
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      {/* Team Info */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-lg font-semibold text-slate-900">{reg.team_name}</h3>
+                          <div className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${statusInfo.color}`}>
+                            <StatusIcon className="h-4 w-4" />
+                            {statusInfo.label}
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm text-slate-600">
+                          Kompetisi: <span className="font-semibold">{reg.competition_id}</span>
+                        </p>
+                        <p className="mt-1 text-sm text-slate-600">
+                          {getMemberLabel(reg.team_members)}
+                        </p>
                       </div>
-                    ))}
+
+                      {/* Action */}
+                      <Button asChild variant="ghost" size="sm" className="rounded-full">
+                        <Link href="/dashboard">Lihat Detail</Link>
+                      </Button>
+                    </div>
                   </div>
-                </article>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-12 text-center">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-slate-200">
+                <ClipboardList className="h-6 w-6 text-slate-500" />
+              </div>
+              <p className="mt-4 font-semibold text-slate-900">Belum ada registrasi</p>
+              <p className="mt-2 text-slate-600">Mulai daftar kompetisi sekarang untuk melihat status di sini.</p>
+              <Button asChild size="sm" className="mt-6 rounded-full bg-indigo-600 hover:bg-indigo-700">
+                <Link href="/competitions">Lihat Kompetisi</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
     </main>

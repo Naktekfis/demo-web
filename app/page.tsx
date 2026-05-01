@@ -1,107 +1,105 @@
 import Link from "next/link"
-import { ArrowRight, CheckCircle2, MapPinned, ShieldCheck, Sparkles, Ticket } from "lucide-react"
+import { ArrowRight, CheckCircle2, MapPinned, ShieldCheck, Sparkles, Ticket, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
 const highlights = [
   {
     icon: Sparkles,
-    title: "Beralih dari scaffold ke produk",
-    description: "Fondasi Next.js, shadcn/ui, Supabase, dan dokumentasi fase sudah siap dipakai.",
+    title: "Pendaftaran mudah",
+    description: "Alur registrasi yang simpel dan intuitif untuk peserta.",
   },
   {
-    icon: MapPinned,
-    title: "Alur event yang jelas",
-    description: "Homepage ini menjadi titik masuk untuk registrasi, venue, dan konten acara.",
+    icon: Users,
+    title: "Manajemen tim",
+    description: "Kelola anggota tim dengan form yang user-friendly.",
   },
   {
-    icon: ShieldCheck,
-    title: "Siap bertumbuh per fase",
-    description: "Struktur proyek sekarang cukup rapi untuk lanjut ke Sanity, media, dan deployment.",
+    icon: CheckCircle2,
+    title: "Status real-time",
+    description: "Pantau status pendaftaran secara real-time di dashboard.",
   },
 ]
 
 export default function Home() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(15,23,42,0.08),_transparent_30%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_100%)] px-6 py-10 text-slate-950 sm:px-10 lg:px-12">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.18),_transparent_55%)] blur-3xl" />
-
-      <section className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col justify-center gap-12">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-sm shadow-sm backdrop-blur">
-          <Ticket className="h-4 w-4 text-slate-700" />
-          <span>ITB Insight demo workspace</span>
+    <main className="overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative min-h-[calc(100vh-80px)] bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 px-6 py-20 sm:px-10 lg:px-12">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -right-1/3 -top-1/2 h-96 w-96 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="absolute -bottom-1/2 -left-1/4 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
         </div>
 
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <div className="space-y-7">
-            <div className="space-y-4">
-              <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-                Homepage event yang rapi, cepat, dan siap diisi konten fase berikutnya.
-              </h1>
-              <p className="max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-                Ini sudah memakai komponen shadcn/ui, koneksi Supabase yang tervalidasi, dan struktur
-                Next.js yang bisa langsung dipakai untuk registrasi, media, dan deployment.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="rounded-full px-6">
-                <Link href="#highlights">
-                  Lihat highlight
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-                <Link href="/docs">Buka dokumentasi</Link>
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-              {['Next.js 14', 'shadcn/ui', 'Supabase', 'Tailwind'].map((item) => (
-                <span key={item} className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 shadow-sm">
-                  {item}
-                </span>
-              ))}
-            </div>
+        {/* Content */}
+        <div className="relative mx-auto flex min-h-[calc(100vh-80px-120px)] w-full max-w-6xl flex-col justify-center gap-8">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-indigo-400/50 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+            <Ticket className="h-4 w-4" />
+            <span>Platform Registrasi ITB Insight</span>
           </div>
 
-          <div className="rounded-3xl border border-slate-200/80 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur">
-            <div className="space-y-4 rounded-2xl bg-slate-950 p-5 text-white shadow-inner">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Phase 0 status</p>
-              <p className="text-2xl font-semibold">Fondasi awal sudah hidup.</p>
-              <div className="space-y-3 text-sm text-slate-300">
-                {[
-                  'Next.js app scaffold selesai',
-                  'Supabase connectivity sudah dicek',
-                  'shadcn/ui aktif dan siap dipakai',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-400" />
-                    <span>{item}</span>
+          <div className="space-y-6">
+            <h1 className="max-w-4xl text-5xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl">
+              Daftar kompetisi dengan mudah
+            </h1>
+            <p className="max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
+              Bergabunglah dengan kompetisi terbaik di ITB Insight. Daftar, kelola tim, dan menangkan hadiah menarik bersama kami.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="rounded-full bg-indigo-600 px-8 hover:bg-indigo-700">
+              <Link href="/competitions">
+                Lihat Kompetisi
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-full border-slate-400 bg-slate-800/50 px-8 text-white hover:bg-slate-700 hover:text-white">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Highlights Section */}
+      <section id="highlights" className="bg-white px-6 py-20 sm:px-10 lg:px-12">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="mb-16 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Fitur Utama</p>
+            <h2 className="mt-3 text-4xl font-bold text-slate-900 sm:text-5xl">Pengalaman terbaik untuk peserta</h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {highlights.map((item, idx) => {
+              const Icon = item.icon
+              return (
+                <div key={idx} className="rounded-2xl border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:border-indigo-300 hover:bg-indigo-50">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100">
+                    <Icon className="h-6 w-6 text-indigo-600" />
                   </div>
-                ))}
-              </div>
-            </div>
+                  <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
+                  <p className="mt-2 text-slate-600">{item.description}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
+      </section>
 
-        <div id="highlights" className="grid gap-4 md:grid-cols-3">
-          {highlights.map((item) => {
-            const Icon = item.icon
-
-            return (
-              <article
-                key={item.title}
-                className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-200 hover:-translate-y-1"
-              >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h2 className="text-xl font-semibold text-slate-950">{item.title}</h2>
-                <p className="mt-3 leading-7 text-slate-600">{item.description}</p>
-              </article>
-            )
-          })}
+      {/* CTA Section */}
+      <section className="bg-indigo-600 px-6 py-16 sm:px-10 lg:px-12">
+        <div className="mx-auto w-full max-w-4xl text-center">
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">Siap untuk mengikuti kompetisi?</h2>
+          <p className="mt-4 text-lg text-indigo-100">Jangan lewatkan kesempatan emas untuk berkompetisi dan menunjukkan kemampuan Anda.</p>
+          <div className="mt-8">
+            <Button asChild size="lg" className="rounded-full bg-white px-8 text-indigo-600 hover:bg-slate-100">
+              <Link href="/competitions">
+                Mulai Daftar Sekarang
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
     </main>

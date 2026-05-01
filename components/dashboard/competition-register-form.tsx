@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Trash2, Plus, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
@@ -31,9 +32,11 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
   const [contactEmail, setContactEmail] = useState('')
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([emptyMember()])
   const [submitting, setSubmitting] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
   const maxMembers = useMemo(() => competition.teamMax || 5, [competition.teamMax])
+  const canAddMore = teamMembers.length < maxMembers
 
   const updateMember = (index: number, field: keyof TeamMember, value: string) => {
     setTeamMembers((current) => {
@@ -44,7 +47,9 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
   }
 
   const addMember = () => {
-    setTeamMembers((current) => (current.length >= maxMembers ? current : [...current, emptyMember()]))
+    if (canAddMore) {
+      setTeamMembers((current) => [...current, emptyMember()])
+    }
   }
 
   const removeMember = (index: number) => {
@@ -55,6 +60,7 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
     event.preventDefault()
     setSubmitting(true)
     setErrorMessage('')
+    setSuccessMessage('')
 
     try {
       const { data: sessionData } = await supabase.auth.getSession()
@@ -79,116 +85,177 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
       const payload = await response.json()
 
       if (!response.ok) {
-        throw new Error(payload.error || 'Registration failed')
+        setErrorMessage(payload.error || 'Gagal mengirim registrasi. Coba lagi.')
+        setSubmitting(false)
+        return
       }
 
-      router.push(`/dashboard?registration=${payload.registration?.id || 'success'}`)
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Registration failed')
-    } finally {
+      setSuccessMessage('Registrasi berhasil! Silakan cek email konfirmasi.')
+      setTimeout(() => router.push('/dashboard'), 2000)
+    } catch (err) {
+      setErrorMessage('Terjadi kesalahan. Silakan coba lagi.')
       setSubmitting(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-      <div className="grid gap-5 md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Nama tim</span>
-          <input
-            type="text"
-            required
-            value={teamName}
-            onChange={(event) => setTeamName(event.target.value)}
-            placeholder="Contoh: Delta Pulse"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
-          />
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-slate-700">Email kontak</span>
-          <input
-            type="email"
-            required
-            value={contactEmail}
-            onChange={(event) => setContactEmail(event.target.value)}
-            placeholder="team@itbinsight.id"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
-          />
-        </label>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">Daftar Kompetisi</h1>
+        <p className="mt-2 text-slate-600">
+          Daftar untuk kompetisi <span className="font-semibold text-indigo-600">{competition.title}</span>
+        </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold text-slate-950">Anggota tim</h3>
-            <p className="text-sm text-slate-500">Minimal 1 anggota, maksimal {maxMembers} anggota.</p>
+      {/* Status Messages */}
+      {errorMessage && (
+        <div className="flex gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-600" />
+          <p className="text-sm text-rose-700">{errorMessage}</p>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="flex gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+          <p className="text-sm text-emerald-700">{successMessage}</p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Team Info Section */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-8">
+          <h2 className="mb-6 text-xl font-semibold text-slate-900">Informasi Tim</h2>
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="teamName" className="block text-sm font-semibold text-slate-700">
+                Nama Tim
+              </label>
+              <input
+                id="teamName"
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="Contoh: Tim Robotika ITB"
+                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="contactEmail" className="block text-sm font-semibold text-slate-700">
+                Email Kontak
+              </label>
+              <input
+                id="contactEmail"
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder="kontakt@tim.com"
+                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                required
+              />
+            </div>
           </div>
-          <Button type="button" variant="outline" className="rounded-full px-4" onClick={addMember} disabled={teamMembers.length >= maxMembers}>
-            + Tambah anggota
-          </Button>
         </div>
 
-        <div className="space-y-4">
-          {teamMembers.map((member, index) => (
-            <div key={`${member.email || 'member'}-${index}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-4 flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-slate-600">Anggota {index + 1}</p>
-                {teamMembers.length > 1 ? (
-                  <button type="button" onClick={() => removeMember(index)} className="text-sm font-medium text-rose-600 hover:text-rose-700">
-                    Hapus
-                  </button>
-                ) : null}
-              </div>
+        {/* Team Members Section */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-8">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-slate-900">Anggota Tim</h2>
+            <span className="text-sm font-medium text-slate-500">
+              {teamMembers.length} dari {maxMembers}
+            </span>
+          </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Nama</span>
+          <div className="space-y-5">
+            {teamMembers.map((member, idx) => (
+              <div key={idx} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-4 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700">Anggota {idx + 1}</p>
+                  {teamMembers.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeMember(idx)}
+                      className="text-rose-600 hover:text-rose-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
                   <input
                     type="text"
-                    required
                     value={member.name}
-                    onChange={(event) => updateMember(index, 'name', event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    onChange={(e) => updateMember(idx, 'name', e.target.value)}
+                    placeholder="Nama lengkap"
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
                   />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Email</span>
                   <input
                     type="email"
-                    required
                     value={member.email}
-                    onChange={(event) => updateMember(index, 'email', event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    onChange={(e) => updateMember(idx, 'email', e.target.value)}
+                    placeholder="Email"
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
                   />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">Institusi</span>
                   <input
                     type="text"
-                    required
                     value={member.institution}
-                    onChange={(event) => updateMember(index, 'institution', event.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-slate-400"
+                    onChange={(e) => updateMember(idx, 'institution', e.target.value)}
+                    placeholder="Institusi/Sekolah"
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
                   />
-                </label>
+                  <select
+                    value={member.role}
+                    onChange={(e) => updateMember(idx, 'role', e.target.value)}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  >
+                    <option>Leader</option>
+                    <option>Member</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            ))}
+          </div>
 
-      {errorMessage ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {errorMessage}
+          {canAddMore && (
+            <Button
+              type="button"
+              onClick={addMember}
+              variant="outline"
+              className="mt-4 w-full rounded-lg"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Anggota
+            </Button>
+          )}
         </div>
-      ) : null}
 
-      <Button type="submit" size="lg" className="w-full rounded-full px-6" disabled={submitting}>
-        {submitting ? 'Mengirim...' : 'Kirim pendaftaran'}
-      </Button>
-    </form>
+        {/* Submit Button */}
+        <div className="flex gap-3">
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 rounded-full bg-indigo-600 px-6 hover:bg-indigo-700 disabled:bg-slate-300"
+          >
+            {submitting ? 'Mengirim...' : 'Kirim Registrasi'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="rounded-full px-6"
+            onClick={() => router.back()}
+          >
+            Batal
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
