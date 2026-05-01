@@ -46,7 +46,7 @@
    └──────────┴──────────┴──────────┴──────────┴────────┘
              │
    ┌─────────▼─────────┐
-   │   Vercel / Netlify │
+    │   Vercel │
    │  Hosting + CI/CD   │
    └───────────────────┘
 ```
@@ -69,11 +69,11 @@
 | **CMS** | Sanity.io | Berita, artikel, deskripsi event |
 | **Maps** | Mapbox GL JS | Peta venue interaktif ITB |
 | **Email** | Resend | Konfirmasi registrasi |
-| **Hosting** | Netlify (free, tanpa restriksi ToS) | **BUKAN Vercel Hobby** |
-| **CI/CD** | GitHub Actions | Auto-deploy ke Netlify |
+| **Hosting** | Vercel (free) | **Deploy utama** |
+| **CI/CD** | GitHub Actions | Auto-deploy ke Vercel |
 | **Monitoring** | Sentry (free tier) | Error tracking production |
 
-> ⚠️ **PENTING:** Jangan pakai Vercel Hobby Plan. Website event organisasi masuk kategori komersial dan berisiko suspend tanpa peringatan. Pakai **Netlify** (free, no ToS restriction) untuk demo dan pengembangan awal.
+> ⚠️ **PENTING:** Gunakan **Vercel** untuk deploy demo ini. Next.js paling natural di Vercel dan cocok untuk preview, env vars, dan auto-deploy dari GitHub.
 
 ---
 
@@ -87,7 +87,7 @@ Demo ini bukan prototype kosmetik — ini adalah **proof-of-concept yang menyent
 4. **Animasi "wow factor"** — particle hero + Framer Motion scroll
 5. **Map interaktif** — Mapbox dengan minimal 1 pin venue ITB
 6. **Email terkirim** — konfirmasi via Resend setelah registrasi
-7. **Deploy live** — bisa dibuka siapapun via URL Netlify
+7. **Deploy live** — bisa dibuka siapapun via URL Vercel
 
 **Fitur PRD yang dipilih untuk demo:** `CPP-01 (Auth Terpadu)` + `MH-01 (Registrasi Lomba)` — ini adalah flow paling kritikal dan paling sering ditanya stakeholder.
 
@@ -201,7 +201,7 @@ demo-web/
 - [ ] Daftar Resend → dapat API key
 - [ ] Daftar Mapbox → dapat public token
 - [ ] Setup `.env.local` dengan semua keys
-- [ ] Push ke GitHub, connect ke Netlify, set env vars di Netlify
+- [ ] Push ke GitHub, connect ke Vercel, set env vars di Vercel
 
 **Deliverable:** `localhost:3000` tampil halaman kosong, semua env vars valid
 
@@ -273,7 +273,7 @@ demo-web/
 - [ ] **QR Ticket** di dashboard (generate dari user ID)
 - [ ] **Responsive design** check (mobile-first)
 - [ ] **OG image** untuk social sharing
-- [ ] Final deploy ke Netlify dengan custom subdomain
+- [ ] Final deploy ke Vercel dengan custom subdomain
 - [ ] Lighthouse audit — target score > 80
 
 ---
@@ -466,22 +466,11 @@ Buat juga `.env.example` dengan value dikosongkan — ini yang di-commit ke Git.
 2. Verifikasi domain (atau pakai `onboarding@resend.dev` untuk testing)
 3. Buat email template konfirmasi registrasi (HTML sederhana dulu)
 
-### Netlify
-1. Connect repo GitHub di [netlify.com](https://netlify.com)
-2. Build command: `npm run build`
-3. Publish directory: `.next`
-4. Install Netlify Next.js plugin: tambahkan `@netlify/plugin-nextjs` di `netlify.toml`
-5. Set semua env vars di **Site Settings → Environment Variables**
-
-```toml
-# netlify.toml
-[build]
-  command = "npm run build"
-  publish = ".next"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
-```
+### Vercel
+1. Connect repo GitHub di [vercel.com](https://vercel.com)
+2. Import project Next.js langsung dari repo
+3. Set environment variables di dashboard Vercel
+4. Deploy otomatis tiap push ke branch utama
 
 ---
 
@@ -760,7 +749,7 @@ export const articlesQuery = defineQuery(`
 | Risiko | Dampak | Mitigasi |
 |--------|--------|----------|
 | Supabase free tier cold start saat spike | Auth lambat / timeout | Upgrade ke Pro sebelum Agustus |
-| Vercel Hobby ToS violation | Site di-suspend tanpa warning | Pakai Netlify dari awal |
+| Deploy build gagal karena peer deps | Install gagal di CI | Pakai `legacy-peer-deps` via `.npmrc` |
 | Sanity rate limit free tier | Konten tidak muncul | Cache dengan `next: { revalidate: 3600 }` |
 | Mapbox token exposed di client | Quota abuse | Set allowed URLs di Mapbox dashboard |
 | Resend 3K limit habis | Email tidak terkirim | Monitor quota, upgrade Oktober |
@@ -771,7 +760,7 @@ export const articlesQuery = defineQuery(`
 
 Demo dianggap selesai dan siap dipresentasikan jika semua item ini ✅:
 
-- [ ] URL live dapat dibuka tanpa error (Netlify)
+- [ ] URL live dapat dibuka tanpa error (Vercel)
 - [ ] Google OAuth berhasil login dan redirect ke dashboard
 - [ ] Form registrasi lomba berhasil submit → data muncul di Supabase dashboard
 - [ ] Email konfirmasi masuk ke inbox setelah registrasi

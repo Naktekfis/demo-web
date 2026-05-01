@@ -16,7 +16,7 @@
 - [ ] Setup API keys (Resend, Mapbox)
 - [ ] Create `.env.local` with all keys
 - [ ] Push to GitHub
-- [ ] Connect to Netlify & deploy
+- [ ] Connect to Vercel & deploy
 
 ---
 
@@ -75,7 +75,7 @@ npx shadcn-ui@latest init
 5. Setup **Authentication → Providers → Google OAuth**
 6. Add Redirect URLs:
    - `http://localhost:3000/auth/callback`
-   - `https://xxxx.netlify.app/auth/callback` (update nanti)
+   - `https://xxxx.vercel.app/auth/callback` (update nanti)
 
 ---
 
@@ -166,9 +166,9 @@ git push origin main
 
 ---
 
-## Step 9: Deploy to Netlify
+## Step 9: Deploy to Vercel
 
-1. Go to [netlify.com](https://netlify.com)
+1. Go to [vercel.com](https://vercel.com)
 2. **New site from Git** → Connect GitHub
 3. Select repo `demo-web`
 4. **Build settings:**
@@ -191,9 +191,9 @@ git push origin main
 ## ⚠️ Important Notes
 
 - **JANGAN commit `.env.local`** — add to `.gitignore`
-- Netlify free tier cocok untuk demo (no ToS restrictions)
-- Verify semua env vars di Netlify sebelum deploy
-- Test auth flow: Google OAuth redirect harus ke `https://xxxx.netlify.app/auth/callback`
+- Vercel free tier cocok untuk demo
+- Verify semua env vars di Vercel sebelum deploy
+- Test auth flow: Google OAuth redirect harus ke `https://xxxx.vercel.app/auth/callback`
 
 ---
 

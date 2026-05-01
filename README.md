@@ -77,7 +77,7 @@ demo-web/
 | **CMS** | Sanity.io | ✅ Planned |
 | **Maps** | Mapbox GL JS | ✅ Planned |
 | **Email** | Resend | ✅ Planned |
-| **Hosting** | Netlify (FREE) | ✅ Planned |
+| **Hosting** | Vercel (FREE) | ✅ Planned |
 | **CI/CD** | GitHub Actions | ✅ Planned |
 
 ---
@@ -164,7 +164,7 @@ Details: [.agents/skills-reference/SKILLS-INSTALLED.md](.agents/skills-reference
 
 Demo dianggap selesai ketika:
 
-- [ ] URL live di Netlify, accessible tanpa error
+- [ ] URL live di Vercel, accessible tanpa error
 - [ ] Google OAuth login → redirect ke dashboard
 - [ ] Competition registration end-to-end working
 - [ ] Email confirmation masuk ke inbox
@@ -186,7 +186,7 @@ Demo dianggap selesai ketika:
 - **Sanity CMS:** https://sanity.io
 - **Mapbox:** https://mapbox.com
 - **Resend:** https://resend.com
-- **Netlify:** https://netlify.com
+- **Vercel:** https://vercel.com
 - **GitHub:** https://github.com
 
 ### Documentation
@@ -220,7 +220,7 @@ May 8+       Ready for Presentation
 2. **Test as you go** — `npm run dev` frequently
 3. **Check console for errors** — Fix immediately
 4. **Use the .env.example template** — Don't commit `.env.local`
-5. **Deploy early to Netlify** — Test live URL, fix auth redirect
+5. **Deploy early to Vercel** — Test live URL, fix auth redirect
 6. **Use installed skills** — Ask Copilot for guidance, it will reference the skills
 
 ---
@@ -240,7 +240,7 @@ A: Free tier cukup untuk demo ini. Jangan expose di production.
 A: 8 hari kalau follow phases, 2-3 hari kalau full-time sprint.
 
 **Q: Bisa deploy sebelum selesai semua phase?**  
-A: Iya, deploy sejak Phase 1 selesai ke Netlify. Update terus-menerus.
+A: Iya, deploy sejak Phase 1 selesai ke Vercel. Update terus-menerus.
 
 ---
 

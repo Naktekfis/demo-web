@@ -52,7 +52,7 @@ Phase 4 (Polish)          [░░░░░░░░░░░░░░░░░�
 - ⏳ Setup API keys (Resend, Mapbox)
 - ⏳ Create `.env.local` with all environment variables
 - ⏳ Push to GitHub
-- ⏳ Deploy to Netlify
+- ⏳ Deploy to Vercel
 
 **Expected Completion:** May 1-2, 2026
 
@@ -127,7 +127,7 @@ demo-web/
 | CMS | Sanity.io | ✅ Plan |
 | Maps | Mapbox GL JS | 📦 To Install |
 | Email | Resend | 📦 To Install |
-| Hosting | Netlify | ✅ Plan |
+| Hosting | Vercel | ✅ Plan |
 | CI/CD | GitHub Actions | ✅ Plan |
 
 ---
@@ -139,7 +139,7 @@ demo-web/
 3. Install semua dependencies
 4. Setup Supabase & Sanity projects
 5. Configure environment variables
-6. Deploy ke Netlify
+6. Deploy ke Vercel
 7. Test di `localhost:3000`
 
 **Target Completion Date:** May 2, 2026
@@ -150,7 +150,7 @@ demo-web/
 
 Demo dianggap selesai dan siap presentasi ketika:
 
-- [ ] URL live dapat dibuka tanpa error (Netlify)
+- [ ] URL live dapat dibuka tanpa error (Vercel)
 - [ ] Google OAuth berhasil login & redirect ke dashboard
 - [ ] Form registrasi lomba berhasil submit → data muncul di Supabase
 - [ ] Email konfirmasi masuk ke inbox setelah registrasi
@@ -178,7 +178,7 @@ Demo dianggap selesai dan siap presentasi ketika:
 | Date | Update | Status |
 |------|--------|--------|
 | May 1, 2026 | Initial setup - Skills discovery & documentation | ✅ Complete |
-| (TBD) | Phase 0 completion - Deployed to Netlify | ⏳ Pending |
+| (TBD) | Phase 0 completion - Deployed to Vercel | ⏳ Pending |
 | (TBD) | Phase 1 completion - Auth + Landing | ⏳ Pending |
 | (TBD) | Phase 2 completion - Competition Registration | ⏳ Pending |
 | (TBD) | Phase 3 completion - Map + Media | ⏳ Pending |

@@ -168,7 +168,7 @@ Just ask Copilot questions like:
       ├─ Create Next.js app
       ├─ Install dependencies
       ├─ Configure services
-      ├─ Deploy to Netlify
+      ├─ Deploy to Vercel
       └─ Verify localhost:3000 works
 
 📅 May 2-3, 2026
@@ -238,7 +238,7 @@ Just ask Copilot questions like:
 1. Create Next.js app with all dependencies
 2. Setup all 4 external services (Supabase, Sanity, Mapbox, Resend)
 3. Configure environment variables
-4. Deploy to Netlify
+4. Deploy to Vercel
 5. Test on localhost:3000
 
 ### Expected Completion:

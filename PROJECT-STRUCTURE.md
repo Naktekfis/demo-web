@@ -54,7 +54,7 @@ PHASE 0: SETUP
 ├─ Install dependencies  
 ├─ Setup Supabase + Sanity + Mapbox + Resend
 ├─ Configure .env.local
-└─ Deploy to Netlify
+└─ Deploy to Vercel
    └─ ✅ localhost:3000 works
 
         ↓↓↓
@@ -253,7 +253,7 @@ demo-web/
 ├── .env.local (all vars filled)
 ├── .env.example (template)
 ├── middleware.ts (complete)
-└── netlify.toml (config)
+└── vercel.json (optional config)
 ```
 
 ---
@@ -336,7 +336,7 @@ Phase 4 Success:
 1. **Read:** [README.md](README.md) ← Overview
 2. **Read:** [docs/00-SETUP.md](docs/00-SETUP.md) ← Phase 0 details
 3. **Execute:** Phase 0 steps (create app, install deps)
-4. **Deploy:** To Netlify
+4. **Deploy:** To Vercel
 5. **Read:** [docs/01-AUTH-LANDING.md](docs/01-AUTH-LANDING.md)
 6. **Build:** Phase 1 features
 7. ... **Continue** through Phases 2, 3, 4

@@ -13,7 +13,7 @@
 - [ ] Implement QR Ticket di dashboard
 - [ ] Responsive design check (mobile-first)
 - [ ] Create OG image untuk social sharing
-- [ ] Final Netlify deploy
+- [ ] Final Vercel deploy
 - [ ] Run Lighthouse audit
 - [ ] Test di berbagai browser
 
@@ -359,7 +359,7 @@ export default function RootLayout({
 npm install -g lighthouse
 
 # Run audit
-lighthouse https://yourdomain.netlify.app --output-path=./lighthouse-report.html
+lighthouse https://yourdomain.vercel.app --output-path=./lighthouse-report.html
 ```
 
 **Target scores:**
@@ -382,7 +382,7 @@ git add .
 git commit -m "feat: complete demo - all phases ready for presentation"
 git push origin main
 
-# Monitor Netlify deploy → https://yourdomain.netlify.app
+# Monitor Vercel deploy → https://yourdomain.vercel.app
 ```
 
 ---
