@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Trash2, Plus, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import type { CompetitionSummary } from '@/lib/competitions'
 
 type TeamMember = {
@@ -63,6 +63,7 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
     setSuccessMessage('')
 
     try {
+      const supabase = createClient()
       const { data: sessionData } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
 

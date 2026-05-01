@@ -1,4 +1,4 @@
-import { createServiceClient, hasSupabaseServiceConfig } from '@/lib/supabase'
+import { createServiceClient } from '@/lib/supabase/server'
 
 export type RegistrationRow = {
   id: string
@@ -42,7 +42,7 @@ const fallbackRegistrations: RegistrationRow[] = [
 ]
 
 export async function getRegistrations() {
-  if (!hasSupabaseServiceConfig()) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return fallbackRegistrations
   }
 

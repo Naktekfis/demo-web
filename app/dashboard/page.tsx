@@ -86,14 +86,14 @@ export default async function DashboardPage() {
 
         {/* CTA Buttons */}
         <div className="flex flex-wrap gap-3">
-          <Button asChild size="lg" className="rounded-full bg-indigo-600 px-6 hover:bg-indigo-700">
+          <Button asChild size="lg" className="rounded-full bg-indigo-600 px-6 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all">
             <Link href="/competitions">
               Lihat Kompetisi
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-            <Link href="/competitions/robotika-challenge">Coba Registrasi</Link>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-6 border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+            <Link href="/dashboard/my-tickets">Tiket Saya</Link>
           </Button>
         </div>
 

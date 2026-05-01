@@ -7,8 +7,30 @@ import { Header } from '@/components/header'
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata = {
-  title: 'ITB Insight Demo',
-  description: 'Demo web for ITB Insight event',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  title: 'ITB Insight 2026 - Tech Exhibition',
+  description: 'Platform kompetisi, workshop, dan pameran teknologi terbesar di Institut Teknologi Bandung.',
+  openGraph: {
+    title: 'ITB Insight 2026',
+    description: 'Tech exhibition terbesar kedua di ITB. Ikuti berbagai kompetisi dan acara inovatif!',
+    url: 'https://itb-insight.vercel.app',
+    siteName: 'ITB Insight',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'id_ID',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ITB Insight 2026',
+    description: 'Tech exhibition terbesar kedua di ITB.',
+    images: ['/og-image.png'],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

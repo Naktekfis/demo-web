@@ -2,30 +2,24 @@ import Link from "next/link"
 import { ArrowRight, CheckCircle2, MapPinned, ShieldCheck, Sparkles, Ticket, Users } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { HeroParticles } from "@/components/landing/hero-particles"
+import { CountdownTimer } from "@/components/landing/countdown-timer"
+import { ProgramHighlights } from "@/components/landing/program-highlights"
 
-const highlights = [
-  {
-    icon: Sparkles,
-    title: "Pendaftaran mudah",
-    description: "Alur registrasi yang simpel dan intuitif untuk peserta.",
-  },
-  {
-    icon: Users,
-    title: "Manajemen tim",
-    description: "Kelola anggota tim dengan form yang user-friendly.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Status real-time",
-    description: "Pantau status pendaftaran secara real-time di dashboard.",
-  },
+const stats = [
+  { value: "10+", label: "Kompetisi" },
+  { value: "2000+", label: "Peserta" },
+  { value: "100M+", label: "Total Hadiah" },
 ]
+
+
 
 export default function Home() {
   return (
     <main className="overflow-hidden">
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-80px)] bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 px-6 py-20 sm:px-10 lg:px-12">
+        <HeroParticles />
         {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -right-1/3 -top-1/2 h-96 w-96 rounded-full bg-indigo-500/20 blur-3xl" />
@@ -48,7 +42,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="mt-2">
+            <CountdownTimer />
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row mt-4">
             <Button asChild size="lg" className="rounded-full bg-indigo-600 px-8 hover:bg-indigo-700">
               <Link href="/competitions">
                 Lihat Kompetisi
@@ -58,6 +56,15 @@ export default function Home() {
             <Button asChild variant="outline" size="lg" className="rounded-full border-slate-400 bg-slate-800/50 px-8 text-white hover:bg-slate-700 hover:text-white">
               <Link href="/dashboard">Dashboard</Link>
             </Button>
+          </div>
+
+          <div className="flex gap-8 mt-8 border-t border-white/10 pt-8">
+            {stats.map((stat, idx) => (
+              <div key={idx}>
+                <div className="text-3xl font-bold text-white">{stat.value}</div>
+                <div className="text-sm text-indigo-200 mt-1">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -70,20 +77,7 @@ export default function Home() {
             <h2 className="mt-3 text-4xl font-bold text-slate-900 sm:text-5xl">Pengalaman terbaik untuk peserta</h2>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3">
-            {highlights.map((item, idx) => {
-              const Icon = item.icon
-              return (
-                <div key={idx} className="rounded-2xl border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:border-indigo-300 hover:bg-indigo-50">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-100">
-                    <Icon className="h-6 w-6 text-indigo-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
-                  <p className="mt-2 text-slate-600">{item.description}</p>
-                </div>
-              )
-            })}
-          </div>
+          <ProgramHighlights />
         </div>
       </section>
 
