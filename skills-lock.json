@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "nextjs-typescript-tailwindcss-supabase": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "nextjs-typescript-tailwindcss-supabase/SKILL.md",
+      "computedHash": "8f4b8ac7ae5483ed7e75ed8b7e8dcc32b5049ef935edfbf7fa5a11022737048f"
+    },
+    "supabase": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/supabase/SKILL.md",
+      "computedHash": "5e179217b674b2c9617e54b09578b1119a315c784c22a9f22d940926de082d87"
+    },
+    "ui-design-system": {
+      "source": "samhvw8/dot-claude",
+      "sourceType": "github",
+      "skillPath": "skills/ui-design-system/SKILL.md",
+      "computedHash": "da805b478040b37f22d4ca74134bdad1f281f390f605fda2add000fec01df3c7"
+    }
+  }
+}
