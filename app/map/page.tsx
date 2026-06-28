@@ -1,5 +1,15 @@
-import { VenueMap } from '@/components/map/venue-map'
+import dynamic from 'next/dynamic'
 import { MapPinned } from 'lucide-react'
+
+// ponytail: dynamic ssr:false — maplibre-gl references window during module init, crashes SSG.
+const VenueMap = dynamic(() => import('@/components/map/venue-map').then(m => m.VenueMap), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[580px] flex items-center justify-center bg-slate-100 rounded-2xl border border-slate-200">
+      <p className="text-slate-400">Memuat peta...</p>
+    </div>
+  ),
+})
 
 export const metadata = {
   title: 'Peta Venue - ITB Insight',
