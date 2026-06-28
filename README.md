@@ -18,7 +18,7 @@
 
 ITB Insight 2026 Demo Web adalah proof-of-concept untuk platform peserta ITB Insight, tech exhibition besar di Institut Teknologi Bandung. Fokus utamanya sederhana: menunjukkan flow nyata dari publikasi acara sampai registrasi kompetisi, bukan sekadar landing page statis.
 
-Demo ini menggabungkan frontend Next.js dengan layanan produksi seperti Supabase, Sanity, Mapbox, dan Resend. Konten kompetisi bisa datang dari CMS, pendaftaran masuk ke database, user login lewat Supabase Auth, dan peserta bisa memantau status dari dashboard.
+Demo ini menggabungkan frontend Next.js dengan layanan produksi seperti Supabase, Sanity, dan Resend. Konten kompetisi bisa datang dari CMS, pendaftaran masuk ke database, user login lewat Supabase Auth, dan peserta bisa memantau status dari dashboard.
 
 > [!NOTE]
 > Repository ini adalah demo application. Beberapa halaman sudah punya fallback data agar tetap bisa dibuka saat service eksternal belum dikonfigurasi.
@@ -31,7 +31,7 @@ Demo ini menggabungkan frontend Next.js dengan layanan produksi seperti Supabase
 - **Registration flow** untuk tim peserta, termasuk validasi jumlah anggota dan submit ke Supabase.
 - **Participant dashboard** untuk melihat ringkasan registrasi, status, dan akses tiket.
 - **Email confirmation** melalui Resend setelah registrasi berhasil diproses.
-- **Interactive venue map** dengan Mapbox, marker lokasi ITB, dan filter tipe venue.
+- **Interactive venue map** dengan MapLibre GL JS, marker lokasi ITB, dan filter tipe venue.
 - **News, gallery, about, dan QR ticket pages** sebagai pelengkap experience event.
 - **Production-friendly metadata** dengan Open Graph image dan remote image config untuk Sanity.
 
@@ -45,7 +45,7 @@ Demo ini menggabungkan frontend Next.js dengan layanan produksi seperti Supabase
 | UI & Motion | [Lucide React](https://lucide.dev), [Framer Motion](https://www.framer.com/motion), Three.js |
 | Auth & Database | [Supabase](https://supabase.com) Auth, PostgreSQL, SSR helpers |
 | CMS | [Sanity](https://www.sanity.io) + GROQ queries |
-| Map | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/) |
+| Map | [MapLibre GL JS](https://maplibre.org) |
 | Email | [Resend](https://resend.com) |
 | Deployment target | [Vercel](https://vercel.com) |
 
@@ -61,7 +61,7 @@ flowchart LR
   api --> db[Supabase PostgreSQL]
   api --> email[Resend]
   pages --> cms[Sanity CMS]
-  pages --> map[Mapbox]
+  pages --> map[MapLibre]
 ```
 
 Business logic stays inside the Next.js app. Public pages render CMS-backed content, protected flows use Supabase sessions, and `/api/register` handles the registration write path plus optional confirmation email.
@@ -74,7 +74,6 @@ Business logic stays inside the Next.js app. Public pages render CMS-backed cont
 - npm
 - Supabase project
 - Sanity project
-- Mapbox access token
 - Resend API key, if email confirmation is needed
 
 ### Run Locally
@@ -104,7 +103,6 @@ NEXT_PUBLIC_SANITY_PROJECT_ID=your-sanity-project-id
 NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
 
-NEXT_PUBLIC_MAPBOX_TOKEN=your-mapbox-token
 NEXT_PUBLIC_EVENT_DATE=2026-11-15T08:00:00+07:00
 
 RESEND_API_KEY=your-resend-api-key
@@ -164,7 +162,7 @@ demo-web/
 - Development fallback competitions live in `lib/competitions.ts`.
 - Dashboard registrations are read from Supabase for the logged-in user.
 - `/api/register` requires a valid Supabase bearer token, validates competition data, writes to `registrations`, then sends email when Resend is configured.
-- Mapbox gracefully shows a missing-token state if `NEXT_PUBLIC_MAPBOX_TOKEN` is not set.
+- Map uses MapLibre GL JS with free CartoDB Positron tiles — no API key required.
 
 ## Deployment
 
