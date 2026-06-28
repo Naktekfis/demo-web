@@ -7,7 +7,7 @@ import { X, ZoomIn } from 'lucide-react'
 // Placeholder images
 const images = Array.from({ length: 12 }, (_, i) => ({
   id: i,
-  src: `https://images.unsplash.com/photo-${1600000000 + i * 100}?w=800&h=600&fit=crop`,
+  src: '/og-image.png',
   alt: `Galeri Kegiatan ${i + 1}`,
 }))
 
@@ -30,7 +30,8 @@ export default function GalleryPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {images.map((img, idx) => (
-            <motion.div
+            <motion.button
+              type="button"
               key={img.id}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -48,7 +49,7 @@ export default function GalleryPage() {
               <div className="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/20 transition-colors duration-300 flex items-center justify-center">
                 <ZoomIn className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-10 h-10 drop-shadow-md" />
               </div>
-            </motion.div>
+            </motion.button>
           ))}
         </div>
 
@@ -64,6 +65,7 @@ export default function GalleryPage() {
             >
               <button
                 onClick={() => setSelectedImage(null)}
+                aria-label="Tutup gambar galeri"
                 className="absolute top-6 right-6 text-white/70 hover:text-white transition bg-white/10 hover:bg-white/20 p-2 rounded-full"
               >
                 <X className="w-6 h-6" />

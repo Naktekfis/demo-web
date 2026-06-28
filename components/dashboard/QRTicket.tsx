@@ -3,12 +3,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 
-export function QRTicket({ userId, userName }: { userId: string; userName: string }) {
-  const qrValue = JSON.stringify({
-    userId,
-    userName,
-    timestamp: new Date().toISOString(),
-  })
+export function QRTicket({ userId, userName, ticketCode }: { userId: string; userName: string; ticketCode: string }) {
 
   const handleDownload = () => {
     const canvas = document.querySelector('canvas')
@@ -35,7 +30,7 @@ export function QRTicket({ userId, userName }: { userId: string; userName: strin
         
         <div className="bg-white p-6 rounded-2xl flex justify-center mb-8 shadow-inner shadow-slate-200">
           <QRCodeCanvas
-            value={qrValue}
+            value={ticketCode}
             size={220}
             level="H"
             includeMargin={true}

@@ -1,4 +1,5 @@
 import { sanityClient } from '@/lib/sanity/client'
+import { hasSanityConfig } from '@/lib/sanity'
 import Image from 'next/image'
 import { Calendar, User } from 'lucide-react'
 
@@ -8,13 +9,14 @@ export const revalidate = 60
 const articlesQuery = `
   *[_type == "article"] | order(publishedAt desc)[0..9] {
     _id, title, slug, excerpt, publishedAt,
-    "coverImageUrl": coverImage.asset->url,
-    "author": author->name
+    "coverImageUrl": coverImage.asset->url
   }
 `
 
 export default async function NewsPage() {
-  const articles = await sanityClient.fetch(articlesQuery)
+  const articles = hasSanityConfig()
+    ? await sanityClient.fetch(articlesQuery).catch(() => [])
+    : []
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">

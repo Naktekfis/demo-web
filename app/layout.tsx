@@ -1,10 +1,11 @@
 import './globals.css'
 import React from 'react'
-import { Inter } from "next/font/google"
+import { Gabarito, Roboto_Mono } from "next/font/google"
 import { cn } from "@/lib/utils"
 import { Header } from '@/components/header'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const gabarito = Gabarito({ subsets: ['latin'], variable: '--font-heading' })
+const robotoMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -35,7 +36,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={cn('font-sans', inter.variable)}>
+    <html lang="id" className={cn('font-sans', gabarito.variable, robotoMono.variable)}>
       <body className="bg-slate-50 text-slate-800">
         <Header />
         {children}

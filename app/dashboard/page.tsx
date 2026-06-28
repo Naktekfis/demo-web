@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight } from 'lucide-react'
 
+import { NeuralDashboard } from '@/components/dashboard/neural-dashboard'
 import { Button } from '@/components/ui/button'
 import { getRegistrations } from '@/lib/registrations'
 
@@ -34,18 +35,17 @@ function getMemberLabel(teamMembers: Array<{ name?: string }> | undefined) {
 
 export default async function DashboardPage() {
   const registrations = await getRegistrations()
+  const pendingCount = registrations.filter((reg) => reg.status === 'pending').length
+  const verifiedCount = registrations.filter((reg) => reg.status === 'verified').length
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">
       <section className="mx-auto w-full max-w-6xl space-y-12">
-        {/* Header */}
-        <div className="space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Dashboard</p>
-          <h1 className="text-5xl font-bold text-slate-900 sm:text-6xl">Pusat Registrasi Peserta</h1>
-          <p className="max-w-2xl text-lg text-slate-600">
-            Kelola semua pendaftaran kompetisi Anda di sini. Lihat status, detail tim, dan update registrasi.
-          </p>
-        </div>
+        <NeuralDashboard
+          registrationCount={registrations.length}
+          pendingCount={pendingCount}
+          verifiedCount={verifiedCount}
+        />
 
         {/* Quick Steps */}
         <div className="grid gap-4 md:grid-cols-3">

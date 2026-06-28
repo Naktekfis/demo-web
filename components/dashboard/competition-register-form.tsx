@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { CompetitionSummary } from '@/lib/competitions'
 
 type TeamMember = {
+  id: string
   name: string
   email: string
   institution: string
@@ -20,6 +21,7 @@ type RegistrationFormProps = {
 }
 
 const emptyMember = (): TeamMember => ({
+  id: globalThis.crypto?.randomUUID?.() || Math.random().toString(36),
   name: '',
   email: '',
   institution: '',
@@ -66,6 +68,12 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
       const supabase = createClient()
       const { data: sessionData } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token
+
+      if (!accessToken) {
+        setSubmitting(false)
+        router.push(`/auth/login?next=${encodeURIComponent(`/dashboard/register-competition?comp=${competition.slug.current}`)}`)
+        return
+      }
 
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -173,7 +181,7 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
 
           <div className="space-y-5">
             {teamMembers.map((member, idx) => (
-              <div key={idx} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div key={member.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-sm font-semibold text-slate-700">Anggota {idx + 1}</p>
                   {teamMembers.length > 1 && (

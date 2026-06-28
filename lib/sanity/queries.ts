@@ -17,7 +17,7 @@ export const competitionsQuery = defineQuery(`
 `)
 
 export const competitionBySlugQuery = defineQuery(`
-  *[_type == "competition" && slug.current == $slug][0] {
+  *[_type == "competition" && slug.current == $slug && isActive == true][0] {
     _id,
     title,
     slug,
@@ -40,7 +40,6 @@ export const articlesQuery = defineQuery(`
     slug,
     excerpt,
     publishedAt,
-    "coverImageUrl": coverImage.asset->url,
-    "author": author->name
+    "coverImageUrl": coverImage.asset->url
   }
 `)

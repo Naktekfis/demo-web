@@ -64,7 +64,7 @@ export default async function CompetitionDetailPage({ params }: CompetitionPageP
 
           <div className="mt-10 flex flex-wrap gap-3">
             <Button asChild className="rounded-full px-5">
-              <Link href="/dashboard">Lanjut ke dashboard</Link>
+              <Link href={`/dashboard/register-competition?comp=${encodeURIComponent(slug)}`}>Daftar sekarang</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full px-5">
               <Link href="/competitions">Lihat lomba lain</Link>

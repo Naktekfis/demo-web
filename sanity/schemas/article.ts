@@ -37,11 +37,5 @@ export const article = {
       type: 'image',
       options: { hotspot: true },
     },
-    {
-      name: 'author',
-      title: 'Author',
-      type: 'reference',
-      to: [{ type: 'author' }],
-    },
   ],
 }

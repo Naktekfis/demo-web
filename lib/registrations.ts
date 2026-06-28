@@ -1,4 +1,4 @@
-import { createServiceClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export type RegistrationRow = {
   id: string
@@ -42,24 +42,33 @@ const fallbackRegistrations: RegistrationRow[] = [
 ]
 
 export async function getRegistrations() {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    return fallbackRegistrations
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return process.env.NODE_ENV === 'development' ? fallbackRegistrations : []
   }
 
   try {
-    const supabase = createServiceClient()
+    const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return []
+    }
+
     const { data, error } = await supabase
       .from('registrations')
       .select('id, competition_id, team_name, team_members, status, created_at, updated_at')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10)
 
-    if (error || !data?.length) {
-      return fallbackRegistrations
+    if (error) {
+      return []
     }
 
-    return data as RegistrationRow[]
+    return (data || []) as RegistrationRow[]
   } catch {
-    return fallbackRegistrations
+    return []
   }
 }

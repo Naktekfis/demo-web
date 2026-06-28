@@ -25,8 +25,9 @@ export function VenueMap() {
 
   useEffect(() => {
     if (map.current) return // initialize map only once
+    if (!process.env.NEXT_PUBLIC_MAPBOX_TOKEN || !mapContainer.current) return
     
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current!,

@@ -2,20 +2,23 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { LogIn, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
   const supabase = createClient()
+  const getRedirectUrl = () => {
+    const origin = window.location.origin
+    const next = new URLSearchParams(window.location.search).get('next') || '/dashboard'
+    return `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+  }
 
   const handleGoogleLogin = async () => {
     setLoading(true)
@@ -25,7 +28,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          redirectTo: getRedirectUrl(),
         },
       })
 
@@ -54,7 +57,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/callback`,
+          emailRedirectTo: getRedirectUrl(),
         },
       })
 

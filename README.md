@@ -1,263 +1,186 @@
-# 📚 ITB Insight Demo Web — Project Guide
+<div align="center">
+  <img src="./public/brand/logo-black-text.svg" alt="ITB Insight" width="360" />
 
-Dokumentasi komprehensif untuk membangun quick demo ITB Insight yang memanfaatkan seluruh tech stack produksi. Proyek ini dirancang untuk dipresentasikan ke stakeholder dengan menampilkan seluruh flow dari auth hingga registrasi dan email confirmation.
+  # ITB Insight 2026 Demo Web
 
----
+  _Website demo untuk tech exhibition ITB: landing page, auth, kompetisi, dashboard peserta, CMS, map venue, dan email konfirmasi._
 
-## 🎯 Quick Navigation
+  [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=nextdotjs)](https://nextjs.org)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+  [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB-3ecf8e?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
+  [![Sanity](https://img.shields.io/badge/Sanity-CMS-f03e2f?style=flat-square&logo=sanity&logoColor=white)](https://www.sanity.io)
 
-### Master Documents
+  [Overview](#overview) • [Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Project Structure](#project-structure)
+</div>
 
-1. **[instruction.md](./instruction.md)** ← Master document (PROVIDED)
-   - Konteks proyek lengkap
-   - Arsitektur sistem
-   - Tech stack detailed
-   - Database schema
-   - Kode starter
+## Overview
 
-2. **[PROGRESS.md](./PROGRESS.md)** ← Tracking progress
-   - Status keseluruhan project
-   - Checklist completed
-   - Next steps
+ITB Insight 2026 Demo Web adalah proof-of-concept untuk platform peserta ITB Insight, tech exhibition besar di Institut Teknologi Bandung. Fokus utamanya sederhana: menunjukkan flow nyata dari publikasi acara sampai registrasi kompetisi, bukan sekadar landing page statis.
 
-### Phase-by-Phase Guides
+Demo ini menggabungkan frontend Next.js dengan layanan produksi seperti Supabase, Sanity, Mapbox, dan Resend. Konten kompetisi bisa datang dari CMS, pendaftaran masuk ke database, user login lewat Supabase Auth, dan peserta bisa memantau status dari dashboard.
 
-| Phase | File | Timeline | Focus |
-|-------|------|----------|-------|
-| **0** | [docs/00-SETUP.md](./docs/00-SETUP.md) | Hari 1 | Setup repo, services, env vars |
-| **1** | [docs/01-AUTH-LANDING.md](./docs/01-AUTH-LANDING.md) | Hari 2-3 | Auth + Landing page with animations |
-| **2** | [docs/02-COMPETITION.md](./docs/02-COMPETITION.md) | Hari 4-5 | Competition registration (main feature) |
-| **3** | [docs/03-MAP-MEDIA.md](./docs/03-MAP-MEDIA.md) | Hari 6-7 | Map + Media gallery |
-| **4** | [docs/04-CONTENT-POLISH.md](./docs/04-CONTENT-POLISH.md) | Hari 8 | Content + Polish + Lighthouse |
+> [!NOTE]
+> Repository ini adalah demo application. Beberapa halaman sudah punya fallback data agar tetap bisa dibuka saat service eksternal belum dikonfigurasi.
 
-### Reference
+## Features
 
-- **[.agents/skills-reference/SKILLS-INSTALLED.md](.agents/skills-reference/SKILLS-INSTALLED.md)** ← Installed skills info
+- **Landing page event** dengan visual futuristik, program highlights, CTA, dan countdown.
+- **Authentication** via Supabase: Google OAuth dan magic link email.
+- **Competition catalog** dari Sanity CMS, lengkap dengan halaman detail per kompetisi.
+- **Registration flow** untuk tim peserta, termasuk validasi jumlah anggota dan submit ke Supabase.
+- **Participant dashboard** untuk melihat ringkasan registrasi, status, dan akses tiket.
+- **Email confirmation** melalui Resend setelah registrasi berhasil diproses.
+- **Interactive venue map** dengan Mapbox, marker lokasi ITB, dan filter tipe venue.
+- **News, gallery, about, dan QR ticket pages** sebagai pelengkap experience event.
+- **Production-friendly metadata** dengan Open Graph image dan remote image config untuk Sanity.
 
----
+## Tech Stack
 
-## 📊 Project Structure
+| Area | Technology |
+| --- | --- |
+| Framework | [Next.js 14](https://nextjs.org) App Router |
+| Language | [TypeScript](https://www.typescriptlang.org) |
+| Styling | [Tailwind CSS](https://tailwindcss.com), shadcn-style components |
+| UI & Motion | [Lucide React](https://lucide.dev), [Framer Motion](https://www.framer.com/motion), Three.js |
+| Auth & Database | [Supabase](https://supabase.com) Auth, PostgreSQL, SSR helpers |
+| CMS | [Sanity](https://www.sanity.io) + GROQ queries |
+| Map | [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/) |
+| Email | [Resend](https://resend.com) |
+| Deployment target | [Vercel](https://vercel.com) |
 
+## Architecture
+
+```mermaid
+flowchart LR
+  user[Browser] --> app[Next.js App Router]
+  app --> pages[Pages & React Components]
+  app --> api[Route Handlers]
+  app --> middleware[Supabase Middleware]
+  middleware --> auth[Supabase Auth]
+  api --> db[Supabase PostgreSQL]
+  api --> email[Resend]
+  pages --> cms[Sanity CMS]
+  pages --> map[Mapbox]
 ```
+
+Business logic stays inside the Next.js app. Public pages render CMS-backed content, protected flows use Supabase sessions, and `/api/register` handles the registration write path plus optional confirmation email.
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) 20 or newer
+- npm
+- Supabase project
+- Sanity project
+- Mapbox access token
+- Resend API key, if email confirmation is needed
+
+### Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+> [!TIP]
+> You can browse several pages without external services because the app includes development fallbacks for competitions and registrations.
+
+### Environment Variables
+
+Create `.env.local` in the project root:
+
+```bash
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+
+NEXT_PUBLIC_SANITY_PROJECT_ID=your-sanity-project-id
+NEXT_PUBLIC_SANITY_DATASET=production
+NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
+
+NEXT_PUBLIC_MAPBOX_TOKEN=your-mapbox-token
+NEXT_PUBLIC_EVENT_DATE=2026-11-15T08:00:00+07:00
+
+RESEND_API_KEY=your-resend-api-key
+RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
+```
+
+> [!IMPORTANT]
+> Never expose `SUPABASE_SERVICE_ROLE_KEY` in client components or `NEXT_PUBLIC_*` variables. Keep it server-only.
+
+### Useful Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start local development server |
+| `npm run build` | Build production bundle |
+| `npm run start` | Start production server after build |
+| `npm run lint` | Run Next.js lint command |
+| `node scripts/verify-supabase.js` | Check Supabase REST endpoint connectivity |
+| `node scripts/test-supabase-client.js` | Test Supabase service-role client access |
+
+## App Routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Landing page and event CTA |
+| `/auth/login` | Google OAuth and magic link login |
+| `/auth/callback` | Supabase auth callback route |
+| `/competitions` | Competition list |
+| `/competitions/[slug]` | Competition detail |
+| `/dashboard` | Participant dashboard and registration status |
+| `/dashboard/register-competition` | Team registration form |
+| `/dashboard/my-tickets` | QR ticket page |
+| `/map` | ITB venue map |
+| `/gallery` | Media gallery |
+| `/news` | Sanity-backed news list |
+| `/about` | Event overview and stats |
+| `/api/register` | Registration API endpoint |
+
+## Project Structure
+
+```text
 demo-web/
-├── instruction.md                          ← Master guide (PROVIDED)
-├── PROGRESS.md                             ← Project tracking
-├── README.md                               ← This file
-│
-├── docs/                                   ← Phase-by-phase guides
-│   ├── 00-SETUP.md                        ✅ Phase 0: Scaffolding
-│   ├── 01-AUTH-LANDING.md                 ✅ Phase 1: Auth + Landing
-│   ├── 02-COMPETITION.md                  ✅ Phase 2: Registration (MAIN)
-│   ├── 03-MAP-MEDIA.md                    ✅ Phase 3: Map + Media
-│   └── 04-CONTENT-POLISH.md               ✅ Phase 4: Polish
-│
-├── .agents/
-│   └── skills-reference/
-│       └── SKILLS-INSTALLED.md            ← Installed AI skills info
-│
-├── app/                                   ← Next.js App Router (TO CREATE)
-├── components/                            ← React Components (TO CREATE)
-├── lib/                                   ← Utilities (TO CREATE)
-├── public/                                ← Static files (TO CREATE)
-└── sanity/                                ← Sanity Studio (TO CREATE)
+├── app/                    # Next.js routes, pages, API handlers
+├── components/             # Shared UI, landing, dashboard, and map components
+├── lib/                    # Supabase, Sanity, competition, registration helpers
+├── public/                 # Static assets, logo, OG image
+├── sanity/                 # Sanity schemas
+├── scripts/                # Local verification scripts
+├── docs/                   # Phase notes and implementation guides
+├── middleware.ts           # Supabase session refresh middleware
+└── package.json
 ```
 
----
+## Data & Content Notes
 
-## 🛠️ Tech Stack
+- Competition content is fetched from Sanity when Sanity env vars are present.
+- Development fallback competitions live in `lib/competitions.ts`.
+- Dashboard registrations are read from Supabase for the logged-in user.
+- `/api/register` requires a valid Supabase bearer token, validates competition data, writes to `registrations`, then sends email when Resend is configured.
+- Mapbox gracefully shows a missing-token state if `NEXT_PUBLIC_MAPBOX_TOKEN` is not set.
 
-| Layer | Technology | Status |
-|-------|-----------|--------|
-| **Framework** | Next.js 14 (App Router) | 📋 To setup |
-| **Language** | TypeScript | 📋 To setup |
-| **Styling** | Tailwind CSS v3 + shadcn/ui | 📋 To setup |
-| **Animation** | Framer Motion | 📋 To install |
-| **Database** | Supabase PostgreSQL | ✅ Planned |
-| **Auth** | Supabase Auth (Google OAuth) | ✅ Planned |
-| **CMS** | Sanity.io | ✅ Planned |
-| **Maps** | Mapbox GL JS | ✅ Planned |
-| **Email** | Resend | ✅ Planned |
-| **Hosting** | Vercel (FREE) | ✅ Planned |
-| **CI/CD** | GitHub Actions | ✅ Planned |
+## Deployment
 
----
+This app is designed to deploy cleanly on Vercel.
 
-## ✨ Key Features to Showcase
+1. Push the repository to GitHub.
+2. Import it into Vercel.
+3. Set the same environment variables from `.env.local` in Vercel project settings.
+4. Use `npm run build` as the build command and `.next` as the output directory.
 
-1. **🔐 Unified Authentication**
-   - Google OAuth via Supabase
-   - Magic Link (email OTP) fallback
-   - Automatic profile creation
+> [!WARNING]
+> Configure Supabase OAuth redirect URLs for both local and production domains, otherwise Google OAuth and magic link callbacks will fail after deployment.
 
-2. **🎓 Competition Registration** (MAIN FEATURE)
-   - Browse competitions from Sanity CMS
-   - Register team with multiple members
-   - File upload to Supabase Storage
-   - Automatic email confirmation via Resend
-   - Track registration status on dashboard
+## Current Status
 
-3. **🎨 Hero Animation**
-   - Physics-based particle system
-   - Countdown timer to event date
-   - Framer Motion page transitions
-
-4. **🗺️ Interactive Map**
-   - Mapbox with venue pins
-   - Filter by event type
-   - Information popups
-
-5. **📊 Performance**
-   - Lighthouse score target: > 80
-   - Responsive design (mobile-first)
-   - Optimized images & lazy loading
-
----
-
-## 🚀 Getting Started
-
-### Option 1: Follow Phase-by-Phase (Recommended)
-
-```bash
-# 1. Read Phase 0 guide first
-cat docs/00-SETUP.md
-
-# 2. Execute each step sequentially
-# (Create app, install deps, configure services)
-
-# 3. After Phase 0 complete, move to Phase 1
-cat docs/01-AUTH-LANDING.md
-
-# ... continue through Phases 2, 3, 4
-```
-
-### Option 2: Quick Reference
-
-```bash
-# Just need to remember the 5 phases
-Phase 0 (Setup)         → 00-SETUP.md
-Phase 1 (Auth+Landing)  → 01-AUTH-LANDING.md
-Phase 2 (Registration)  → 02-COMPETITION.md
-Phase 3 (Map+Media)     → 03-MAP-MEDIA.md
-Phase 4 (Polish)        → 04-CONTENT-POLISH.md
-```
-
----
-
-## 📋 Installed AI Skills
-
-3 powerful skills dari open ecosystem sudah diinstall untuk membantu Copilot memberikan guidance yang akurat:
-
-1. **Next.js + TypeScript + Tailwind + Supabase** (659 installs)
-   - `.agents/skills/nextjs-typescript-tailwindcss-supabase`
-
-2. **Supabase Dedicated** (44.6K installs - POPULAR)
-   - `.agents/skills/supabase`
-
-3. **UI Design System** (2.8K installs)
-   - `.agents/skills/ui-design-system`
-
-Details: [.agents/skills-reference/SKILLS-INSTALLED.md](.agents/skills-reference/SKILLS-INSTALLED.md)
-
----
-
-## ✅ Success Criteria
-
-Demo dianggap selesai ketika:
-
-- [ ] URL live di Vercel, accessible tanpa error
-- [ ] Google OAuth login → redirect ke dashboard
-- [ ] Competition registration end-to-end working
-- [ ] Email confirmation masuk ke inbox
-- [ ] Sanity CMS terkoneksi (content dapat diupdate non-dev)
-- [ ] Mapbox menampilkan venue pins
-- [ ] Particle animation berjalan smooth
-- [ ] Responsive di mobile (375px)
-- [ ] Lighthouse score > 80
-- [ ] No console errors
-- [ ] Ready for stakeholder presentation
-
----
-
-## 🔗 Important Links
-
-### External Services to Setup
-
-- **Supabase:** https://supabase.com
-- **Sanity CMS:** https://sanity.io
-- **Mapbox:** https://mapbox.com
-- **Resend:** https://resend.com
-- **Vercel:** https://vercel.com
-- **GitHub:** https://github.com
-
-### Documentation
-
-- **Supabase SSR Guide:** https://supabase.com/docs/guides/auth/server-side/nextjs
-- **Sanity Next.js Guide:** https://www.sanity.io/guides/nextjs-app-router-live-preview
-- **Mapbox GL JS Docs:** https://docs.mapbox.com/mapbox-gl-js/
-- **Resend Next.js:** https://resend.com/docs/send-with-nextjs
-- **shadcn/ui:** https://ui.shadcn.com
-- **Framer Motion:** https://www.framer.com/motion/
-
----
-
-## 🎯 Timeline
-
-```
-May 1        Phase 0 Start         (Skills discovery ✅ + Docs creation ✅)
-May 1-2      Phase 0 Complete      (Setup repo, services, deploy)
-May 2-3      Phase 1 Complete      (Auth + Landing)
-May 4-5      Phase 2 Complete      (Competition Registration - MAIN)
-May 6-7      Phase 3 Complete      (Map + Media)
-May 8        Phase 4 Complete      (Polish + Launch)
-May 8+       Ready for Presentation
-```
-
----
-
-## 💡 Tips for Success
-
-1. **Follow guides in order** — Don't skip phases
-2. **Test as you go** — `npm run dev` frequently
-3. **Check console for errors** — Fix immediately
-4. **Use the .env.example template** — Don't commit `.env.local`
-5. **Deploy early to Vercel** — Test live URL, fix auth redirect
-6. **Use installed skills** — Ask Copilot for guidance, it will reference the skills
-
----
-
-## 🔍 FAQ
-
-**Q: Boleh skip Phase 0?**  
-A: Tidak, Phase 0 setup semua infrastructure. Tanpa ini tidak ada yang jalan.
-
-**Q: Sanity CMS ribet?**  
-A: Tidak, Phase 2 sudah ada langkah-langkah detailed. Ikuti saja.
-
-**Q: Mapbox token mahal?**  
-A: Free tier cukup untuk demo ini. Jangan expose di production.
-
-**Q: Berapa lama total?**  
-A: 8 hari kalau follow phases, 2-3 hari kalau full-time sprint.
-
-**Q: Bisa deploy sebelum selesai semua phase?**  
-A: Iya, deploy sejak Phase 1 selesai ke Vercel. Update terus-menerus.
-
----
-
-## 📞 Support
-
-- **Master Guide:** [instruction.md](./instruction.md)
-- **Progress Tracking:** [PROGRESS.md](./PROGRESS.md)
-- **Skills Info:** [.agents/skills-reference/SKILLS-INSTALLED.md](.agents/skills-reference/SKILLS-INSTALLED.md)
-- **GitHub Copilot:** Installed skills akan help dengan guidance
-
----
-
-## 🎉 Let's Build!
-
-**Start dengan:** `cat docs/00-SETUP.md`
-
----
-
-*Dokumen ini dibuat: May 1, 2026*  
-*Last updated: May 1, 2026*
+- Core Next.js app, visual landing, competitions, dashboard, map, news, gallery, and about pages are present.
+- Supabase Auth helpers and middleware are wired.
+- Registration API and Resend email path are implemented.
+- External services still need correct project-side configuration, schema/RLS setup, and production env vars before the demo is presentation-ready.

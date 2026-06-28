@@ -7,12 +7,39 @@ import { Loader2, Ticket } from 'lucide-react'
 export default function MyTicketsPage() {
   const supabase = createClient()
   const [user, setUser] = useState<any>(null)
+  const [ticketCode, setTicketCode] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      if (user) {
+        const { data: existing, error } = await supabase
+          .from('rsvp')
+          .select('qr_code')
+          .eq('user_id', user.id)
+          .maybeSingle()
+
+        if (error) {
+          setError('Gagal memuat tiket.')
+        } else if (existing?.qr_code) {
+          setTicketCode(existing.qr_code)
+        } else {
+          const { data: created, error: insertError } = await supabase
+            .from('rsvp')
+            .insert({ user_id: user.id })
+            .select('qr_code')
+            .single()
+
+          if (insertError || !created?.qr_code) {
+            setError('Gagal membuat tiket.')
+          } else {
+            setTicketCode(created.qr_code)
+          }
+        }
+      }
       setLoading(false)
     }
     getUser()
@@ -35,9 +62,14 @@ export default function MyTicketsPage() {
           <div className="flex justify-center items-center py-20">
             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
           </div>
-        ) : user ? (
+        ) : user && ticketCode ? (
           <div className="flex justify-center pt-8">
-            <QRTicket userId={user.id} userName={user.user_metadata?.full_name || user.email || 'Peserta ITB Insight'} />
+            <QRTicket userId={user.id} userName={user.user_metadata?.full_name || user.email || 'Peserta ITB Insight'} ticketCode={ticketCode} />
+          </div>
+        ) : error ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200">
+            <h3 className="text-xl font-semibold text-slate-900">Tiket Tidak Tersedia</h3>
+            <p className="text-slate-500 mt-2">{error}</p>
           </div>
         ) : (
           <div className="text-center py-20 bg-white rounded-3xl border border-slate-200">
