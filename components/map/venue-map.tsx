@@ -17,8 +17,19 @@ const venues: Venue[] = [
   { name: 'Sasana Budaya Ganesha', coordinates: [107.6096, -6.8960], type: 'Pameran', description: 'Tech Exhibition ITB' }
 ]
 
-// ponytail: CartoDB Positron — free vector tiles, no token. Swap to self-hosted tiles if rate-limited.
-const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+// ponytail: inline OSM raster tiles — no API key, no CORS issues. Swap to vector tiles for prettier map.
+const MAP_STYLE = {
+  version: 8 as const,
+  sources: {
+    osm: {
+      type: 'raster' as const,
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '© OpenStreetMap contributors',
+    },
+  },
+  layers: [{ id: 'osm', type: 'raster' as const, source: 'osm' }],
+}
 
 export function VenueMap() {
   const mapContainer = useRef<HTMLDivElement>(null)
