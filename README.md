@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/brand/logo-black-text.svg" alt="ITB Insight" width="360" />
+  <img src="./public/brand/logo-white-text.svg" alt="ITB Insight" width="360" />
 
   # ITB Insight 2026 Demo Web
 
