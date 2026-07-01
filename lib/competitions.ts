@@ -57,13 +57,16 @@ export async function getCompetitions() {
 }
 
 export async function getCompetitionBySlug(slug: string) {
+  const fallback = fallbackCompetitions.find((competition) => competition.slug.current === slug) || null
+
   if (!hasSanityConfig()) {
-    return fallbackCompetitions.find((competition) => competition.slug.current === slug) || null
+    return fallback
   }
 
   try {
-    return await sanityClient.fetch<CompetitionSummary | null>(competitionBySlugQuery, { slug })
+    const competition = await sanityClient.fetch<CompetitionSummary | null>(competitionBySlugQuery, { slug })
+    return competition || fallback
   } catch {
-    return fallbackCompetitions.find((competition) => competition.slug.current === slug) || null
+    return fallback
   }
 }
