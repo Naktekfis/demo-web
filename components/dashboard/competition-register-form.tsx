@@ -20,19 +20,19 @@ type RegistrationFormProps = {
   competition: CompetitionSummary
 }
 
-const emptyMember = (): TeamMember => ({
+const emptyMember = (role = 'Member'): TeamMember => ({
   id: globalThis.crypto?.randomUUID?.() || Math.random().toString(36),
   name: '',
   email: '',
   institution: '',
-  role: 'Member',
+  role,
 })
 
 export function CompetitionRegisterForm({ competition }: RegistrationFormProps) {
   const router = useRouter()
   const [teamName, setTeamName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([emptyMember()])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([emptyMember('Leader')])
   const [submitting, setSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -65,6 +65,21 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
     setSuccessMessage('')
 
     try {
+      const emails = teamMembers.map((member) => member.email.trim().toLowerCase())
+      const leaderCount = teamMembers.filter((member) => member.role === 'Leader').length
+
+      if (new Set(emails).size !== emails.length) {
+        setErrorMessage('Email anggota tidak boleh duplikat.')
+        setSubmitting(false)
+        return
+      }
+
+      if (leaderCount !== 1) {
+        setErrorMessage('Tim harus punya tepat 1 Leader.')
+        setSubmitting(false)
+        return
+      }
+
       const supabase = createClient()
       const { data: sessionData } = await supabase.auth.getSession()
       const accessToken = sessionData.session?.access_token

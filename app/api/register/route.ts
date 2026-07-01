@@ -8,6 +8,13 @@ const resendApiKey = process.env.RESEND_API_KEY
 const resendFromEmail = process.env.RESEND_FROM_EMAIL
 const resend = resendApiKey ? new Resend(resendApiKey) : null
 
+const createServiceClient = () => {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+}
+
 type RegistrationPayload = {
   competitionId?: string
   competitionSlug?: string
@@ -67,6 +74,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Data anggota tim tidak valid' }, { status: 400 })
     }
 
+    const memberEmails = teamMembers.map((member) => member.email.toLowerCase())
+    if (new Set(memberEmails).size !== memberEmails.length) {
+      return NextResponse.json({ error: 'Email anggota tidak boleh duplikat' }, { status: 400 })
+    }
+
+    if (teamMembers.filter((member) => member.role === 'Leader').length !== 1) {
+      return NextResponse.json({ error: 'Tim harus punya tepat 1 Leader' }, { status: 400 })
+    }
+
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
       return NextResponse.json({ error: 'Supabase config missing' }, { status: 500 })
     }
@@ -105,10 +121,60 @@ export async function POST(request: NextRequest) {
       .eq('slug', competitionSlug)
       .maybeSingle()
 
-    const dbCompetitionId = dbCompetition?.id || (isUuid(competitionId) ? competitionId : null)
+    let dbCompetitionId = dbCompetition?.id || (isUuid(competitionId) ? competitionId : null)
 
     if (!dbCompetitionId) {
-      return NextResponse.json({ error: 'Kompetisi belum terhubung ke database' }, { status: 400 })
+      const service = createServiceClient()
+      if (service) {
+        const { data: createdCompetition } = await service
+          .from('competitions')
+          .upsert(
+            {
+              name: competition.title,
+              slug: competition.slug.current,
+              description: typeof competition.description === 'string' ? competition.description : null,
+              category: competition.category || null,
+              team_min: minMembers,
+              team_max: maxMembers,
+              registration_open: competition.regOpen || null,
+              registration_close: competition.regClose || null,
+              is_active: true,
+            },
+            { onConflict: 'slug' },
+          )
+          .select('id')
+          .single()
+
+        dbCompetitionId = createdCompetition?.id || null
+      }
+    }
+
+    if (!dbCompetitionId) {
+      return NextResponse.json({ error: 'Kompetisi belum terhubung ke database. Seed tabel competitions atau set SUPABASE_SERVICE_ROLE_KEY.' }, { status: 400 })
+    }
+
+    const service = createServiceClient()
+    const duplicateClient = service || supabase
+    const { data: existingUserRegistration } = await duplicateClient
+      .from('registrations')
+      .select('id')
+      .eq('competition_id', dbCompetitionId)
+      .eq('user_id', data.user.id)
+      .maybeSingle()
+
+    if (existingUserRegistration) {
+      return NextResponse.json({ error: 'Akun ini sudah terdaftar di kompetisi ini' }, { status: 409 })
+    }
+
+    const { data: existingTeamName } = await duplicateClient
+      .from('registrations')
+      .select('id')
+      .eq('competition_id', dbCompetitionId)
+      .eq('team_name', teamName)
+      .maybeSingle()
+
+    if (existingTeamName) {
+      return NextResponse.json({ error: 'Nama tim sudah dipakai di kompetisi ini' }, { status: 409 })
     }
 
     const { data: registration, error } = await supabase
