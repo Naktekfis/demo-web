@@ -5,7 +5,6 @@ import { QRTicket } from '@/components/dashboard/QRTicket'
 import { Loader2, Ticket } from 'lucide-react'
 
 export default function MyTicketsPage() {
-  const supabase = createClient()
   const [user, setUser] = useState<any>(null)
   const [ticketCode, setTicketCode] = useState('')
   const [error, setError] = useState('')
@@ -13,34 +12,40 @@ export default function MyTicketsPage() {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      if (user) {
-        const { data: existing, error } = await supabase
-          .from('rsvp')
-          .select('qr_code')
-          .eq('user_id', user.id)
-          .maybeSingle()
-
-        if (error) {
-          setError('Gagal memuat tiket.')
-        } else if (existing?.qr_code) {
-          setTicketCode(existing.qr_code)
-        } else {
-          const { data: created, error: insertError } = await supabase
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        setUser(user)
+        if (user) {
+          const { data: existing, error } = await supabase
             .from('rsvp')
-            .insert({ user_id: user.id })
             .select('qr_code')
-            .single()
+            .eq('user_id', user.id)
+            .maybeSingle()
 
-          if (insertError || !created?.qr_code) {
-            setError('Gagal membuat tiket.')
+          if (error) {
+            setError('Gagal memuat tiket. Pastikan tabel rsvp sudah dibuat.')
+          } else if (existing?.qr_code) {
+            setTicketCode(existing.qr_code)
           } else {
-            setTicketCode(created.qr_code)
+            const { data: created, error: insertError } = await supabase
+              .from('rsvp')
+              .insert({ user_id: user.id })
+              .select('qr_code')
+              .single()
+
+            if (insertError || !created?.qr_code) {
+              setError('Gagal membuat tiket. Pastikan policy rsvp mengizinkan insert user sendiri.')
+            } else {
+              setTicketCode(created.qr_code)
+            }
           }
         }
+      } catch {
+        setError('Supabase belum dikonfigurasi.')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
     getUser()
   }, [])
