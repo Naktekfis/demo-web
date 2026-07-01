@@ -193,6 +193,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    const ticketClient = service || supabase
+    let ticketCode = ''
+    const { data: existingTicket } = await ticketClient
+      .from('rsvp')
+      .select('qr_code')
+      .eq('user_id', data.user.id)
+      .maybeSingle()
+
+    if (existingTicket?.qr_code) {
+      ticketCode = existingTicket.qr_code
+    } else {
+      const { data: ticket, error: ticketError } = await ticketClient
+        .from('rsvp')
+        .insert({ user_id: data.user.id })
+        .select('qr_code')
+        .single()
+
+      if (ticketError || !ticket?.qr_code) {
+        return NextResponse.json({ error: ticketError?.message || 'Gagal membuat tiket' }, { status: 500 })
+      }
+
+      ticketCode = ticket.qr_code
+    }
+
+    const ticketUrl = `${request.nextUrl.origin}/dashboard/my-tickets`
+
     if (resend && resendFromEmail) {
       try {
         const { error: emailError } = await resend.emails.send({
@@ -206,7 +232,9 @@ export async function POST(request: NextRequest) {
               <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 16px; margin: 24px 0;">
                 <p><strong>Status:</strong> Pending</p>
                 <p><strong>Jumlah anggota:</strong> ${teamMembers.length}</p>
+                <p><strong>Kode tiket:</strong> ${escapeHtml(ticketCode)}</p>
               </div>
+              <p>Tiket QR bisa dibuka di <a href="${ticketUrl}">${ticketUrl}</a>.</p>
               <p>Tim panitia akan meninjau data dan berkas kalian berikutnya.</p>
             </div>
           `,
@@ -218,7 +246,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, registration })
+    return NextResponse.json({ success: true, registration, ticketCode })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })

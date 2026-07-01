@@ -33,7 +33,7 @@ The project combines a modern [Next.js App Router](https://nextjs.org) frontend 
 - **Competition catalog** backed by Sanity CMS with local fallback content for development.
 - **Team registration flow** with team-size validation, duplicate checks, Supabase inserts, and optional Resend confirmation email.
 - **Participant dashboard** for registration summaries, status display, and QR ticket access.
-- **Admin check-in** with admin email allowlist, QR lookup, and venue geofence validation.
+- **Admin check-in** with admin email allowlist, browser QR scan, QR lookup, and venue geofence validation.
 - **Interactive venue map** using MapLibre and OpenStreetMap raster tiles, with filters for competition and exhibition venues.
 - **Content pages** for news, gallery, about, and event metadata with Open Graph support.
 
@@ -172,8 +172,16 @@ demo-web/
 - `/api/register` requires a valid Supabase bearer token, validates competition data, writes to `registrations`, and sends email when Resend is configured.
 - QR tickets use the `rsvp` table, while admin check-in reads and updates the same table.
 - Admin check-in is restricted by `ADMIN_EMAILS` and validates staff location against venue radiuses in `lib/geofence.ts`.
+- QR tickets currently mark event attendance only. Competition registration is separate.
 - Map uses MapLibre GL JS with OpenStreetMap raster tiles, so no map API key is required.
 - Supabase Auth redirect URLs must include local and production callback URLs, for example `http://localhost:3000/auth/callback` and `https://your-domain.example/auth/callback`.
+
+## Future Payment Notes
+
+- Midtrans is not implemented yet.
+- Keep payment behind API routes/webhooks, not client-only plugins.
+- Minimal future flow: create Midtrans transaction from server, store payment status, receive webhook, then unlock the paid feature.
+- Do not couple current attendance QR with payment unless event entry becomes paid.
 
 ## Deployment
 
