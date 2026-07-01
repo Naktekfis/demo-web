@@ -188,6 +188,9 @@ This app is ready for Vercel-style deployment.
 > [!WARNING]
 > Google OAuth and magic links will fail in production if Supabase redirect URLs are not configured for the deployed domain.
 
+> [!WARNING]
+> If the deployed URL shows a Vercel login/protection page instead of the app, the app CSS is not the issue. Disable Deployment Protection for the environment in Vercel Project Settings, use the public production domain, or share a Vercel bypass link/cookie for protected preview deployments.
+
 ## Current Status
 
 - Core Next.js app, visual landing, competitions, dashboard, map, news, gallery, about, and admin check-in pages are present.
