@@ -1,16 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { getNearestCheckinVenue } from '@/lib/geofence'
+
+type BarcodeDetectorInstance = {
+  detect: (source: HTMLVideoElement) => Promise<Array<{ rawValue?: string }>>
+}
+
+type BarcodeDetectorConstructor = new (options?: { formats?: string[] }) => BarcodeDetectorInstance
 
 export function CheckInForm() {
   const [ticketCode, setTicketCode] = useState('')
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [scanning, setScanning] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
   const nearest = location ? getNearestCheckinVenue(location.lat, location.lng) : null
 
@@ -28,11 +37,24 @@ export function CheckInForm() {
     )
   }
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const stopScanner = () => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    setScanning(false)
+  }
+
+  useEffect(() => () => stopScanner(), [])
+
+  const checkIn = async (code: string) => {
     setMessage('')
     if (!location) {
       setMessage('Ambil lokasi staff dulu.')
+      return
+    }
+
+    const cleanCode = code.trim()
+    if (!cleanCode) {
+      setMessage('Kode tiket wajib diisi.')
       return
     }
 
@@ -49,7 +71,7 @@ export function CheckInForm() {
     const response = await fetch('/api/admin/check-in', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ticketCode, lat: location.lat, lng: location.lng }),
+      body: JSON.stringify({ ticketCode: cleanCode, lat: location.lat, lng: location.lng }),
     })
     const payload = await response.json()
     setMessage(response.ok ? `Check-in berhasil di ${payload.venue.name}.` : payload.error || 'Check-in gagal.')
@@ -57,11 +79,59 @@ export function CheckInForm() {
     setLoading(false)
   }
 
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    await checkIn(ticketCode)
+  }
+
+  const startScanner = async () => {
+    setMessage('')
+    const BarcodeDetector = (window as unknown as { BarcodeDetector?: BarcodeDetectorConstructor }).BarcodeDetector
+    if (!BarcodeDetector) {
+      setMessage('Browser belum mendukung kamera QR scanner. Pakai input manual dulu.')
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      streamRef.current = stream
+      setScanning(true)
+
+      const video = videoRef.current
+      if (!video) return
+
+      video.srcObject = stream
+      await video.play()
+
+      const detector = new BarcodeDetector({ formats: ['qr_code'] })
+      let active = true
+
+      const scan = async () => {
+        if (!active || !streamRef.current || !videoRef.current) return
+        const [result] = await detector.detect(videoRef.current)
+        const code = result?.rawValue?.trim()
+        if (code) {
+          active = false
+          setTicketCode(code)
+          stopScanner()
+          await checkIn(code)
+          return
+        }
+        requestAnimationFrame(scan)
+      }
+
+      requestAnimationFrame(scan)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Gagal membuka kamera.')
+      stopScanner()
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-6 space-y-2">
         <h2 className="text-xl font-bold text-slate-900">QR Check-in</h2>
-        <p className="text-sm text-slate-600">Masukkan kode dari QR tiket. Kamera scanner bisa ditambah nanti.</p>
+        <p className="text-sm text-slate-600">Scan QR tiket untuk menandai kehadiran. Input manual tetap tersedia.</p>
       </div>
 
       <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
@@ -77,6 +147,20 @@ export function CheckInForm() {
         <Button type="button" onClick={getLocation} variant="outline" className="mt-3 rounded-full">
           Ambil Lokasi Staff
         </Button>
+      </div>
+
+      <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <video ref={videoRef} className={scanning ? 'aspect-video w-full rounded-lg bg-black object-cover' : 'hidden'} muted playsInline />
+        <div className="mt-3 flex gap-3">
+          <Button type="button" onClick={startScanner} disabled={scanning || loading} className="rounded-full bg-indigo-600 hover:bg-indigo-700">
+            {scanning ? 'Scanning...' : 'Scan QR Kamera'}
+          </Button>
+          {scanning ? (
+            <Button type="button" onClick={stopScanner} variant="outline" className="rounded-full">
+              Stop
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <form onSubmit={submit} className="space-y-4">
