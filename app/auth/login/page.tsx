@@ -184,9 +184,9 @@ export default function LoginPage() {
         {/* Back Link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-600">
-            Belum punya akun?{' '}
-            <Link href="/competitions" className="font-semibold text-indigo-600 hover:text-indigo-700">
-              Mulai dari kompetisi
+            Ingin lihat informasi acara?{' '}
+            <Link href="/" className="font-semibold text-indigo-600 hover:text-indigo-700">
+              Kembali ke beranda
             </Link>
           </p>
         </div>

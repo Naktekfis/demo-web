@@ -49,7 +49,8 @@ export async function getCompetitions() {
   }
 
   try {
-    return (await sanityClient.fetch<CompetitionSummary[]>(competitionsQuery)) || fallbackCompetitions
+    const competitions = await sanityClient.fetch<CompetitionSummary[]>(competitionsQuery)
+    return competitions?.length ? competitions : fallbackCompetitions
   } catch {
     return fallbackCompetitions
   }
