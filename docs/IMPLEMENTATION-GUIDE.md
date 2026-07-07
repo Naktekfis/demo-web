@@ -307,6 +307,8 @@ Acceptance checks:
 
 ## Phase 8: Admin Overview And Registration Review
 
+Status: Done
+
 Goal: Admin can review and manage competition registrations.
 
 Specs:
@@ -330,24 +332,24 @@ Files likely affected:
 
 Steps:
 
-1. Protect admin routes.
-2. Implement overview metrics.
-3. Implement registration list with pagination.
-4. Add search by name, email, phone, team name, team UID, competition, and QR token.
-5. Add filters for competition, registration type, status, and check-in status.
-6. Add registration detail page.
-7. Implement status update endpoint.
-8. Require note for `rejected`.
-9. Add CSV export using current filters.
+1. [x] Protect admin routes.
+2. [x] Implement overview metrics.
+3. [x] Implement registration list with pagination.
+4. [x] Add search by name, email, phone, team name, team UID, competition, and QR token.
+5. [x] Add filters for competition, registration type, status, and check-in status.
+6. [x] Add registration detail page.
+7. [x] Implement status update endpoint.
+8. [x] Require note for `rejected`.
+9. [x] Add CSV export using current filters.
 
 Acceptance checks:
 
-- Non-admin cannot access admin pages or APIs.
-- Admin can see overview metrics.
-- Admin can search registrations by team UID.
-- Admin can update status.
-- Rejection without note is blocked.
-- CSV contains fields from `docs/ADMIN-DASHBOARD.md`.
+- [x] Non-admin cannot access admin pages or APIs.
+- [x] Admin can see overview metrics.
+- [x] Admin can search registrations by team UID.
+- [x] Admin can update status.
+- [x] Rejection without note is blocked.
+- [x] CSV contains fields from `docs/ADMIN-DASHBOARD.md`.
 
 ## Phase 9: Admin Visitors And Gate Check-In
 
