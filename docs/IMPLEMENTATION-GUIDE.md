@@ -194,6 +194,8 @@ Acceptance checks:
 
 ## Phase 5: Individual Registration API And UI
 
+Status: Done
+
 Goal: logged-in Visitor can submit an individual competition registration.
 
 API spec: `POST /api/registrations/individual`
@@ -207,22 +209,22 @@ Files likely affected:
 
 Steps:
 
-1. Create individual registration endpoint.
-2. Validate user session.
-3. Ensure profile exists.
-4. Require phone before submission.
-5. Validate competition exists and is `individual`.
-6. Validate registration window.
-7. Reject duplicate registration.
-8. Insert `competition_registrations` with `registration_kind = individual` and `status = pending`.
-9. Update dashboard to read `competition_registrations`.
+1. [x] Create individual registration endpoint.
+2. [x] Validate user session.
+3. [x] Ensure profile exists.
+4. [x] Require phone before submission.
+5. [x] Validate competition exists and is `individual`.
+6. [x] Validate registration window.
+7. [x] Reject duplicate registration.
+8. [x] Insert `competition_registrations` with `registration_kind = individual` and `status = pending`.
+9. [x] Update dashboard to read `competition_registrations`.
 
 Acceptance checks:
 
-- Unauthenticated user is rejected or redirected.
-- Missing phone blocks submission.
-- Duplicate individual registration returns `DUPLICATE_REGISTRATION`.
-- Success shows `pending` status.
+- [x] Unauthenticated user is rejected or redirected.
+- [x] Missing phone blocks submission.
+- [x] Duplicate individual registration returns `DUPLICATE_REGISTRATION`.
+- [x] Success shows `pending` status.
 
 ## Phase 6: Team Creation And Join Flow
 

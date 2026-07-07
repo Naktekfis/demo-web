@@ -5,6 +5,9 @@ import { createServiceClient } from '@/lib/supabase/server'
 export type RegistrationRow = {
   id: string
   competition_id: string
+  competition_slug?: string
+  competition_name?: string
+  registration_kind?: 'individual' | 'team' | string
   team_name: string
   team_members: Array<{
     name?: string
@@ -59,17 +62,34 @@ export async function getRegistrations() {
     }
 
     const { data, error } = await supabase
-      .from('registrations')
-      .select('id, competition_id, team_name, team_members, status, created_at, updated_at')
+      .from('competition_registrations')
+      .select('id, competition_id, registration_kind, status, submitted_at, updated_at, competitions(slug, name)')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .order('submitted_at', { ascending: false })
       .limit(10)
 
     if (error) {
       return []
     }
 
-    return (data || []) as RegistrationRow[]
+    return (data || []).map((registration) => {
+      const competition = Array.isArray(registration.competitions)
+        ? registration.competitions[0]
+        : registration.competitions
+
+      return {
+        id: registration.id,
+        competition_id: registration.competition_id,
+        competition_slug: competition?.slug,
+        competition_name: competition?.name,
+        registration_kind: registration.registration_kind,
+        team_name: competition?.name || 'Registrasi Individu',
+        team_members: registration.registration_kind === 'individual' ? [{ role: 'Peserta' }] : [],
+        status: registration.status,
+        created_at: registration.submitted_at,
+        updated_at: registration.updated_at,
+      }
+    }) as RegistrationRow[]
   } catch {
     return []
   }
@@ -102,6 +122,10 @@ function descriptionToText(description: CompetitionSummary['description']) {
 }
 
 export async function findOrCreateCompetitionRow(slug: string) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return { ok: false as const, code: 'SUPABASE_CONFIG_MISSING', message: 'Konfigurasi Supabase server belum lengkap.', status: 500 }
+  }
+
   const competition = await getCompetitionBySlug(slug)
 
   if (!competition) {
@@ -109,24 +133,36 @@ export async function findOrCreateCompetitionRow(slug: string) {
   }
 
   const supabase = createServiceClient()
+
+  const { data: existingCompetition, error: existingError } = await supabase
+    .from('competitions')
+    .select('id, slug, name, registration_type, team_uid_prefix, team_min, team_max, registration_open, registration_close, is_active')
+    .eq('slug', competition.slug.current)
+    .maybeSingle()
+
+  if (existingError) {
+    return { ok: false as const, code: 'COMPETITION_LOOKUP_FAILED', message: 'Gagal memuat data kompetisi.', status: 500, error: existingError }
+  }
+
+  if (existingCompetition) {
+    return { ok: true as const, competition: existingCompetition as CompetitionRow, source: competition }
+  }
+
   const { data, error } = await supabase
     .from('competitions')
-    .upsert(
-      {
-        slug: competition.slug.current,
-        name: competition.title,
-        description: descriptionToText(competition.description),
-        category: competition.category || null,
-        registration_type: competition.registrationType,
-        team_uid_prefix: competition.registrationType === 'team' ? competition.teamUidPrefix || null : null,
-        team_min: competition.teamMin || 1,
-        team_max: competition.teamMax || 1,
-        registration_open: competition.regOpen || null,
-        registration_close: competition.regClose || null,
-        is_active: true,
-      },
-      { onConflict: 'slug' },
-    )
+    .insert({
+      slug: competition.slug.current,
+      name: competition.title,
+      description: descriptionToText(competition.description),
+      category: competition.category || null,
+      registration_type: competition.registrationType,
+      team_uid_prefix: competition.registrationType === 'team' ? competition.teamUidPrefix || null : null,
+      team_min: competition.teamMin || 1,
+      team_max: competition.teamMax || 1,
+      registration_open: competition.regOpen || null,
+      registration_close: competition.regClose || null,
+      is_active: true,
+    })
     .select('id, slug, name, registration_type, team_uid_prefix, team_min, team_max, registration_open, registration_close, is_active')
     .single()
 

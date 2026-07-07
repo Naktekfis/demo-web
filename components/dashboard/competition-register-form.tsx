@@ -20,6 +20,10 @@ type RegistrationFormProps = {
   competition: CompetitionSummary
 }
 
+type ApiEnvelope<T> =
+  | { success: true; data: T; error: null }
+  | { success: false; data: null; error: { code: string; message: string } }
+
 const emptyMember = (role = 'Member'): TeamMember => ({
   id: globalThis.crypto?.randomUUID?.() || Math.random().toString(36),
   name: '',
@@ -32,6 +36,7 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
   const router = useRouter()
   const [participantName, setParticipantName] = useState('')
   const [participantEmail, setParticipantEmail] = useState('')
+  const [participantPhone, setParticipantPhone] = useState('')
   const [participantInstitution, setParticipantInstitution] = useState('')
   const [teamName, setTeamName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
@@ -70,6 +75,12 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
     setSuccessMessage('')
 
     try {
+      if (!isIndividual) {
+        setErrorMessage('Registrasi tim akan dibuka lewat alur buat/gabung tim pada fase berikutnya.')
+        setSubmitting(false)
+        return
+      }
+
       const normalizedTeamMembers = isIndividual
         ? [
             {
@@ -113,32 +124,29 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
         return
       }
 
-      const response = await fetch('/api/register', {
+      const response = await fetch('/api/registrations/individual', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
         body: JSON.stringify({
-          competitionId: competition._id,
           competitionSlug: competition.slug.current,
-          competitionTitle: competition.title,
-          registrationType: competition.registrationType,
-          teamName: isIndividual ? participantName : teamName,
-          contactEmail: isIndividual ? participantEmail : contactEmail,
-          teamMembers: normalizedTeamMembers,
+          phoneNumber: participantPhone,
         }),
       })
 
-      const payload = await response.json()
+      const payload = (await response.json()) as ApiEnvelope<{
+        registration: { status: string }
+      }>
 
-      if (!response.ok) {
-        setErrorMessage(payload.error || 'Gagal mengirim registrasi. Coba lagi.')
+      if (!response.ok || !payload.success) {
+        setErrorMessage(payload.error?.message || 'Gagal mengirim registrasi. Coba lagi.')
         setSubmitting(false)
         return
       }
 
-      setSuccessMessage('Registrasi berhasil! Silakan cek email konfirmasi.')
+      setSuccessMessage(`Registrasi berhasil dikirim dengan status ${payload.data.registration.status}.`)
       setTimeout(() => router.push('/dashboard'), 2000)
     } catch (err) {
       setErrorMessage('Terjadi kesalahan. Silakan coba lagi.')
@@ -209,6 +217,21 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
                     value={participantEmail}
                     onChange={(e) => setParticipantEmail(e.target.value)}
                     placeholder="peserta@email.com"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="participantPhone" className="block text-sm font-semibold text-slate-700">
+                    Nomor Telepon
+                  </label>
+                  <input
+                    id="participantPhone"
+                    type="tel"
+                    value={participantPhone}
+                    onChange={(e) => setParticipantPhone(e.target.value)}
+                    placeholder="08xxxxxxxxxx"
                     className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                     required
                   />

@@ -30,7 +30,7 @@ const statusConfig: Record<string, { icon: any; color: string; label: string; bg
 
 function getMemberLabel(teamMembers: Array<{ name?: string }> | undefined) {
   const count = teamMembers?.length || 0
-  return `${count} anggota`
+  return count === 1 ? '1 peserta' : `${count} anggota`
 }
 
 export default async function DashboardPage() {
@@ -130,7 +130,10 @@ export default async function DashboardPage() {
                           </div>
                         </div>
                         <p className="mt-2 text-sm text-slate-600">
-                          Kompetisi: <span className="font-semibold">{reg.competition_id}</span>
+                          Kompetisi: <span className="font-semibold">{reg.competition_name || reg.competition_id}</span>
+                        </p>
+                        <p className="mt-1 text-sm text-slate-600">
+                          Jenis: <span className="font-semibold">{reg.registration_kind === 'individual' ? 'Individu' : 'Tim'}</span>
                         </p>
                         <p className="mt-1 text-sm text-slate-600">
                           {getMemberLabel(reg.team_members)}
