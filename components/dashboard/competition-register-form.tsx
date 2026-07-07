@@ -30,6 +30,9 @@ const emptyMember = (role = 'Member'): TeamMember => ({
 
 export function CompetitionRegisterForm({ competition }: RegistrationFormProps) {
   const router = useRouter()
+  const [participantName, setParticipantName] = useState('')
+  const [participantEmail, setParticipantEmail] = useState('')
+  const [participantInstitution, setParticipantInstitution] = useState('')
   const [teamName, setTeamName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([emptyMember('Leader')])
@@ -37,6 +40,8 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
+  const isIndividual = competition.registrationType === 'individual'
+  const minMembers = useMemo(() => competition.teamMin || 1, [competition.teamMin])
   const maxMembers = useMemo(() => competition.teamMax || 5, [competition.teamMax])
   const canAddMore = teamMembers.length < maxMembers
 
@@ -65,8 +70,26 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
     setSuccessMessage('')
 
     try {
-      const emails = teamMembers.map((member) => member.email.trim().toLowerCase())
-      const leaderCount = teamMembers.filter((member) => member.role === 'Leader').length
+      const normalizedTeamMembers = isIndividual
+        ? [
+            {
+              id: 'participant',
+              name: participantName,
+              email: participantEmail,
+              institution: participantInstitution,
+              role: 'Leader',
+            },
+          ]
+        : teamMembers
+
+      if (!isIndividual && teamMembers.length < minMembers) {
+        setErrorMessage(`Tim minimal berisi ${minMembers} anggota.`)
+        setSubmitting(false)
+        return
+      }
+
+      const emails = normalizedTeamMembers.map((member) => member.email.trim().toLowerCase())
+      const leaderCount = normalizedTeamMembers.filter((member) => member.role === 'Leader').length
 
       if (new Set(emails).size !== emails.length) {
         setErrorMessage('Email anggota tidak boleh duplikat.')
@@ -100,9 +123,10 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
           competitionId: competition._id,
           competitionSlug: competition.slug.current,
           competitionTitle: competition.title,
-          teamName,
-          contactEmail,
-          teamMembers,
+          registrationType: competition.registrationType,
+          teamName: isIndividual ? participantName : teamName,
+          contactEmail: isIndividual ? participantEmail : contactEmail,
+          teamMembers: normalizedTeamMembers,
         }),
       })
 
@@ -129,6 +153,9 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
         <h1 className="text-3xl font-bold text-slate-900">Daftar Kompetisi</h1>
         <p className="mt-2 text-slate-600">
           Daftar untuk kompetisi <span className="font-semibold text-indigo-600">{competition.title}</span>
+          <span className="ml-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
+            {isIndividual ? 'Individu' : 'Tim'}
+          </span>
         </p>
       </div>
 
@@ -148,118 +175,173 @@ export function CompetitionRegisterForm({ competition }: RegistrationFormProps) 
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Team Info Section */}
+        {/* Registration Info Section */}
         <div className="rounded-2xl border border-slate-200 bg-white p-8">
-          <h2 className="mb-6 text-xl font-semibold text-slate-900">Informasi Tim</h2>
+          <h2 className="mb-6 text-xl font-semibold text-slate-900">
+            {isIndividual ? 'Informasi Peserta' : 'Informasi Tim'}
+          </h2>
 
           <div className="space-y-4">
-            <div>
-              <label htmlFor="teamName" className="block text-sm font-semibold text-slate-700">
-                Nama Tim
-              </label>
-              <input
-                id="teamName"
-                type="text"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                placeholder="Contoh: Tim Robotika ITB"
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                required
-              />
-            </div>
+            {isIndividual ? (
+              <>
+                <div>
+                  <label htmlFor="participantName" className="block text-sm font-semibold text-slate-700">
+                    Nama Lengkap
+                  </label>
+                  <input
+                    id="participantName"
+                    type="text"
+                    value={participantName}
+                    onChange={(e) => setParticipantName(e.target.value)}
+                    placeholder="Nama peserta"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="contactEmail" className="block text-sm font-semibold text-slate-700">
-                Email Kontak
-              </label>
-              <input
-                id="contactEmail"
-                type="email"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-                placeholder="kontakt@tim.com"
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                required
-              />
-            </div>
+                <div>
+                  <label htmlFor="participantEmail" className="block text-sm font-semibold text-slate-700">
+                    Email Peserta
+                  </label>
+                  <input
+                    id="participantEmail"
+                    type="email"
+                    value={participantEmail}
+                    onChange={(e) => setParticipantEmail(e.target.value)}
+                    placeholder="peserta@email.com"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="participantInstitution" className="block text-sm font-semibold text-slate-700">
+                    Institusi/Sekolah
+                  </label>
+                  <input
+                    id="participantInstitution"
+                    type="text"
+                    value={participantInstitution}
+                    onChange={(e) => setParticipantInstitution(e.target.value)}
+                    placeholder="Institusi peserta"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label htmlFor="teamName" className="block text-sm font-semibold text-slate-700">
+                    Nama Tim
+                  </label>
+                  <input
+                    id="teamName"
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    placeholder="Contoh: Tim Robotika ITB"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contactEmail" className="block text-sm font-semibold text-slate-700">
+                    Email Kontak
+                  </label>
+                  <input
+                    id="contactEmail"
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    placeholder="kontakt@tim.com"
+                    className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                    required
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
         {/* Team Members Section */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Anggota Tim</h2>
-            <span className="text-sm font-medium text-slate-500">
-              {teamMembers.length} dari {maxMembers}
-            </span>
-          </div>
+        {!isIndividual && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-8">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-slate-900">Anggota Tim</h2>
+              <span className="text-sm font-medium text-slate-500">
+                {teamMembers.length} dari {minMembers}-{maxMembers}
+              </span>
+            </div>
 
-          <div className="space-y-5">
-            {teamMembers.map((member, idx) => (
-              <div key={member.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-700">Anggota {idx + 1}</p>
-                  {teamMembers.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeMember(idx)}
-                      className="text-rose-600 hover:text-rose-700"
+            <div className="space-y-5">
+              {teamMembers.map((member, idx) => (
+                <div key={member.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-700">Anggota {idx + 1}</p>
+                    {teamMembers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeMember(idx)}
+                        className="text-rose-600 hover:text-rose-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <input
+                      type="text"
+                      value={member.name}
+                      onChange={(e) => updateMember(idx, 'name', e.target.value)}
+                      placeholder="Nama lengkap"
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      required
+                    />
+                    <input
+                      type="email"
+                      value={member.email}
+                      onChange={(e) => updateMember(idx, 'email', e.target.value)}
+                      placeholder="Email"
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      required
+                    />
+                    <input
+                      type="text"
+                      value={member.institution}
+                      onChange={(e) => updateMember(idx, 'institution', e.target.value)}
+                      placeholder="Institusi/Sekolah"
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                      required
+                    />
+                    <select
+                      value={member.role}
+                      onChange={(e) => updateMember(idx, 'role', e.target.value)}
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
+                      <option>Leader</option>
+                      <option>Member</option>
+                    </select>
+                  </div>
                 </div>
+              ))}
+            </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <input
-                    type="text"
-                    value={member.name}
-                    onChange={(e) => updateMember(idx, 'name', e.target.value)}
-                    placeholder="Nama lengkap"
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    required
-                  />
-                  <input
-                    type="email"
-                    value={member.email}
-                    onChange={(e) => updateMember(idx, 'email', e.target.value)}
-                    placeholder="Email"
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    required
-                  />
-                  <input
-                    type="text"
-                    value={member.institution}
-                    onChange={(e) => updateMember(idx, 'institution', e.target.value)}
-                    placeholder="Institusi/Sekolah"
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                    required
-                  />
-                  <select
-                    value={member.role}
-                    onChange={(e) => updateMember(idx, 'role', e.target.value)}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                  >
-                    <option>Leader</option>
-                    <option>Member</option>
-                  </select>
-                </div>
-              </div>
-            ))}
+            {canAddMore && (
+              <Button
+                type="button"
+                onClick={addMember}
+                variant="outline"
+                className="mt-4 w-full rounded-lg"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Tambah Anggota
+              </Button>
+            )}
           </div>
-
-          {canAddMore && (
-            <Button
-              type="button"
-              onClick={addMember}
-              variant="outline"
-              className="mt-4 w-full rounded-lg"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Tambah Anggota
-            </Button>
-          )}
-        </div>
+        )}
 
         {/* Submit Button */}
         <div className="flex gap-3">

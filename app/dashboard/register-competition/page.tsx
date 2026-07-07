@@ -49,6 +49,8 @@ export default async function RegisterCompetitionPage({ searchParams }: Register
     )
   }
 
+  const isIndividual = competition.registrationType === 'individual'
+
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 lg:px-12">
       <section className="mx-auto w-full max-w-5xl space-y-8">
@@ -60,7 +62,9 @@ export default async function RegisterCompetitionPage({ searchParams }: Register
             Daftar: {competition.title}
           </h1>
           <p className="max-w-2xl text-base leading-7 text-slate-600">
-            Isi data tim di bawah ini. Saat auth dan schema database final sudah masuk, form ini bisa langsung mengirim data ke Supabase dan memicu email konfirmasi.
+            {isIndividual
+              ? 'Isi data peserta di bawah ini. Saat auth dan schema database final sudah masuk, form ini bisa langsung mengirim data ke Supabase dan memicu email konfirmasi.'
+              : 'Isi data tim di bawah ini. Saat auth dan schema database final sudah masuk, form ini bisa langsung mengirim data ke Supabase dan memicu email konfirmasi.'}
           </p>
         </div>
 

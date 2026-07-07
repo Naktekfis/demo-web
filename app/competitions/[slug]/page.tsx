@@ -25,6 +25,10 @@ export default async function CompetitionDetailPage({ params }: CompetitionPageP
     : typeof competition.description === 'string'
       ? competition.description
       : 'Detail lomba akan tampil dari Sanity ketika project key tersedia.'
+  const isIndividual = competition.registrationType === 'individual'
+  const registrationLabel = isIndividual
+    ? 'Registrasi individu'
+    : `Registrasi tim ${competition.teamMin || 1}-${competition.teamMax || 5} orang`
 
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 lg:px-12">
@@ -38,7 +42,7 @@ export default async function CompetitionDetailPage({ params }: CompetitionPageP
             <span className="rounded-full bg-slate-100 px-3 py-1 font-medium uppercase tracking-wide text-slate-600">
               {competition.category || 'other'}
             </span>
-            <span>Tim {competition.teamMin || 1}-{competition.teamMax || 5}</span>
+            <span>{registrationLabel}</span>
             <span>
               Tutup:{' '}
               {competition.regClose ? new Date(competition.regClose).toLocaleDateString('id-ID') : 'TBA'}
@@ -50,6 +54,11 @@ export default async function CompetitionDetailPage({ params }: CompetitionPageP
           </h1>
 
           <p className="mt-5 max-w-3xl text-base leading-8 text-slate-600">{descriptionText}</p>
+
+          <div className="mt-6 rounded-2xl border border-indigo-100 bg-indigo-50 p-5 text-sm text-indigo-950">
+            <p className="font-semibold">Tipe pendaftaran</p>
+            <p className="mt-1 text-indigo-800">{registrationLabel}</p>
+          </div>
 
           {competition.requirements?.length ? (
             <div className="mt-8">

@@ -35,6 +35,26 @@ export const competition = {
       },
     },
     {
+      name: 'registrationType',
+      title: 'Registration Type',
+      type: 'string',
+      initialValue: 'team',
+      options: {
+        list: [
+          { title: 'Individual', value: 'individual' },
+          { title: 'Team', value: 'team' },
+        ],
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
+    {
+      name: 'teamUidPrefix',
+      title: 'Team UID Prefix',
+      type: 'string',
+      description: 'Required for team competitions, for example RBT or HCK.',
+      hidden: ({ parent }: any) => parent?.registrationType !== 'team',
+    },
+    {
       name: 'teamMin',
       title: 'Min Team Size',
       type: 'number',
