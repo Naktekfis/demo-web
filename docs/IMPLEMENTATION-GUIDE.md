@@ -166,6 +166,8 @@ Acceptance checks:
 
 ## Phase 4: Ticket Creation After Login
 
+Status: Done
+
 Goal: every Visitor gets one QR ticket after first sign-up/login.
 
 Files likely affected:
@@ -177,18 +179,18 @@ Files likely affected:
 
 Steps:
 
-1. Implement `POST /api/tickets/ensure`.
-2. Call ticket ensure after auth callback when possible.
-3. Keep a fallback ensure call on ticket/dashboard page load.
-4. Update ticket page to read `visitor_tickets` instead of `rsvp`.
-5. Ensure QR displays opaque token only.
+1. [x] Implement `POST /api/tickets/ensure`.
+2. [x] Call ticket ensure after auth callback when possible.
+3. [x] Keep a fallback ensure call on ticket/dashboard page load.
+4. [x] Update ticket page to read `visitor_tickets` instead of `rsvp`.
+5. [x] Ensure QR displays opaque token only.
 
 Acceptance checks:
 
-- New Visitor gets exactly one ticket.
-- Returning Visitor keeps same QR token.
-- Ticket page works after refresh.
-- QR payload does not expose user metadata.
+- [x] New Visitor gets exactly one ticket.
+- [x] Returning Visitor keeps same QR token.
+- [x] Ticket page works after refresh.
+- [x] QR payload does not expose user metadata.
 
 ## Phase 5: Individual Registration API And UI
 

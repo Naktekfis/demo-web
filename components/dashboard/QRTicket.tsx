@@ -3,14 +3,14 @@ import { QRCodeCanvas } from 'qrcode.react'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 
-export function QRTicket({ userId, userName, ticketCode }: { userId: string; userName: string; ticketCode: string }) {
+export function QRTicket({ ticketCode }: { ticketCode: string }) {
 
   const handleDownload = () => {
     const canvas = document.querySelector('canvas')
     if (canvas) {
       const link = document.createElement('a')
       link.href = canvas.toDataURL('image/png')
-      link.download = `ticket-${userId.slice(0, 8)}.png`
+      link.download = `ticket-${ticketCode.slice(0, 8)}.png`
       link.click()
     }
   }
@@ -39,11 +39,8 @@ export function QRTicket({ userId, userName, ticketCode }: { userId: string; use
         </div>
 
         <div className="bg-white/10 rounded-xl p-4 backdrop-blur-md border border-white/20 text-left mb-8">
-          <p className="text-sm text-indigo-100 mb-1">Nama Peserta</p>
-          <p className="text-lg font-semibold mb-3">{userName}</p>
-          
-          <p className="text-sm text-indigo-100 mb-1">User ID</p>
-          <p className="text-sm font-mono bg-white/10 px-2 py-1 rounded inline-block">{userId.slice(0, 8).toUpperCase()}</p>
+          <p className="text-sm text-indigo-100 mb-1">Kode Tiket</p>
+          <p className="break-all text-sm font-mono bg-white/10 px-3 py-2 rounded">{ticketCode}</p>
         </div>
 
         <Button 

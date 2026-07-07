@@ -1,11 +1,24 @@
 'use client'
 import { createClient } from '@/lib/supabase/client'
+import { type User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { QRTicket } from '@/components/dashboard/QRTicket'
 import { Loader2, Ticket } from 'lucide-react'
 
+type EnsureTicketResponse = {
+  success: boolean
+  data: {
+    ticket: {
+      qr_code: string
+    }
+  } | null
+  error: {
+    message: string
+  } | null
+}
+
 export default function MyTicketsPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [ticketCode, setTicketCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -17,29 +30,15 @@ export default function MyTicketsPage() {
         const { data: { user } } = await supabase.auth.getUser()
         setUser(user)
         if (user) {
-          const { data: existing, error } = await supabase
-            .from('rsvp')
-            .select('qr_code')
-            .eq('user_id', user.id)
-            .maybeSingle()
+          const response = await fetch('/api/tickets/ensure', { method: 'POST' })
+          const body = (await response.json()) as EnsureTicketResponse
 
-          if (error) {
-            setError('Gagal memuat tiket. Pastikan tabel rsvp sudah dibuat.')
-          } else if (existing?.qr_code) {
-            setTicketCode(existing.qr_code)
-          } else {
-            const { data: created, error: insertError } = await supabase
-              .from('rsvp')
-              .insert({ user_id: user.id })
-              .select('qr_code')
-              .single()
-
-            if (insertError || !created?.qr_code) {
-              setError('Gagal membuat tiket. Pastikan policy rsvp mengizinkan insert user sendiri.')
-            } else {
-              setTicketCode(created.qr_code)
-            }
+          if (!response.ok || !body.success || !body.data?.ticket.qr_code) {
+            setError(body.error?.message || 'Gagal memuat tiket pengunjung.')
+            return
           }
+
+          setTicketCode(body.data.ticket.qr_code)
         }
       } catch {
         setError('Supabase belum dikonfigurasi.')
@@ -69,7 +68,7 @@ export default function MyTicketsPage() {
           </div>
         ) : user && ticketCode ? (
           <div className="flex justify-center pt-8">
-            <QRTicket userId={user.id} userName={user.user_metadata?.full_name || user.email || 'Peserta ITB Insight'} ticketCode={ticketCode} />
+            <QRTicket ticketCode={ticketCode} />
           </div>
         ) : error ? (
           <div className="text-center py-20 bg-white rounded-3xl border border-slate-200">
