@@ -5,7 +5,7 @@
 
 # ITB Insight 2026 Demo Web
 
-_Demo platform event untuk pameran teknologi ITB: landing page, auth peserta, katalog kompetisi, registrasi tim, dashboard, tiket QR, CMS, map venue, dan admin check-in._
+_MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, dashboard peserta, dashboard admin, dan gate check-in._
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -13,15 +13,15 @@ _Demo platform event untuk pameran teknologi ITB: landing page, auth peserta, ka
 [![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB-3ecf8e?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
 [![Sanity](https://img.shields.io/badge/Sanity-CMS-f03e2f?style=flat-square&logo=sanity&logoColor=white)](https://www.sanity.io)
 
-[Overview](#overview) • [Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Project Structure](#project-structure)
+[Overview](#overview) • [Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Project Structure](#project-structure) • [Docs](#docs)
 
 </div>
 
 ## Overview
 
-ITB Insight 2026 Demo Web is a production-style proof of concept for a campus tech exhibition experience. It is not just a static event page: visitors can authenticate, browse competitions, register a team, view their participant dashboard, generate QR tickets, explore venue locations, and let admins perform geofenced check-ins.
+ITB Insight 2026 Demo Web is a production-style MVP for the competition-registration flow. It is not just a static event page: visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
 
-The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, [Sanity](https://www.sanity.io) for content, [Resend](https://resend.com) for email confirmation, and [MapLibre GL JS](https://maplibre.org) for the venue map.
+The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, [Resend](https://resend.com) for future email confirmation paths, and [MapLibre GL JS](https://maplibre.org) for the venue map.
 
 > [!NOTE]
 > Several public pages include fallback demo data, so the app can still be explored before Supabase and Sanity are fully configured.
@@ -30,10 +30,13 @@ The project combines a modern [Next.js App Router](https://nextjs.org) frontend 
 
 - **Event landing page** with branded hero visuals, program highlights, countdown, and clear CTAs.
 - **Supabase Auth** with Google OAuth and email magic link login.
-- **Competition catalog** backed by Sanity CMS with local fallback content for development.
-- **Team registration flow** with team-size validation, duplicate checks, Supabase inserts, and optional Resend confirmation email.
-- **Participant dashboard** for registration summaries, status display, and QR ticket access.
-- **Admin check-in** with admin email allowlist, browser QR scan, QR lookup, and venue geofence validation.
+- **Competition catalog** with hardcoded MVP data and optional Sanity fallback support.
+- **Individual registration flow** with authenticated submission, duplicate checks, and pending status.
+- **Team registration flow** where leaders create teams, receive a team UID, members join by UID, and leaders submit final registration.
+- **Participant dashboard** for individual/team registration summaries, status display, team UID visibility, and QR ticket access.
+- **Visitor QR tickets** created through `visitor_tickets` and reused across sessions.
+- **Admin dashboard** for overview metrics, registration search/review, status updates, visitor list, CSV export, and QR check-in.
+- **Admin check-in** with browser QR scan or manual token input, no MVP geofence requirement.
 - **Interactive venue map** using MapLibre and OpenStreetMap raster tiles, with filters for competition and exhibition venues.
 - **Content pages** for news, gallery, about, and event metadata with Open Graph support.
 
@@ -67,7 +70,7 @@ flowchart LR
   pages --> map[MapLibre + OSM Tiles]
 ```
 
-Business logic stays inside the Next.js app. Public pages render CMS-backed content, protected flows use Supabase sessions, `/api/register` handles registration writes plus optional confirmation email, and `/api/admin/check-in` validates QR check-ins with venue geofence rules.
+Business logic stays inside the Next.js app. Public pages render hardcoded or fallback content, protected flows use Supabase sessions, registration APIs handle individual/team submissions, and admin APIs handle registration review, CSV export, visitor listing, and QR check-in.
 
 ## Getting Started
 
@@ -76,7 +79,7 @@ Business logic stays inside the Next.js app. Public pages render CMS-backed cont
 - [Node.js](https://nodejs.org) 20 or newer
 - npm
 - Supabase project for auth and database-backed flows
-- Sanity project for CMS-backed competitions/news
+- Sanity project only if CMS-backed competitions/news are needed
 - Resend API key if registration confirmation email is required
 
 ### Run Locally
@@ -128,6 +131,9 @@ ADMIN_EMAILS=admin@example.com,staff@example.com
 | `node scripts/verify-supabase.js` | Check Supabase REST endpoint connectivity |
 | `node scripts/test-supabase-client.js` | Verify Supabase service-role client access |
 
+> [!NOTE]
+> `npm run lint` still invokes `next lint`, which may prompt for ESLint setup when no ESLint config exists. Use `npm run build` as the reliable full verification command for now.
+
 ## App Routes
 
 | Route | Purpose |
@@ -138,15 +144,31 @@ ADMIN_EMAILS=admin@example.com,staff@example.com
 | `/competitions` | Competition list |
 | `/competitions/[slug]` | Competition detail |
 | `/dashboard` | Participant dashboard and registration status |
-| `/dashboard/register-competition` | Team registration form |
+| `/dashboard/register-competition` | Individual registration entry point |
 | `/dashboard/my-tickets` | QR ticket page |
+| `/dashboard/teams/create` | Create a team and receive a team UID |
+| `/dashboard/teams/join` | Join a team with team UID |
 | `/admin` | Admin entry page |
+| `/admin/registrations` | Admin registration list, search, and export |
+| `/admin/registrations/[id]` | Admin registration detail and status update |
+| `/admin/visitors` | Admin visitor list and QR/check-in status |
 | `/admin/check-in` | Admin QR check-in flow |
 | `/map` | ITB venue map |
 | `/gallery` | Media gallery |
 | `/news` | News page |
 | `/about` | Event overview |
-| `/api/register` | Registration API endpoint |
+| `/api/tickets/ensure` | Ensure visitor QR ticket |
+| `/api/registrations/individual` | Individual competition registration endpoint |
+| `/api/registrations/team` | Team registration submit endpoint |
+| `/api/teams` | Team creation endpoint |
+| `/api/teams/join` | Team join endpoint |
+| `/api/teams/[teamId]/leave` | Leave team before submission |
+| `/api/teams/[teamId]/members/[memberId]` | Leader removes member before submission |
+| `/api/admin/overview` | Admin overview metrics endpoint |
+| `/api/admin/registrations` | Admin registration list/search endpoint |
+| `/api/admin/registrations/[id]/status` | Admin registration status update endpoint |
+| `/api/admin/registrations/export` | Admin registration CSV export endpoint |
+| `/api/admin/visitors` | Admin visitor list endpoint |
 | `/api/admin/check-in` | Admin check-in API endpoint |
 
 ## Project Structure
@@ -157,6 +179,7 @@ demo-web/
 ├── components/             # Shared UI, landing, dashboard, map, and admin components
 ├── lib/                    # Supabase, Sanity, competition, registration, geofence helpers
 ├── public/                 # Static assets, brand logo, Open Graph image
+├── docs/                   # PRD, MVP scope, implementation guide, API/schema specs
 ├── sanity/                 # Sanity schemas
 ├── scripts/                # Local verification scripts
 ├── middleware.ts           # Supabase session refresh middleware
@@ -165,16 +188,29 @@ demo-web/
 
 ## Data & Content Notes
 
-- Competition content is fetched from Sanity when Sanity env vars are present.
-- Development fallback competitions live in `lib/competitions.ts`.
+- Competition content is hardcoded for MVP in `lib/competitions.ts`; Sanity support remains optional/fallback.
 - Sanity schemas live in `sanity/schemas` for competitions, articles, and rich text content.
-- Dashboard registrations are read from Supabase for the logged-in user.
-- `/api/register` requires a valid Supabase bearer token, validates competition data, writes to `registrations`, and sends email when Resend is configured.
-- QR tickets use the `rsvp` table, while admin check-in reads and updates the same table.
-- Admin check-in is restricted by `ADMIN_EMAILS` and validates staff location against venue radiuses in `lib/geofence.ts`.
-- QR tickets currently mark event attendance only. Competition registration is separate.
+- Dashboard registrations are read from `competition_registrations`, `competition_teams`, and `competition_team_members` for the logged-in user.
+- QR tickets use `visitor_tickets`; `rsvp` is no longer the MVP ticket table.
+- Admin access uses `admin_roles` when available and falls back to `ADMIN_EMAILS`.
+- Admin check-in updates `visitor_tickets` by opaque QR token and does not require geofence for MVP.
+- QR tickets currently mark gate attendance only. Competition registration status is tracked separately.
 - Map uses MapLibre GL JS with OpenStreetMap raster tiles, so no map API key is required.
 - Supabase Auth redirect URLs must include local and production callback URLs, for example `http://localhost:3000/auth/callback` and `https://your-domain.example/auth/callback`.
+
+## Docs
+
+| Document | Purpose |
+| --- | --- |
+| `docs/prd-itbinsight.md` | Current product source of truth |
+| `docs/MVP-SCOPE.md` | MVP boundary and role definitions |
+| `docs/IMPLEMENTATION-GUIDE.md` | Step-by-step implementation guide |
+| `docs/API-CONTRACTS.md` | MVP endpoint contracts and response envelope |
+| `docs/SUPABASE-SCHEMA-PLAN.md` | Supabase schema and migration plan |
+| `docs/ADMIN-DASHBOARD.md` | Admin dashboard behavior and acceptance criteria |
+| `docs/REGISTRATION-FLOWS.md` | Guest, visitor, individual, team, admin, and check-in flows |
+| `docs/DATA-MODEL.md` | Conceptual data model and RLS expectations |
+| `docs/IMPLEMENTATION-GAP.md` | Gap audit from PRD to implementation |
 
 ## Future Payment Notes
 
@@ -201,7 +237,7 @@ This app is ready for Vercel-style deployment.
 
 ## Current Status
 
-- Core Next.js app, visual landing, competitions, dashboard, map, news, gallery, about, and admin check-in pages are present.
-- Supabase Auth helpers and middleware are wired.
-- Registration API, Resend email path, QR ticket generation, and geofenced admin check-in are implemented.
-- External services still need correct project-side configuration, database tables/RLS policies, OAuth redirect URLs, and production env vars before the demo is presentation-ready.
+- Core Next.js app, visual landing, competitions, dashboard, team create/join, QR tickets, map, news, gallery, about, and admin pages are present.
+- Supabase Auth helpers, middleware, MVP schema migration, ticket helpers, registration helpers, team helpers, and admin helpers are wired.
+- Individual registration, team UID flow, team submit, admin registration review, CSV export, visitor list, QR ticket generation, and no-geofence admin check-in are implemented.
+- Payment, booth tracking, RSVP/alumni flows, feedback, sponsor features, and advanced analytics remain out of MVP scope.
