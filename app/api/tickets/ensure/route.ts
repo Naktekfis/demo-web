@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     return apiError('SERVER_CONFIG_MISSING', 'Konfigurasi server tiket belum lengkap.', 500)
   }
 
-  const result = await ensureVisitorTicket(auth.user.id).catch(() => null)
+  const result = await ensureVisitorTicket(auth.user.id)
 
   if (!result?.ok) {
     return apiError('TICKET_ENSURE_FAILED', 'Gagal menyiapkan tiket pengunjung.', 500)

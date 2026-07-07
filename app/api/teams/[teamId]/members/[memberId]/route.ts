@@ -35,8 +35,8 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   if (memberError) return apiError('TEAM_MEMBER_LOOKUP_FAILED', 'Gagal memuat anggota tim.', 500)
   if (!member) return apiError('TEAM_MEMBER_NOT_FOUND', 'Anggota tim tidak ditemukan.', 404)
-  if (member.member_role === 'leader' || member.user_id === auth.user.id) {
-    return apiError('LEADER_REMOVE_BLOCKED', 'Leader tidak dapat dihapus dari tim lewat endpoint ini.', 400)
+  if (member.member_role === 'leader') {
+    return apiError('LEADER_REMOVE_BLOCKED', 'Leader tidak dapat dihapus dari tim lewat endpoint ini.', 409)
   }
 
   const { error: deleteError } = await supabase.from('competition_team_members').delete().eq('id', memberId).eq('team_id', teamId)

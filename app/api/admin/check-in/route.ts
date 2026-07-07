@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
     return apiError('SERVER_CONFIG_MISSING', 'Konfigurasi server admin belum lengkap.', 500)
   }
 
-  const payload = (await request.json()) as Payload
-  const qrCode = payload.qrCode?.trim()
-  if (!qrCode) {
-    return apiError('MISSING_QR_CODE', 'QR code wajib diisi.', 400)
-  }
-
   try {
+    const payload = (await request.json()) as Payload
+    const qrCode = payload.qrCode?.trim()
+    if (!qrCode) {
+      return apiError('MISSING_QR_CODE', 'QR code wajib diisi.', 400)
+    }
+
     const supabase = createServiceClient()
 
     const { data: ticket, error: ticketError } = await supabase
@@ -44,12 +44,18 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date().toISOString()
-    const { error: updateError } = await supabase
+    const { data: updated, error: updateError } = await supabase
       .from('visitor_tickets')
       .update({ checked_in: true, checked_in_at: now, checked_in_by: admin.user.id })
       .eq('id', ticket.id)
+      .eq('checked_in', false)
+      .select('id')
+      .maybeSingle()
 
     if (updateError) throw updateError
+    if (!updated) {
+      return apiError('ALREADY_CHECKED_IN', 'Tiket sudah check-in sebelumnya.', 409)
+    }
 
     return apiSuccess({ qrCode: ticket.qr_code, checkedInAt: now })
   } catch {

@@ -16,19 +16,29 @@ export async function GET(request: NextRequest) {
   const params = new URL(request.url).searchParams
 
   try {
-    const page = await listAdminRegistrations(
-      createServiceClient(),
-      {
-        q: params.get('q') || undefined,
-        competitionSlug: params.get('competitionSlug') || undefined,
-        registrationType: params.get('registrationType') || undefined,
-        status: params.get('status') || undefined,
-        checkInStatus: params.get('checkInStatus') || undefined,
-      },
-      { page: 1, pageSize: 1000 },
-    )
+    let allItems: Awaited<ReturnType<typeof listAdminRegistrations>>['items'] = []
+    let page = 1
+    const pageSize = 500
+    let hasMore = true
 
-    return new NextResponse(adminRegistrationsToCsv(page.items), {
+    while (hasMore) {
+      const result = await listAdminRegistrations(
+        createServiceClient(),
+        {
+          q: params.get('q') || undefined,
+          competitionSlug: params.get('competitionSlug') || undefined,
+          registrationType: params.get('registrationType') || undefined,
+          status: params.get('status') || undefined,
+          checkInStatus: params.get('checkInStatus') || undefined,
+        },
+        { page, pageSize },
+      )
+      allItems.push(...result.items)
+      hasMore = result.total > page * pageSize
+      page += 1
+    }
+
+    return new NextResponse(adminRegistrationsToCsv(allItems), {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': 'attachment; filename="itb-insight-registrations.csv"',

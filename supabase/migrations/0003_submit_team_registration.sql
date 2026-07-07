@@ -15,6 +15,7 @@ as $$
 declare
   v_team record;
   v_registration public.competition_registrations%rowtype;
+  v_member_count integer;
 begin
   select id, competition_id, leader_user_id, status
   into v_team
@@ -28,6 +29,19 @@ begin
 
   if v_team.status <> 'draft' then
     raise exception 'TEAM_ALREADY_SUBMITTED';
+  end if;
+
+  select count(*)
+  into v_member_count
+  from public.competition_team_members
+  where team_id = v_team.id;
+
+  if v_member_count < (select team_min from public.competitions where id = v_team.competition_id) then
+    raise exception 'TEAM_BELOW_MINIMUM';
+  end if;
+
+  if v_member_count > (select team_max from public.competitions where id = v_team.competition_id) then
+    raise exception 'TEAM_ABOVE_MAXIMUM';
   end if;
 
   insert into public.competition_registrations (

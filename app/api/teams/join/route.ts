@@ -66,14 +66,6 @@ export async function POST(request: NextRequest) {
     return apiError('USER_ALREADY_IN_TEAM', 'Akun ini sudah tergabung dalam tim untuk kompetisi ini.', 409)
   }
 
-  const { count, error: countError } = await supabase
-    .from('competition_team_members')
-    .select('id', { count: 'exact', head: true })
-    .eq('team_id', team.id)
-
-  if (countError) return apiError('TEAM_MEMBER_LOOKUP_FAILED', 'Gagal memeriksa anggota tim.', 500)
-  if ((count || 0) >= competition.team_max) return apiError('TEAM_FULL', 'Tim sudah penuh.', 409)
-
   const { profile } = profileResult
   const { data: member, error: memberError } = await supabase
     .from('competition_team_members')
@@ -95,6 +87,21 @@ export async function POST(request: NextRequest) {
     }
 
     return apiError('TEAM_JOIN_FAILED', 'Gagal bergabung ke tim.', 500)
+  }
+
+  const { count: recountCount, error: recountError } = await supabase
+    .from('competition_team_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('team_id', team.id)
+
+  if (recountError) {
+    await supabase.from('competition_team_members').delete().eq('id', member.id)
+    return apiError('TEAM_JOIN_FAILED', 'Gagal memverifikasi kapasitas tim.', 500)
+  }
+
+  if ((recountCount || 0) > competition.team_max) {
+    await supabase.from('competition_team_members').delete().eq('id', member.id)
+    return apiError('TEAM_FULL', 'Tim sudah penuh.', 409)
   }
 
   return apiSuccess({ team: { id: team.id, team_uid: team.team_uid, team_name: team.team_name, status: team.status }, member }, 201)

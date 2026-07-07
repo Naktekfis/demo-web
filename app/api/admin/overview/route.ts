@@ -15,23 +15,25 @@ export async function GET(request: NextRequest) {
 
   try {
     const supabase = createServiceClient()
-    const [ticketsResult, teamsResult, registrationsPage] = await Promise.all([
-      supabase.from('visitor_tickets').select('id, checked_in'),
-      supabase.from('competition_teams').select('id'),
+    const [ticketsCountResult, checkedInCountResult, teamsCountResult, registrationsPage] = await Promise.all([
+      supabase.from('visitor_tickets').select('id', { count: 'exact', head: true }),
+      supabase.from('visitor_tickets').select('id', { count: 'exact', head: true }).eq('checked_in', true),
+      supabase.from('competition_teams').select('id', { count: 'exact', head: true }),
       listAdminRegistrations(supabase, {}, { page: 1, pageSize: 1000 }),
     ])
 
-    if (ticketsResult.error) throw ticketsResult.error
-    if (teamsResult.error) throw teamsResult.error
+    if (ticketsCountResult.error) throw ticketsCountResult.error
+    if (checkedInCountResult.error) throw checkedInCountResult.error
+    if (teamsCountResult.error) throw teamsCountResult.error
 
     const registrations = registrationsPage.items
 
     return apiSuccess({
       metrics: {
-        totalVisitors: ticketsResult.data?.length || 0,
-        totalCheckedInVisitors: (ticketsResult.data || []).filter((ticket) => ticket.checked_in).length,
+        totalVisitors: ticketsCountResult.count || 0,
+        totalCheckedInVisitors: checkedInCountResult.count || 0,
         totalRegistrations: registrationsPage.total,
-        totalTeams: teamsResult.data?.length || 0,
+        totalTeams: teamsCountResult.count || 0,
         pendingRegistrations: registrations.filter((registration) => registration.status === 'pending').length,
         verifiedRegistrations: registrations.filter((registration) => registration.status === 'verified').length,
         rejectedRegistrations: registrations.filter((registration) => registration.status === 'rejected').length,

@@ -4,23 +4,12 @@ import { apiError, apiSuccess, unauthorizedResponse, type ApiErrorCode } from '@
 import { getAuthenticatedUser } from '@/lib/auth'
 import { findOrCreateCompetitionRow } from '@/lib/registrations'
 import { createServiceClient } from '@/lib/supabase/server'
+import { isRegistrationOpen } from '@/lib/team-registration'
 import { ensureVisitorTicket } from '@/lib/tickets'
 
 type IndividualRegistrationPayload = {
   competitionSlug?: string
   phoneNumber?: string
-}
-
-function isRegistrationOpen(registrationOpen: string | null, registrationClose: string | null) {
-  const now = Date.now()
-  const opensAt = registrationOpen ? new Date(registrationOpen).getTime() : null
-  const closesAt = registrationClose ? new Date(registrationClose).getTime() : null
-
-  if ((opensAt !== null && Number.isNaN(opensAt)) || (closesAt !== null && Number.isNaN(closesAt))) {
-    return false
-  }
-
-  return (opensAt === null || opensAt <= now) && (closesAt === null || closesAt >= now)
 }
 
 export async function POST(request: NextRequest) {
@@ -98,17 +87,7 @@ export async function POST(request: NextRequest) {
     return apiError('PROFILE_REQUIRED', 'Profil pengguna belum siap. Silakan coba lagi.', 500)
   }
 
-  const { data: profileWithPhone, error: phoneProfileError } = await supabase
-    .from('profiles')
-    .select('id, phone')
-    .eq('id', profile.id)
-    .single()
-
-  if (phoneProfileError || !profileWithPhone) {
-    return apiError('PROFILE_REQUIRED', 'Profil pengguna belum siap. Silakan coba lagi.', 500)
-  }
-
-  if (!profileWithPhone.phone?.trim() && phoneNumber) {
+  if (!profile.phone?.trim() && phoneNumber) {
     const { data: updatedProfile, error: updateProfileError } = await supabase
       .from('profiles')
       .update({ phone: phoneNumber })
@@ -121,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  if (!profileWithPhone.phone?.trim() && !phoneNumber) {
+  if (!profile.phone?.trim() && !phoneNumber) {
     return apiError('PHONE_REQUIRED', 'Nomor telepon wajib dilengkapi sebelum mendaftar kompetisi.', 400)
   }
 

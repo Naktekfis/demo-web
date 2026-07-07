@@ -102,7 +102,10 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (memberError || !member) {
-    await supabase.from('competition_teams').delete().eq('id', createdTeam.id)
+    const { error: deleteError } = await supabase.from('competition_teams').delete().eq('id', createdTeam.id)
+    if (deleteError) {
+      console.error('Gagal menghapus tim yatim:', createdTeam.id, deleteError)
+    }
     return apiError('TEAM_MEMBER_CREATE_FAILED', 'Gagal menambahkan leader ke tim.', 500)
   }
 

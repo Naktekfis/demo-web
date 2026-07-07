@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('visitor_tickets')
-      .select('id, user_id, qr_code, checked_in, checked_in_at, profiles!inner(id, full_name, email, phone, institution)', {
+      .select('id, user_id, qr_code, checked_in, checked_in_at, profiles(id, full_name, email, phone, institution)', {
         count: 'exact',
       })
 

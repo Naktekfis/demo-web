@@ -24,7 +24,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   if (teamError) return apiError('TEAM_LOOKUP_FAILED', 'Gagal memuat tim.', 500)
   if (!team) return apiError('TEAM_NOT_FOUND', 'Tim tidak ditemukan.', 404)
   if (team.status !== 'draft') return apiError('TEAM_LOCKED', 'Keanggotaan tim sudah dikunci.', 409)
-  if (team.leader_user_id === auth.user.id) return apiError('LEADER_LEAVE_BLOCKED', 'Leader tidak dapat keluar dari tim.', 400)
+  if (team.leader_user_id === auth.user.id) return apiError('LEADER_LEAVE_BLOCKED', 'Leader tidak dapat keluar dari tim.', 409)
 
   const { data: member, error: memberError } = await supabase
     .from('competition_team_members')

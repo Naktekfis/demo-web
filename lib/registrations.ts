@@ -231,8 +231,26 @@ export async function findOrCreateCompetitionRow(slug: string) {
     .select('id, slug, name, registration_type, team_uid_prefix, team_min, team_max, registration_open, registration_close, is_active')
     .single()
 
-  if (error || !data) {
+  if (error) {
+    if (error.code === '23505') {
+      const { data: raced, error: racedError } = await supabase
+        .from('competitions')
+        .select('id, slug, name, registration_type, team_uid_prefix, team_min, team_max, registration_open, registration_close, is_active')
+        .eq('slug', competition.slug.current)
+        .maybeSingle()
+
+      if (racedError || !raced) {
+        return { ok: false as const, code: 'COMPETITION_LOOKUP_FAILED', message: 'Gagal memuat data kompetisi.', status: 500, error }
+      }
+
+      return { ok: true as const, competition: raced as CompetitionRow, source: competition }
+    }
+
     return { ok: false as const, code: 'COMPETITION_LOOKUP_FAILED', message: 'Gagal memuat data kompetisi.', status: 500, error }
+  }
+
+  if (!data) {
+    return { ok: false as const, code: 'COMPETITION_LOOKUP_FAILED', message: 'Gagal memuat data kompetisi.', status: 500 }
   }
 
   return { ok: true as const, competition: data as CompetitionRow, source: competition }

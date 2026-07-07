@@ -499,6 +499,8 @@ Run these checks in order.
 
 ## Phase 12: Final Verification
 
+Status: Done
+
 Goal: ensure repo is ready for handoff.
 
 Commands:
@@ -519,10 +521,10 @@ Do not rely on `npm run lint` until the repo has a non-interactive ESLint config
 
 Definition of done:
 
-- Build passes.
-- TypeScript check passes.
-- Manual QA script passes or failures are documented.
-- Known deferred items are not accidentally implemented halfway.
+- [x] Build passes.
+- [x] TypeScript check passes.
+- [x] Manual QA script passes or failures are documented.
+- [x] Known deferred items are not accidentally implemented halfway.
 
 ## Rollback And Safety Notes
 
