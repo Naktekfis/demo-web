@@ -228,6 +228,8 @@ Acceptance checks:
 
 ## Phase 6: Team Creation And Join Flow
 
+Status: Done
+
 Goal: team-based competitions support leader-created teams and member join by UID.
 
 API specs:
@@ -249,27 +251,27 @@ Files likely affected:
 
 Steps:
 
-1. Build team creation endpoint.
-2. Generate team UID with competition prefix and 6 random uppercase characters.
-3. Insert `competition_teams` with `status = draft`.
-4. Insert leader into `competition_team_members`.
-5. Build join endpoint.
-6. Validate UID format and competition slug.
-7. Enforce one team per user per competition.
-8. Enforce max team size.
-9. Add leader remove-member endpoint before submission.
-10. Add member leave endpoint before submission.
-11. Block all user membership edits when team status is not `draft`.
+1. [x] Build team creation endpoint.
+2. [x] Generate team UID with competition prefix and 6 random uppercase characters.
+3. [x] Insert `competition_teams` with `status = draft`.
+4. [x] Insert leader into `competition_team_members`.
+5. [x] Build join endpoint.
+6. [x] Validate UID format and competition slug.
+7. [x] Enforce one team per user per competition.
+8. [x] Enforce max team size.
+9. [x] Add leader remove-member endpoint before submission.
+10. [x] Add member leave endpoint before submission.
+11. [x] Block all user membership edits when team status is not `draft`.
 
 Acceptance checks:
 
-- Leader can create team and receive UID like `ROBO-A7K2QD`.
-- Member can join with valid UID.
-- Invalid UID returns `TEAM_NOT_FOUND` or `INVALID_TEAM_UID`.
-- Full team returns `TEAM_FULL`.
-- Leader can remove member before submit.
-- Member can leave before submit.
-- No member edits after submit.
+- [x] Leader can create team and receive UID like `ROBO-A7K2QD`.
+- [x] Member can join with valid UID.
+- [x] Invalid UID returns `TEAM_NOT_FOUND` or `INVALID_TEAM_UID`.
+- [x] Full team returns `TEAM_FULL`.
+- [x] Leader can remove member before submit.
+- [x] Member can leave before submit.
+- [x] No member edits after submit.
 
 ## Phase 7: Team Registration Submit
 

@@ -51,6 +51,50 @@ export default async function RegisterCompetitionPage({ searchParams }: Register
 
   const isIndividual = competition.registrationType === 'individual'
 
+  if (!isIndividual) {
+    return (
+      <main className="min-h-screen px-6 py-12 sm:px-10 lg:px-12">
+        <section className="mx-auto w-full max-w-5xl space-y-8">
+          <div className="space-y-3">
+            <Link href={`/competitions/${comp}`} className="text-sm font-medium text-slate-500 hover:text-slate-950">
+              ← Kembali ke detail lomba
+            </Link>
+            <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              Registrasi Tim: {competition.title}
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-slate-600">
+              Buat tim untuk mendapatkan UID, atau gabung ke tim yang sudah dibuat leader. Registrasi final tim dilakukan setelah anggota lengkap.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Leader</p>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-950">Buat Tim Baru</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Leader membuat tim draft dan membagikan UID seperti {competition.teamUidPrefix || 'TIM'}-A7K2QD ke anggota.
+              </p>
+              <Button asChild className="mt-6 rounded-full bg-indigo-600 px-5 hover:bg-indigo-700">
+                <Link href={`/dashboard/teams/create?comp=${comp}`}>Buat tim</Link>
+              </Button>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-widest text-slate-500">Member</p>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-950">Gabung Dengan UID</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                Minta UID dari leader tim. Satu akun hanya bisa bergabung dalam satu tim untuk kompetisi ini.
+              </p>
+              <Button asChild variant="outline" className="mt-6 rounded-full px-5">
+                <Link href={`/dashboard/teams/join?comp=${comp}`}>Gabung tim</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen px-6 py-12 sm:px-10 lg:px-12">
       <section className="mx-auto w-full max-w-5xl space-y-8">
