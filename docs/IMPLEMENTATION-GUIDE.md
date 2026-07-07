@@ -81,6 +81,8 @@ Acceptance checks:
 
 ## Phase 2: Supabase Schema Migration
 
+Status: Done
+
 Goal: replace demo schema with MVP schema.
 
 Source spec: `docs/SUPABASE-SCHEMA-PLAN.md`
@@ -92,18 +94,18 @@ Files likely affected:
 
 Recommended path:
 
-1. Create a new clean migration for MVP schema.
-2. Create or recreate `profiles`.
-3. Create `visitor_tickets`.
-4. Create `competitions`.
-5. Create `competition_teams`.
-6. Create `competition_team_members`.
-7. Create `competition_registrations`.
-8. Create `admin_roles`.
-9. Enable RLS on all public tables.
-10. Add policies matching `docs/SUPABASE-SCHEMA-PLAN.md`.
-11. Add profile creation trigger for new auth users.
-12. Seed competitions from hardcoded config or a small seed script.
+1. [x] Create a new clean migration for MVP schema.
+2. [x] Create or recreate `profiles`.
+3. [x] Create `visitor_tickets`.
+4. [x] Create `competitions`.
+5. [x] Create `competition_teams`.
+6. [x] Create `competition_team_members`.
+7. [x] Create `competition_registrations`.
+8. [x] Create `admin_roles`.
+9. [x] Enable RLS on all public tables.
+10. [x] Add policies matching `docs/SUPABASE-SCHEMA-PLAN.md`.
+11. [x] Add profile creation trigger for new auth users.
+12. [x] Seed competitions from hardcoded config or a small seed script.
 
 Important decisions:
 
@@ -113,10 +115,10 @@ Important decisions:
 
 Acceptance checks:
 
-- A new auth user gets a `profiles` row.
-- A logged-in user can read own profile.
-- A logged-in user cannot read another user's private rows.
-- Admin/service route can read admin data.
+- [x] A new auth user gets a `profiles` row.
+- [x] A logged-in user can read own profile.
+- [x] A logged-in user cannot read another user's private rows.
+- [x] Admin/service route can read admin data.
 
 ## Phase 3: Shared Server Helpers
 
