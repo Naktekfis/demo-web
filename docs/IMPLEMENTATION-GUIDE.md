@@ -425,75 +425,77 @@ Acceptance checks:
 
 ## Phase 11: Manual QA Script
 
+Status: Done
+
 Goal: verify end-to-end MVP behavior.
 
 Run these checks in order.
 
 ### Guest
 
-1. Open landing page.
-2. Open competition list.
-3. Open competition detail.
-4. Click register while logged out.
-5. Confirm redirect to login with return path.
+1. [x] Open landing page.
+2. [x] Open competition list.
+3. [x] Open competition detail.
+4. [x] Click register while logged out.
+5. [x] Confirm redirect to login with return path.
 
 ### Visitor Ticket
 
-1. Log in as new Visitor.
-2. Confirm profile exists.
-3. Confirm `visitor_tickets` row exists.
-4. Open ticket page.
-5. Refresh ticket page.
-6. Confirm QR token stays the same.
+1. [x] Log in as new Visitor.
+2. [x] Confirm profile exists.
+3. [x] Confirm `visitor_tickets` row exists.
+4. [x] Open ticket page.
+5. [x] Refresh ticket page.
+6. [x] Confirm QR token stays the same.
 
 ### Individual Registration
 
-1. Open individual competition.
-2. Submit without phone.
-3. Confirm submission is blocked.
-4. Add phone.
-5. Submit registration.
-6. Confirm status is `pending`.
-7. Submit again.
-8. Confirm duplicate is rejected.
+1. [x] Open individual competition.
+2. [x] Submit without phone.
+3. [x] Confirm submission is blocked.
+4. [x] Add phone.
+5. [x] Submit registration.
+6. [x] Confirm status is `pending`.
+7. [x] Submit again.
+8. [x] Confirm duplicate is rejected.
 
 ### Team Registration
 
-1. Log in as leader.
-2. Create team.
-3. Copy team UID.
-4. Log in as member.
-5. Join using team UID.
-6. Leader removes member before submit.
-7. Member rejoins.
-8. Leader submits final team registration.
-9. Try member leave after submit.
-10. Confirm edit is blocked.
+1. [x] Log in as leader.
+2. [x] Create team.
+3. [x] Copy team UID.
+4. [x] Log in as member.
+5. [x] Join using team UID.
+6. [x] Leader removes member before submit.
+7. [x] Member rejoins.
+8. [x] Leader submits final team registration.
+9. [x] Try member leave after submit.
+10. [x] Confirm edit is blocked.
 
 ### Admin Review
 
-1. Log in as admin.
-2. Open `/admin`.
-3. Open registrations list.
-4. Search by team UID.
-5. Open registration detail.
-6. Reject without note.
-7. Confirm blocked.
-8. Reject with note.
-9. Change back to pending.
-10. Change to verified.
-11. Export CSV.
+1. [x] Log in as admin.
+2. [x] Open `/admin`.
+3. [x] Open registrations list.
+4. [x] Search by team UID.
+5. [x] Open registration detail.
+6. [x] Reject without note.
+7. [x] Confirm blocked.
+8. [x] Reject with note.
+9. [x] Change back to pending.
+10. [x] Change to verified.
+11. [x] Export CSV.
 
 ### Gate Check-In
 
-1. Open visitor QR.
-2. Open admin check-in page.
-3. Scan or paste QR token.
-4. Confirm success.
-5. Scan same token again.
-6. Confirm duplicate response.
-7. Try fake QR token.
-8. Confirm not found response.
+1. [x] Open visitor QR.
+2. [x] Open admin check-in page.
+3. [x] Scan or paste QR token.
+4. [x] Confirm success.
+5. [x] Scan same token again.
+6. [x] Confirm duplicate response.
+7. [x] Try fake QR token.
+8. [x] Confirm not found response.
 
 ## Phase 12: Final Verification
 

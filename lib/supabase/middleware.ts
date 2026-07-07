@@ -37,11 +37,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect pages that expose participant-only competition flows.
+  // Protect participant-only pages. Competition list/detail are public; registration lives under /dashboard.
   if (
     !user &&
-    (request.nextUrl.pathname.startsWith('/dashboard') ||
-      request.nextUrl.pathname.startsWith('/competitions'))
+    request.nextUrl.pathname.startsWith('/dashboard')
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
