@@ -275,6 +275,8 @@ Acceptance checks:
 
 ## Phase 7: Team Registration Submit
 
+Status: Done
+
 Goal: leader can submit final team registration.
 
 API spec: `POST /api/registrations/team`
@@ -287,21 +289,21 @@ Files likely affected:
 
 Steps:
 
-1. Validate user is team leader.
-2. Validate team status is `draft`.
-3. Count team members.
-4. Validate `team_min` and `team_max`.
-5. Reject duplicate team registration.
-6. Insert `competition_registrations` with `registration_kind = team` and `status = pending`.
-7. Update team status to `submitted`.
-8. Show submitted status in participant dashboard.
+1. [x] Validate user is team leader.
+2. [x] Validate team status is `draft`.
+3. [x] Count team members.
+4. [x] Validate `team_min` and `team_max`.
+5. [x] Reject duplicate team registration.
+6. [x] Insert `competition_registrations` with `registration_kind = team` and `status = pending`.
+7. [x] Update team status to `submitted`.
+8. [x] Show submitted status in participant dashboard.
 
 Acceptance checks:
 
-- Non-leader cannot submit.
-- Below-minimum team cannot submit.
-- Duplicate team submit returns `TEAM_ALREADY_SUBMITTED`.
-- Submitted team membership is locked.
+- [x] Non-leader cannot submit.
+- [x] Below-minimum team cannot submit.
+- [x] Duplicate team submit returns `TEAM_ALREADY_SUBMITTED`.
+- [x] Submitted team membership is locked.
 
 ## Phase 8: Admin Overview And Registration Review
 

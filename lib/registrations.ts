@@ -4,6 +4,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export type RegistrationRow = {
   id: string
+  team_id?: string
+  team_uid?: string
   competition_id: string
   competition_slug?: string
   competition_name?: string
@@ -16,6 +18,10 @@ export type RegistrationRow = {
     role?: string
   }>
   status: 'pending' | 'verified' | 'rejected' | string
+  is_team_leader?: boolean
+  team_member_count?: number
+  team_min?: number
+  team_max?: number
   created_at?: string
   updated_at?: string
 }
@@ -72,7 +78,7 @@ export async function getRegistrations() {
       return []
     }
 
-    return (data || []).map((registration) => {
+    const individualRegistrations = (data || []).map((registration) => {
       const competition = Array.isArray(registration.competitions)
         ? registration.competitions[0]
         : registration.competitions
@@ -90,6 +96,65 @@ export async function getRegistrations() {
         updated_at: registration.updated_at,
       }
     }) as RegistrationRow[]
+
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return individualRegistrations
+    }
+
+    const serviceSupabase = createServiceClient()
+    const { data: memberships, error: membershipsError } = await serviceSupabase
+      .from('competition_team_members')
+      .select(
+        'id, team_id, member_role, competition_teams!inner(id, competition_id, team_uid, team_name, leader_user_id, status, created_at, updated_at, competitions(id, slug, name, team_min, team_max))',
+      )
+      .eq('user_id', user.id)
+
+    if (membershipsError || !memberships?.length) {
+      return individualRegistrations
+    }
+
+    const teamIds = memberships.map((membership) => membership.team_id)
+    const { data: teamRegistrations } = await serviceSupabase
+      .from('competition_registrations')
+      .select('id, team_id, registration_kind, status, submitted_at, updated_at')
+      .eq('registration_kind', 'team')
+      .in('team_id', teamIds)
+
+    const registrationsByTeamId = new Map((teamRegistrations || []).map((registration) => [registration.team_id, registration]))
+    const teamRows = await Promise.all(
+      memberships.map(async (membership) => {
+        const team = Array.isArray(membership.competition_teams)
+          ? membership.competition_teams[0]
+          : membership.competition_teams
+        const competition = Array.isArray(team?.competitions) ? team?.competitions[0] : team?.competitions
+        const registration = registrationsByTeamId.get(membership.team_id)
+        const { count } = await serviceSupabase
+          .from('competition_team_members')
+          .select('id', { count: 'exact', head: true })
+          .eq('team_id', membership.team_id)
+
+        return {
+          id: registration?.id || `team-${membership.team_id}`,
+          team_id: membership.team_id,
+          team_uid: team?.team_uid,
+          competition_id: team?.competition_id || '',
+          competition_slug: competition?.slug,
+          competition_name: competition?.name,
+          registration_kind: 'team',
+          team_name: team?.team_name || 'Tim',
+          team_members: Array.from({ length: count || 0 }, () => ({})),
+          status: registration?.status || team?.status || 'draft',
+          is_team_leader: team?.leader_user_id === user.id,
+          team_member_count: count || 0,
+          team_min: competition?.team_min,
+          team_max: competition?.team_max,
+          created_at: registration?.submitted_at || team?.created_at,
+          updated_at: registration?.updated_at || team?.updated_at,
+        } as RegistrationRow
+      }),
+    )
+
+    return [...individualRegistrations, ...teamRows]
   } catch {
     return []
   }

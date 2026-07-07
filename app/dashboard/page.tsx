@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight } from 'lucide-react'
 
 import { NeuralDashboard } from '@/components/dashboard/neural-dashboard'
+import { TeamSubmitButton } from '@/components/dashboard/team-submit-button'
 import { Button } from '@/components/ui/button'
 import { getRegistrations } from '@/lib/registrations'
 
@@ -13,6 +14,12 @@ const statusConfig: Record<string, { icon: any; color: string; label: string; bg
     color: 'text-amber-700',
     label: 'Menunggu',
     bg: 'bg-amber-50 border-amber-200',
+  },
+  draft: {
+    icon: ClipboardList,
+    color: 'text-slate-700',
+    label: 'Draft',
+    bg: 'bg-white border-slate-200',
   },
   verified: {
     icon: CheckCircle2,
@@ -113,6 +120,11 @@ export default async function DashboardPage() {
               {registrations.map((reg) => {
                 const statusInfo = statusConfig[reg.status] || statusConfig.pending
                 const StatusIcon = statusInfo.icon
+                const isDraftTeam = reg.registration_kind === 'team' && reg.status === 'draft'
+                const submitDisabledReason =
+                  isDraftTeam && (reg.team_member_count || 0) < (reg.team_min || 1)
+                    ? `Minimal ${reg.team_min || 1} anggota sebelum submit.`
+                    : undefined
 
                 return (
                   <div
@@ -135,15 +147,27 @@ export default async function DashboardPage() {
                         <p className="mt-1 text-sm text-slate-600">
                           Jenis: <span className="font-semibold">{reg.registration_kind === 'individual' ? 'Individu' : 'Tim'}</span>
                         </p>
+                        {reg.team_uid && (
+                          <p className="mt-1 text-sm text-slate-600">
+                            UID Tim: <span className="font-mono font-semibold">{reg.team_uid}</span>
+                          </p>
+                        )}
                         <p className="mt-1 text-sm text-slate-600">
                           {getMemberLabel(reg.team_members)}
+                          {reg.registration_kind === 'team' && reg.team_min && reg.team_max
+                            ? ` dari ${reg.team_min}-${reg.team_max} anggota wajib`
+                            : ''}
                         </p>
                       </div>
 
                       {/* Action */}
-                      <Button asChild variant="ghost" size="sm" className="rounded-full">
-                        <Link href="/dashboard">Lihat Detail</Link>
-                      </Button>
+                      {isDraftTeam && reg.is_team_leader && reg.team_id ? (
+                        <TeamSubmitButton teamId={reg.team_id} disabledReason={submitDisabledReason} />
+                      ) : (
+                        <Button asChild variant="ghost" size="sm" className="rounded-full">
+                          <Link href="/dashboard">Lihat Detail</Link>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )
