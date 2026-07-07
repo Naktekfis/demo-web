@@ -353,6 +353,8 @@ Acceptance checks:
 
 ## Phase 9: Admin Visitors And Gate Check-In
 
+Status: Done
+
 Goal: Admin can see all Visitors and check in any Visitor with a valid QR.
 
 Specs:
@@ -370,22 +372,22 @@ Files likely affected:
 
 Steps:
 
-1. Implement visitor list endpoint.
-2. Add visitor page with search by name, email, phone, QR token, and check-in status.
-3. Update check-in endpoint to accept `{ "qrCode": "opaque-token" }`.
-4. Remove `lat` and `lng` requirement from check-in.
-5. Remove geofence validation for MVP.
-6. On successful check-in, set `checked_in`, `checked_in_at`, and `checked_in_by`.
-7. Return `ALREADY_CHECKED_IN` for duplicates.
-8. Keep manual QR token input as fallback when camera scanning is unavailable.
+1. [x] Implement visitor list endpoint.
+2. [x] Add visitor page with search by name, email, phone, QR token, and check-in status.
+3. [x] Update check-in endpoint to accept `{ "qrCode": "opaque-token" }`.
+4. [x] Remove `lat` and `lng` requirement from check-in.
+5. [x] Remove geofence validation for MVP.
+6. [x] On successful check-in, set `checked_in`, `checked_in_at`, and `checked_in_by`.
+7. [x] Return `ALREADY_CHECKED_IN` for duplicates.
+8. [x] Keep manual QR token input as fallback when camera scanning is unavailable.
 
 Acceptance checks:
 
-- Admin can check in any Visitor with QR.
-- QR does not need competition registration.
-- Unknown QR returns `TICKET_NOT_FOUND`.
-- Duplicate QR returns `ALREADY_CHECKED_IN`.
-- Check-in works without browser geolocation permission.
+- [x] Admin can check in any Visitor with QR.
+- [x] QR does not need competition registration.
+- [x] Unknown QR returns `TICKET_NOT_FOUND`.
+- [x] Duplicate QR returns `ALREADY_CHECKED_IN`.
+- [x] Check-in works without browser geolocation permission.
 
 ## Phase 10: Replace Legacy Data Access
 

@@ -83,6 +83,9 @@ export default async function AdminPage() {
               <Link href="/admin/registrations">Registrasi</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full">
+              <Link href="/admin/visitors">Pengunjung</Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
               <Link href="/admin/check-in">Check-in</Link>
             </Button>
             <Button asChild variant="outline" className="rounded-full">
