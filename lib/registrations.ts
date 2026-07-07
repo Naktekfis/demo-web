@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { getCompetitionBySlug, type CompetitionSummary } from '@/lib/competitions'
+import { createServiceClient } from '@/lib/supabase/server'
 
 export type RegistrationRow = {
   id: string
@@ -71,4 +73,66 @@ export async function getRegistrations() {
   } catch {
     return []
   }
+}
+
+export type CompetitionRow = {
+  id: string
+  slug: string
+  name: string
+  registration_type: 'individual' | 'team'
+  team_uid_prefix: string | null
+  team_min: number
+  team_max: number
+  registration_open: string | null
+  registration_close: string | null
+  is_active: boolean
+}
+
+function descriptionToText(description: CompetitionSummary['description']) {
+  if (typeof description === 'string') return description
+  if (!Array.isArray(description)) return null
+
+  const text = description
+    .flatMap((block) => (typeof block === 'object' && block && 'children' in block ? (block.children as unknown[]) : []))
+    .map((child) => (typeof child === 'object' && child && 'text' in child ? String(child.text) : ''))
+    .filter(Boolean)
+    .join(' ')
+
+  return text || null
+}
+
+export async function findOrCreateCompetitionRow(slug: string) {
+  const competition = await getCompetitionBySlug(slug)
+
+  if (!competition) {
+    return { ok: false as const, code: 'COMPETITION_NOT_FOUND', message: 'Kompetisi tidak ditemukan.', status: 404 }
+  }
+
+  const supabase = createServiceClient()
+  const { data, error } = await supabase
+    .from('competitions')
+    .upsert(
+      {
+        slug: competition.slug.current,
+        name: competition.title,
+        description: descriptionToText(competition.description),
+        category: competition.category || null,
+        registration_type: competition.registrationType,
+        team_uid_prefix: competition.registrationType === 'team' ? competition.teamUidPrefix || null : null,
+        team_min: competition.teamMin || 1,
+        team_max: competition.teamMax || 1,
+        registration_open: competition.regOpen || null,
+        registration_close: competition.regClose || null,
+        is_active: true,
+      },
+      { onConflict: 'slug' },
+    )
+    .select('id, slug, name, registration_type, team_uid_prefix, team_min, team_max, registration_open, registration_close, is_active')
+    .single()
+
+  if (error || !data) {
+    return { ok: false as const, code: 'COMPETITION_LOOKUP_FAILED', message: 'Gagal memuat data kompetisi.', status: 500, error }
+  }
+
+  return { ok: true as const, competition: data as CompetitionRow, source: competition }
 }

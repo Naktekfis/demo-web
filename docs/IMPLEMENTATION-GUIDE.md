@@ -122,6 +122,8 @@ Acceptance checks:
 
 ## Phase 3: Shared Server Helpers
 
+Status: Done
+
 Goal: avoid repeating auth, admin, ticket, and response logic across endpoints.
 
 Files likely affected:
@@ -135,13 +137,13 @@ Files likely affected:
 
 Steps:
 
-1. Add response helpers for the shared API envelope.
-2. Add authenticated-user helper for route handlers.
-3. Add admin-check helper using `admin_roles` or temporary `ADMIN_EMAILS` fallback.
-4. Add `ensureVisitorTicket(userId)` helper.
-5. Add `generateQrToken()` helper for opaque QR token.
-6. Add `generateTeamUid(prefix)` helper.
-7. Add competition lookup helper that maps hardcoded data to DB competition rows.
+1. [x] Add response helpers for the shared API envelope.
+2. [x] Add authenticated-user helper for route handlers.
+3. [x] Add admin-check helper using `admin_roles` or temporary `ADMIN_EMAILS` fallback.
+4. [x] Add `ensureVisitorTicket(userId)` helper.
+5. [x] Add `generateQrToken()` helper for opaque QR token.
+6. [x] Add `generateTeamUid(prefix)` helper.
+7. [x] Add competition lookup helper that maps hardcoded data to DB competition rows.
 
 Response shape:
 
@@ -158,9 +160,9 @@ Response shape:
 
 Acceptance checks:
 
-- New endpoints return consistent `success`, `data`, and `error` fields.
-- Error code is stable English `SCREAMING_SNAKE_CASE`.
-- Error message is Bahasa Indonesia.
+- [x] New endpoints return consistent `success`, `data`, and `error` fields.
+- [x] Error code is stable English `SCREAMING_SNAKE_CASE`.
+- [x] Error message is Bahasa Indonesia.
 
 ## Phase 4: Ticket Creation After Login
 
