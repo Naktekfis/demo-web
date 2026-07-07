@@ -391,6 +391,8 @@ Acceptance checks:
 
 ## Phase 10: Replace Legacy Data Access
 
+Status: Done
+
 Goal: remove old MVP-incompatible assumptions from current code.
 
 Known legacy areas:
