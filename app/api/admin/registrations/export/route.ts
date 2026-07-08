@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
           competitionSlug: params.get('competitionSlug') || undefined,
           registrationType: params.get('registrationType') || undefined,
           status: params.get('status') || undefined,
+          paymentStatus: params.get('paymentStatus') || undefined,
           checkInStatus: params.get('checkInStatus') || undefined,
         },
         { page, pageSize },

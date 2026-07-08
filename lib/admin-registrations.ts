@@ -1,5 +1,11 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
-import { getLatestPaymentsByRegistrationIds, getPaymentDisplayStatus, type PaymentSummary } from '@/lib/payments'
+import {
+  getLatestMidtransTransactionsByPaymentIds,
+  getLatestPaymentsByRegistrationIds,
+  getPaymentDisplayStatus,
+  type MidtransTransactionSummary,
+  type PaymentSummary,
+} from '@/lib/payments'
 
 export type AdminRegistrationStatus = 'submitted' | 'verified' | 'rejected'
 export type AdminRegistrationKind = 'individual' | 'team'
@@ -88,6 +94,7 @@ export type AdminRegistrationItem = {
   checkedInAt: string | null
   paymentStatus: string
   payment: PaymentSummary | null
+  midtransTransaction: MidtransTransactionSummary | null
 }
 
 export type AdminRegistrationFilters = {
@@ -96,6 +103,7 @@ export type AdminRegistrationFilters = {
   registrationType?: string
   status?: string
   checkInStatus?: string
+  paymentStatus?: string
 }
 
 export type AdminRegistrationPage = {
@@ -166,6 +174,7 @@ function itemMatchesFilters(item: AdminRegistrationItem, filters: AdminRegistrat
   if (filters.competitionSlug && item.competitionSlug !== filters.competitionSlug) return false
   if (filters.registrationType && item.registrationKind !== filters.registrationType) return false
   if (filters.status && item.status !== filters.status) return false
+  if (filters.paymentStatus && item.paymentStatus !== filters.paymentStatus) return false
 
   if (filters.checkInStatus === 'checked_in' && !item.checkedIn) return false
   if (filters.checkInStatus === 'not_checked_in' && item.checkedIn) return false
@@ -254,6 +263,10 @@ export async function listAdminRegistrations(
     supabase,
     registrations.map((registration) => registration.id),
   )
+  const midtransTransactions = await getLatestMidtransTransactionsByPaymentIds(
+    supabase,
+    Array.from(payments.values()).map((payment) => payment.id),
+  )
 
   const items = registrations.map((registration) => {
     const competition = competitions.get(registration.competition_id)
@@ -269,6 +282,7 @@ export async function listAdminRegistrations(
         : [makeMemberFromProfile(registration.user_id ? profiles.get(registration.user_id) : undefined, registration.user_id ? tickets.get(registration.user_id) : undefined)]
     const primaryContact = mappedMembers.find((member) => member.role === 'leader') || mappedMembers[0] || emptyMember
     const payment = payments.get(registration.id)
+    const midtransTransaction = payment ? midtransTransactions.get(payment.id) : undefined
 
     return {
       id: registration.id,
@@ -289,6 +303,7 @@ export async function listAdminRegistrations(
       checkedInAt: mappedMembers.find((member) => member.checkedIn)?.checkedInAt || null,
       paymentStatus: getPaymentDisplayStatus(payment),
       payment: payment || null,
+      midtransTransaction: midtransTransaction || null,
     } satisfies AdminRegistrationItem
   })
 
@@ -323,6 +338,9 @@ export function adminRegistrationsToCsv(items: AdminRegistrationItem[]) {
     'payment_provider',
     'payment_amount',
     'payment_currency',
+    'payment_midtrans_order_id',
+    'payment_expired_at',
+    'payment_attempted_at',
     'paid_at',
     'team_name',
     'team_uid',
@@ -345,6 +363,9 @@ export function adminRegistrationsToCsv(items: AdminRegistrationItem[]) {
       item.payment?.provider || '',
       item.payment?.amount || '',
       item.payment?.currency || '',
+      item.midtransTransaction?.order_id || '',
+      item.payment?.expired_at || '',
+      item.payment?.created_at || '',
       item.payment?.paid_at || '',
       item.teamName,
       item.teamUid,

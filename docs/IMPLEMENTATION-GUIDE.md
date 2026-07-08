@@ -609,7 +609,7 @@ Acceptance checks:
 
 ## Phase 15: Admin Payment Visibility
 
-Status: Next
+Status: Done
 
 Goal: let Admin inspect payment status before manual verification.
 
@@ -624,18 +624,18 @@ Files likely affected:
 
 Steps:
 
-1. [ ] Add paid/pending payment metrics to admin overview.
-2. [ ] Add payment status column to registration list.
-3. [ ] Add payment provider, amount, paid at, and Midtrans order ID fields to detail page.
-4. [ ] Add payment fields to CSV export.
-5. [ ] Add mock/demo-only payment override if useful for testing.
+1. [x] Add paid/pending payment metrics to admin overview.
+2. [x] Add payment status column to registration list.
+3. [x] Add payment provider, amount, paid at, and Midtrans order ID fields to detail page.
+4. [x] Add payment fields to CSV export.
+5. [x] Skip mock/demo-only payment override because it is not needed for current testing and should not look like production behavior.
 
 Acceptance checks:
 
-- [ ] Admin can inspect payment status.
-- [ ] CSV includes payment fields.
-- [ ] Admin can verify registration after payment is paid.
-- [ ] Mock override is not presented as production behavior.
+- [x] Admin can inspect payment status.
+- [x] CSV includes payment fields.
+- [x] Admin can verify registration after payment is paid.
+- [x] Mock override is not presented as production behavior.
 
 ## Phase 16: Midtrans Sandbox Snap
 

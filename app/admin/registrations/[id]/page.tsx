@@ -68,7 +68,12 @@ export default async function AdminRegistrationDetailPage({ params }: { params: 
             <div><dt className="text-sm text-slate-500">Status</dt><dd className="font-semibold capitalize text-slate-900">{registration.paymentStatus === 'unpaid' ? 'Belum dibuat' : registration.paymentStatus}</dd></div>
             <div><dt className="text-sm text-slate-500">Provider</dt><dd className="font-semibold text-slate-900">{registration.payment?.provider || '-'}</dd></div>
             <div><dt className="text-sm text-slate-500">Amount</dt><dd className="font-semibold text-slate-900">{registration.payment ? `${registration.payment.currency} ${registration.payment.amount.toLocaleString('id-ID')}` : '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Midtrans order ID</dt><dd className="font-mono text-sm font-semibold text-slate-900">{registration.midtransTransaction?.order_id || '-'}</dd></div>
             <div><dt className="text-sm text-slate-500">Paid at</dt><dd className="font-semibold text-slate-900">{registration.payment?.paid_at ? new Date(registration.payment.paid_at).toLocaleString('id-ID') : '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Expired at</dt><dd className="font-semibold text-slate-900">{registration.payment?.expired_at ? new Date(registration.payment.expired_at).toLocaleString('id-ID') : '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Latest attempt</dt><dd className="font-semibold text-slate-900">{registration.payment?.created_at ? new Date(registration.payment.created_at).toLocaleString('id-ID') : '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Midtrans transaction status</dt><dd className="font-semibold text-slate-900">{registration.midtransTransaction?.transaction_status || '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Midtrans fraud status</dt><dd className="font-semibold text-slate-900">{registration.midtransTransaction?.fraud_status || '-'}</dd></div>
           </dl>
         </div>
 

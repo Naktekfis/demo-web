@@ -20,7 +20,7 @@ function param(searchParams: Props['searchParams'], key: string) {
 
 function buildExportHref(searchParams: Props['searchParams']) {
   const params = new URLSearchParams()
-  for (const key of ['q', 'competitionSlug', 'registrationType', 'status', 'checkInStatus']) {
+  for (const key of ['q', 'competitionSlug', 'registrationType', 'status', 'paymentStatus', 'checkInStatus']) {
     const value = param(searchParams, key)
     if (value) params.set(key, value)
   }
@@ -51,6 +51,7 @@ export default async function AdminRegistrationsPage({ searchParams }: Props) {
           competitionSlug: param(searchParams, 'competitionSlug') || undefined,
           registrationType: param(searchParams, 'registrationType') || undefined,
           status: param(searchParams, 'status') || undefined,
+          paymentStatus: param(searchParams, 'paymentStatus') || undefined,
           checkInStatus: param(searchParams, 'checkInStatus') || undefined,
         },
         { page: param(searchParams, 'page') || undefined, pageSize: param(searchParams, 'pageSize') || undefined },
@@ -77,7 +78,7 @@ export default async function AdminRegistrationsPage({ searchParams }: Props) {
           </div>
         </div>
 
-        <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-6">
+        <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-7">
           <input name="q" defaultValue={param(searchParams, 'q')} placeholder="Cari nama, email, UID, QR..." className="rounded-lg border border-slate-300 px-3 py-2 text-sm lg:col-span-2" />
           <select name="competitionSlug" defaultValue={param(searchParams, 'competitionSlug')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             <option value="">Semua kompetisi</option>
@@ -94,12 +95,21 @@ export default async function AdminRegistrationsPage({ searchParams }: Props) {
             <option value="verified">Verified</option>
             <option value="rejected">Rejected</option>
           </select>
+          <select name="paymentStatus" defaultValue={param(searchParams, 'paymentStatus')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Semua pembayaran</option>
+            <option value="unpaid">Belum dibuat</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+            <option value="expired">Expired</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
           <select name="checkInStatus" defaultValue={param(searchParams, 'checkInStatus')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             <option value="">Semua check-in</option>
             <option value="checked_in">Sudah check-in</option>
             <option value="not_checked_in">Belum check-in</option>
           </select>
-          <Button type="submit" className="rounded-full bg-indigo-600 hover:bg-indigo-700 lg:col-start-6">Terapkan</Button>
+          <Button type="submit" className="rounded-full bg-indigo-600 hover:bg-indigo-700 lg:col-start-7">Terapkan</Button>
         </form>
 
         {error ? <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">{error}</div> : null}
@@ -126,6 +136,11 @@ export default async function AdminRegistrationsPage({ searchParams }: Props) {
                 <div className="lg:col-span-1 space-y-2">
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">{registration.status}</span>
                   <p className="text-xs capitalize text-slate-500">Pay: {registration.paymentStatus === 'unpaid' ? 'belum dibuat' : registration.paymentStatus}</p>
+                  {registration.payment ? (
+                    <p className="text-xs text-slate-500">
+                      {registration.payment.provider} · {registration.payment.currency} {registration.payment.amount.toLocaleString('id-ID')}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="lg:col-span-3">
                   <form action={updateRegistrationStatus} className="flex flex-wrap justify-end gap-2">

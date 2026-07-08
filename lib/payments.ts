@@ -17,6 +17,19 @@ export type PaymentSummary = {
   updated_at: string
 }
 
+export type MidtransTransactionSummary = {
+  id: string
+  payment_id: string
+  order_id: string
+  snap_token: string | null
+  redirect_url: string | null
+  transaction_status: string | null
+  fraud_status: string | null
+  gross_amount: number | null
+  created_at: string
+  updated_at: string
+}
+
 export type PaymentRegistration = {
   id: string
   status: string
@@ -67,6 +80,29 @@ export async function getLatestPaymentsByRegistrationIds(supabase: SupabaseClien
   }
 
   return paymentsByRegistrationId
+}
+
+export async function getLatestMidtransTransactionsByPaymentIds(supabase: SupabaseClient, paymentIds: string[]) {
+  const uniqueIds = Array.from(new Set(paymentIds.filter(Boolean)))
+  const transactionsByPaymentId = new Map<string, MidtransTransactionSummary>()
+
+  if (uniqueIds.length === 0) return transactionsByPaymentId
+
+  const { data, error } = await supabase
+    .from('midtrans_transactions')
+    .select('id, payment_id, order_id, snap_token, redirect_url, transaction_status, fraud_status, gross_amount, created_at, updated_at')
+    .in('payment_id', uniqueIds)
+    .order('created_at', { ascending: false })
+
+  if (error) return transactionsByPaymentId
+
+  for (const transaction of (data || []) as MidtransTransactionSummary[]) {
+    if (!transactionsByPaymentId.has(transaction.payment_id)) {
+      transactionsByPaymentId.set(transaction.payment_id, transaction)
+    }
+  }
+
+  return transactionsByPaymentId
 }
 
 export function getPaymentDisplayStatus(payment: PaymentSummary | undefined) {
