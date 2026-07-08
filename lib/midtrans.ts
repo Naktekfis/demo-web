@@ -1,3 +1,5 @@
+import { createHash, timingSafeEqual } from 'crypto'
+
 type MidtransCustomerDetails = {
   first_name: string
   email?: string
@@ -22,6 +24,18 @@ export type MidtransSnapTransaction = {
   redirect_url: string
 }
 
+export type MidtransNotificationPayload = {
+  order_id?: string
+  status_code?: string
+  gross_amount?: string
+  signature_key?: string
+  transaction_status?: string
+  fraud_status?: string
+  [key: string]: unknown
+}
+
+export type MappedMidtransPaymentStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'
+
 function getMidtransServerKey() {
   return process.env.MIDTRANS_SERVER_KEY?.trim()
 }
@@ -39,6 +53,41 @@ function truncate(value: string, maxLength: number) {
 
 export function hasMidtransConfig() {
   return Boolean(getMidtransServerKey())
+}
+
+export function verifyMidtransSignature(payload: MidtransNotificationPayload) {
+  const serverKey = getMidtransServerKey()
+
+  if (!serverKey) return false
+
+  const signature = payload.signature_key
+  const source = `${payload.order_id || ''}${payload.status_code || ''}${payload.gross_amount || ''}${serverKey}`
+  const expected = createHash('sha512').update(source).digest('hex')
+
+  if (!signature || Buffer.byteLength(signature) !== Buffer.byteLength(expected)) return false
+
+  return timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+}
+
+export function mapMidtransPaymentStatus(payload: MidtransNotificationPayload): MappedMidtransPaymentStatus {
+  switch (payload.transaction_status) {
+    case 'settlement':
+      return 'paid'
+    case 'capture':
+      if (payload.fraud_status === 'deny') return 'failed'
+      return payload.fraud_status === 'challenge' ? 'pending' : 'paid'
+    case 'pending':
+      return 'pending'
+    case 'expire':
+      return 'expired'
+    case 'cancel':
+      return 'cancelled'
+    case 'deny':
+    case 'failure':
+      return 'failed'
+    default:
+      return 'pending'
+  }
 }
 
 export async function createMidtransSnapTransaction(input: CreateMidtransSnapTransactionInput) {

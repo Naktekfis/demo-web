@@ -680,7 +680,7 @@ Acceptance checks:
 
 ## Phase 17: Midtrans Webhook
 
-Status: Next
+Status: Done
 
 Goal: update payment status from verified Midtrans notifications.
 
@@ -688,23 +688,25 @@ Endpoint:
 
 - `POST /api/payments/midtrans/notification`
 
+Callback URL for deployed testing: `https://www.itbinsight.com/api/payments/midtrans/notification`.
+
 Steps:
 
-1. [ ] Configure callback URL using `https://www.itbinsight.com` or a tunnel during testing.
-2. [ ] Verify Midtrans signature.
-3. [ ] Look up `midtrans_transactions.order_id`.
-4. [ ] Map Midtrans status to internal payment status.
-5. [ ] Store raw notification payload.
-6. [ ] Make endpoint idempotent.
-7. [ ] Do not auto-verify registration.
+1. [x] Configure callback URL using `https://www.itbinsight.com` or a tunnel during testing.
+2. [x] Verify Midtrans signature.
+3. [x] Look up `midtrans_transactions.order_id`.
+4. [x] Map Midtrans status to internal payment status.
+5. [x] Store raw notification payload.
+6. [x] Make endpoint idempotent.
+7. [x] Do not auto-verify registration.
 
 Acceptance checks:
 
-- [ ] Invalid signature is rejected.
-- [ ] Duplicate webhook is safe.
-- [ ] `settlement` or `capture` marks payment `paid`.
-- [ ] `expire` marks payment `expired`.
-- [ ] Registration status remains separate.
+- [x] Invalid signature is rejected.
+- [x] Duplicate webhook is safe.
+- [x] `settlement` or `capture` marks payment `paid`.
+- [x] `expire` marks payment `expired`.
+- [x] Registration status remains separate.
 
 ## Rollback And Safety Notes
 
