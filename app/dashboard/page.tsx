@@ -179,7 +179,7 @@ export default async function DashboardPage() {
                       ) : canPay ? (
                         <PaymentActionButton
                           registrationId={reg.id}
-                          paymentId={reg.payment?.id}
+                          paymentProvider={reg.payment?.provider}
                           paymentStatus={reg.payment_status}
                         />
                       ) : (

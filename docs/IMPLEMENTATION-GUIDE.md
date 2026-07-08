@@ -639,7 +639,7 @@ Acceptance checks:
 
 ## Phase 16: Midtrans Sandbox Snap
 
-Status: Next
+Status: Done
 
 Goal: connect payment creation to Midtrans Sandbox after mock flow is stable.
 
@@ -661,22 +661,22 @@ NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-sandbox-client-key
 
 Steps:
 
-1. [ ] Add server-only Midtrans helper.
-2. [ ] Add provider `midtrans` path to `POST /api/payments/create`.
-3. [ ] Generate unique Midtrans `order_id`.
-4. [ ] Send customer details: name, email, phone.
-5. [ ] Send item details: competition name, registration/team name, amount.
-6. [ ] Store Snap token, redirect URL, order ID, and raw response.
-7. [ ] Redirect user to Midtrans Sandbox Snap URL.
-8. [ ] Return user to `/dashboard` for minimum bug risk.
-9. [ ] Dashboard refreshes payment status after return.
+1. [x] Add server-only Midtrans helper.
+2. [x] Add provider `midtrans` path to `POST /api/payments/create`.
+3. [x] Generate unique Midtrans `order_id`.
+4. [x] Send customer details: name, email, phone.
+5. [x] Send item details: competition name, registration/team name, amount.
+6. [x] Store Snap token, redirect URL, order ID, and raw response.
+7. [x] Redirect user to Midtrans Sandbox Snap URL.
+8. [x] Return user to `/dashboard` for minimum bug risk.
+9. [x] Dashboard refreshes payment status after return.
 
 Acceptance checks:
 
-- [ ] Sandbox transaction is created server-side.
-- [ ] User reaches Midtrans payment page.
-- [ ] Server key is never exposed to client.
-- [ ] Return to dashboard does not break registration/payment state.
+- [x] Sandbox transaction is created server-side.
+- [x] User reaches Midtrans payment page.
+- [x] Server key is never exposed to client.
+- [x] Return to dashboard does not break registration/payment state.
 
 ## Phase 17: Midtrans Webhook
 

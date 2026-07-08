@@ -13,21 +13,16 @@ type ApiEnvelope<T> =
 
 type PaymentActionButtonProps = {
   registrationId: string
-  paymentId?: string
+  paymentProvider?: string
   paymentStatus?: string
 }
 
-export function PaymentActionButton({ registrationId, paymentId, paymentStatus }: PaymentActionButtonProps) {
+export function PaymentActionButton({ registrationId, paymentProvider, paymentStatus }: PaymentActionButtonProps) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const handlePayment = async () => {
-    if (paymentStatus === 'pending' && paymentId) {
-      router.push(`/dashboard/payments/${paymentId}/mock`)
-      return
-    }
-
     setSubmitting(true)
     setErrorMessage('')
 
@@ -47,7 +42,7 @@ export function PaymentActionButton({ registrationId, paymentId, paymentStatus }
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ registrationId, provider: 'mock' }),
+        body: JSON.stringify({ registrationId, provider: paymentProvider || 'midtrans' }),
       })
 
       const payload = (await response.json()) as ApiEnvelope<{ redirectUrl: string }>
