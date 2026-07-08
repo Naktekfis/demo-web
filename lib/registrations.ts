@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCompetitionBySlug, type CompetitionSummary } from '@/lib/competitions'
+import { getLatestPaymentsByRegistrationIds, getPaymentDisplayStatus, type PaymentSummary } from '@/lib/payments'
 import { createServiceClient } from '@/lib/supabase/server'
 
 export type RegistrationRow = {
@@ -17,7 +18,9 @@ export type RegistrationRow = {
     institution?: string
     role?: string
   }>
-  status: 'pending' | 'verified' | 'rejected' | string
+  status: 'submitted' | 'verified' | 'rejected' | string
+  payment_status?: string
+  payment?: PaymentSummary
   is_team_leader?: boolean
   team_member_count?: number
   team_min?: number
@@ -35,7 +38,7 @@ const fallbackRegistrations: RegistrationRow[] = [
       { name: 'Alya', email: 'alya@example.com', institution: 'ITB', role: 'Leader' },
       { name: 'Raka', email: 'raka@example.com', institution: 'ITB', role: 'Member' },
     ],
-    status: 'pending',
+    status: 'submitted',
     created_at: new Date().toISOString(),
   },
   {
@@ -78,10 +81,16 @@ export async function getRegistrations() {
       return []
     }
 
+    const individualPayments = await getLatestPaymentsByRegistrationIds(
+      supabase,
+      (data || []).map((registration) => registration.id),
+    )
+
     const individualRegistrations = (data || []).map((registration) => {
       const competition = Array.isArray(registration.competitions)
         ? registration.competitions[0]
         : registration.competitions
+      const payment = individualPayments.get(registration.id)
 
       return {
         id: registration.id,
@@ -92,6 +101,8 @@ export async function getRegistrations() {
         team_name: competition?.name || 'Registrasi Individu',
         team_members: registration.registration_kind === 'individual' ? [{ role: 'Peserta' }] : [],
         status: registration.status,
+        payment_status: getPaymentDisplayStatus(payment),
+        payment,
         created_at: registration.submitted_at,
         updated_at: registration.updated_at,
       }
@@ -120,6 +131,10 @@ export async function getRegistrations() {
       .eq('registration_kind', 'team')
       .in('team_id', teamIds)
 
+    const teamPayments = await getLatestPaymentsByRegistrationIds(
+      serviceSupabase,
+      (teamRegistrations || []).map((registration) => registration.id),
+    )
     const registrationsByTeamId = new Map((teamRegistrations || []).map((registration) => [registration.team_id, registration]))
     const teamRows = await Promise.all(
       memberships.map(async (membership) => {
@@ -128,6 +143,7 @@ export async function getRegistrations() {
           : membership.competition_teams
         const competition = Array.isArray(team?.competitions) ? team?.competitions[0] : team?.competitions
         const registration = registrationsByTeamId.get(membership.team_id)
+        const payment = registration?.id ? teamPayments.get(registration.id) : undefined
         const { count } = await serviceSupabase
           .from('competition_team_members')
           .select('id', { count: 'exact', head: true })
@@ -144,6 +160,8 @@ export async function getRegistrations() {
           team_name: team?.team_name || 'Tim',
           team_members: Array.from({ length: count || 0 }, () => ({})),
           status: registration?.status || team?.status || 'draft',
+          payment_status: registration ? getPaymentDisplayStatus(payment) : undefined,
+          payment,
           is_team_leader: team?.leader_user_id === user.id,
           team_member_count: count || 0,
           team_min: competition?.team_min,

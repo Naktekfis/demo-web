@@ -107,7 +107,7 @@ export default async function RegisterCompetitionPage({ searchParams }: Register
           </h1>
           <p className="max-w-2xl text-base leading-7 text-slate-600">
             {isIndividual
-              ? 'Pastikan profil dan nomor telepon sudah lengkap. Registrasi akan masuk dengan status pending untuk ditinjau admin.'
+              ? 'Pastikan profil dan nomor telepon sudah lengkap. Registrasi akan masuk dengan status submitted untuk ditinjau admin.'
               : 'Registrasi tim akan memakai alur buat tim, UID tim, dan gabung anggota pada fase berikutnya.'}
           </p>
         </div>

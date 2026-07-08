@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/IMPLEMENTATION-GAP.md`
+Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/IMPLEMENTATION-GAP.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`
 
 Audience: web development team implementing the MVP under a tight timeline.
 
@@ -12,11 +12,11 @@ Audience: web development team implementing the MVP under a tight timeline.
 
 This guide turns the MVP docs into an implementation sequence. Follow it in order unless a blocker requires reordering.
 
-The MVP is competition registration only, with visitor QR creation, team registration, admin registration review, CSV export, and admin-operated gate check-in.
+The core MVP is competition registration, with visitor QR creation, team registration, admin registration review, CSV export, and admin-operated gate check-in. Payment is the next implementation layer: internal mock first, then Midtrans Sandbox Snap.
 
 ## Implementation Rules
 
-- Keep payment out of MVP.
+- Implement payment in two stages after core registration is stable: internal mock first, then Midtrans Sandbox Snap.
 - Keep booth tracking out of MVP.
 - Keep RSVP/alumni/feedback/sponsor flows out of MVP.
 - Keep competition data hardcoded for MVP.
@@ -110,7 +110,7 @@ Recommended path:
 Important decisions:
 
 - This MVP can use a clean reset because production data is not assumed.
-- Do not add payment tables yet.
+- Payment tables are added in Phase 13 after core registration is stable.
 - Do not preserve `rsvp` unless needed temporarily for compatibility.
 
 Acceptance checks:
@@ -216,7 +216,7 @@ Steps:
 5. [x] Validate competition exists and is `individual`.
 6. [x] Validate registration window.
 7. [x] Reject duplicate registration.
-8. [x] Insert `competition_registrations` with `registration_kind = individual` and `status = pending`.
+8. [x] Insert `competition_registrations` with `registration_kind = individual` and `status = submitted`.
 9. [x] Update dashboard to read `competition_registrations`.
 
 Acceptance checks:
@@ -224,7 +224,7 @@ Acceptance checks:
 - [x] Unauthenticated user is rejected or redirected.
 - [x] Missing phone blocks submission.
 - [x] Duplicate individual registration returns `DUPLICATE_REGISTRATION`.
-- [x] Success shows `pending` status.
+- [x] Success shows `submitted` status.
 
 ## Phase 6: Team Creation And Join Flow
 
@@ -294,7 +294,7 @@ Steps:
 3. [x] Count team members.
 4. [x] Validate `team_min` and `team_max`.
 5. [x] Reject duplicate team registration.
-6. [x] Insert `competition_registrations` with `registration_kind = team` and `status = pending`.
+6. [x] Insert `competition_registrations` with `registration_kind = team` and `status = submitted`.
 7. [x] Update team status to `submitted`.
 8. [x] Show submitted status in participant dashboard.
 
@@ -455,7 +455,7 @@ Run these checks in order.
 3. [x] Confirm submission is blocked.
 4. [x] Add phone.
 5. [x] Submit registration.
-6. [x] Confirm status is `pending`.
+6. [x] Confirm status is `submitted`.
 7. [x] Submit again.
 8. [x] Confirm duplicate is rejected.
 
@@ -482,7 +482,7 @@ Run these checks in order.
 6. [x] Reject without note.
 7. [x] Confirm blocked.
 8. [x] Reject with note.
-9. [x] Change back to pending.
+9. [x] Change back to submitted.
 10. [x] Change to verified.
 11. [x] Export CSV.
 
@@ -526,6 +526,186 @@ Definition of done:
 - [x] Manual QA script passes or failures are documented.
 - [x] Known deferred items are not accidentally implemented halfway.
 
+## Phase 13: Payment Schema And State Model
+
+Status: Done
+
+Goal: add payment persistence without changing registration verification behavior.
+
+Specs:
+
+- `docs/PAYMENT-MIDTRANS-PLAN.md`
+- `docs/PAYMENT-FLOWS.md`
+- `docs/SUPABASE-SCHEMA-PLAN.md`
+
+Files likely affected:
+
+- `supabase/migrations/*`
+- `lib/payments.ts`
+- `lib/registrations.ts`
+- dashboard registration queries
+- admin registration queries
+
+Steps:
+
+1. [x] Add `payments` table.
+2. [x] Add `midtrans_transactions` table.
+3. [x] Keep registration status and payment status separate.
+4. [x] Ensure existing submitted registrations can show missing payment as payable.
+5. [x] Add payment joins to dashboard registration data.
+6. [x] Add payment joins to admin registration data.
+7. [x] Do not auto-verify registration when payment becomes `paid`.
+
+Acceptance checks:
+
+- [x] Registration can be `submitted` while payment is `pending`.
+- [x] Payment can be `paid` while registration remains `submitted`.
+- [x] Admin can still change registration to `verified` manually.
+
+## Phase 14: Internal Mock Payment
+
+Status: Next
+
+Goal: prove payment UX and state transitions before Midtrans integration.
+
+API specs:
+
+- `POST /api/payments/create`
+- `GET /api/payments/[id]`
+- `POST /api/payments/mock/settle`
+- `POST /api/payments/mock/fail`
+- `POST /api/payments/mock/expire`
+
+Files likely affected:
+
+- `app/api/payments/create/route.ts`
+- `app/api/payments/[id]/route.ts`
+- `app/api/payments/mock/settle/route.ts`
+- `app/api/payments/mock/fail/route.ts`
+- `app/api/payments/mock/expire/route.ts`
+- `app/dashboard/payments/[id]/mock/page.tsx`
+- dashboard registration card component
+
+Steps:
+
+1. [ ] Implement `POST /api/payments/create` with provider `mock`.
+2. [ ] Use amount from hardcoded competition data; default IDR 10,000.
+3. [ ] Allow individual participant to pay own registration.
+4. [ ] Allow only team leader to pay team registration.
+5. [ ] Block payment when registration is `verified` or `rejected`.
+6. [ ] Reuse active pending payment instead of creating duplicates.
+7. [ ] Add dashboard `Bayar` button after registration submission.
+8. [ ] Add mock payment page with success/fail/expire demo actions.
+9. [ ] Add retry CTA for `failed`, `expired`, or `cancelled` payments.
+10. [ ] Confirm mock success sets `payment_status = paid` only.
+
+Acceptance checks:
+
+- [ ] Individual participant can mock-pay.
+- [ ] Team leader can mock-pay.
+- [ ] Team member cannot pay team registration.
+- [ ] Retry works while registration is `submitted`.
+- [ ] Paid payment does not auto-verify registration.
+
+## Phase 15: Admin Payment Visibility
+
+Status: Next
+
+Goal: let Admin inspect payment status before manual verification.
+
+Files likely affected:
+
+- `app/admin/page.tsx`
+- `app/admin/registrations/page.tsx`
+- `app/admin/registrations/[id]/page.tsx`
+- `app/api/admin/overview/route.ts`
+- `app/api/admin/registrations/route.ts`
+- `app/api/admin/registrations/export/route.ts`
+
+Steps:
+
+1. [ ] Add paid/pending payment metrics to admin overview.
+2. [ ] Add payment status column to registration list.
+3. [ ] Add payment provider, amount, paid at, and Midtrans order ID fields to detail page.
+4. [ ] Add payment fields to CSV export.
+5. [ ] Add mock/demo-only payment override if useful for testing.
+
+Acceptance checks:
+
+- [ ] Admin can inspect payment status.
+- [ ] CSV includes payment fields.
+- [ ] Admin can verify registration after payment is paid.
+- [ ] Mock override is not presented as production behavior.
+
+## Phase 16: Midtrans Sandbox Snap
+
+Status: Next
+
+Goal: connect payment creation to Midtrans Sandbox after mock flow is stable.
+
+Files likely affected:
+
+- `lib/midtrans.ts`
+- `app/api/payments/create/route.ts`
+- payment dashboard flow
+- `.env.local` and deployment env vars
+
+Environment variables:
+
+```bash
+MIDTRANS_SERVER_KEY=your-sandbox-server-key
+MIDTRANS_CLIENT_KEY=your-sandbox-client-key
+MIDTRANS_IS_PRODUCTION=false
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-sandbox-client-key
+```
+
+Steps:
+
+1. [ ] Add server-only Midtrans helper.
+2. [ ] Add provider `midtrans` path to `POST /api/payments/create`.
+3. [ ] Generate unique Midtrans `order_id`.
+4. [ ] Send customer details: name, email, phone.
+5. [ ] Send item details: competition name, registration/team name, amount.
+6. [ ] Store Snap token, redirect URL, order ID, and raw response.
+7. [ ] Redirect user to Midtrans Sandbox Snap URL.
+8. [ ] Return user to `/dashboard` for minimum bug risk.
+9. [ ] Dashboard refreshes payment status after return.
+
+Acceptance checks:
+
+- [ ] Sandbox transaction is created server-side.
+- [ ] User reaches Midtrans payment page.
+- [ ] Server key is never exposed to client.
+- [ ] Return to dashboard does not break registration/payment state.
+
+## Phase 17: Midtrans Webhook
+
+Status: Next
+
+Goal: update payment status from verified Midtrans notifications.
+
+Endpoint:
+
+- `POST /api/payments/midtrans/notification`
+
+Steps:
+
+1. [ ] Configure callback URL using `https://www.itbinsight.com` or a tunnel during testing.
+2. [ ] Verify Midtrans signature.
+3. [ ] Look up `midtrans_transactions.order_id`.
+4. [ ] Map Midtrans status to internal payment status.
+5. [ ] Store raw notification payload.
+6. [ ] Make endpoint idempotent.
+7. [ ] Do not auto-verify registration.
+
+Acceptance checks:
+
+- [ ] Invalid signature is rejected.
+- [ ] Duplicate webhook is safe.
+- [ ] `settlement` or `capture` marks payment `paid`.
+- [ ] `expire` marks payment `expired`.
+- [ ] Registration status remains separate.
+
 ## Rollback And Safety Notes
 
 - Do not expose `SUPABASE_SERVICE_ROLE_KEY` in client code.
@@ -549,3 +729,8 @@ Definition of done:
 10. Legacy table cleanup.
 11. Manual QA.
 12. Final build/type verification.
+13. Payment schema and state model.
+14. Internal mock payment.
+15. Admin payment visibility.
+16. Midtrans Sandbox Snap.
+17. Midtrans webhook.

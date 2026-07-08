@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { isAdminUser } from '@/lib/admin'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-const allowedStatuses = ['pending', 'verified', 'rejected']
+const allowedStatuses = ['submitted', 'verified', 'rejected']
 
 export async function updateRegistrationStatus(formData: FormData) {
   const supabase = createClient()

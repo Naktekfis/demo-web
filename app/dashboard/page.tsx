@@ -9,10 +9,10 @@ import { getRegistrations } from '@/lib/registrations'
 export const dynamic = 'force-dynamic'
 
 const statusConfig: Record<string, { icon: any; color: string; label: string; bg: string }> = {
-  pending: {
+  submitted: {
     icon: Clock,
     color: 'text-amber-700',
-    label: 'Menunggu',
+    label: 'Submitted',
     bg: 'bg-amber-50 border-amber-200',
   },
   draft: {
@@ -42,7 +42,7 @@ function getMemberLabel(teamMembers: Array<{ name?: string }> | undefined) {
 
 export default async function DashboardPage() {
   const registrations = await getRegistrations()
-  const pendingCount = registrations.filter((reg) => reg.status === 'pending').length
+  const submittedCount = registrations.filter((reg) => reg.status === 'submitted').length
   const verifiedCount = registrations.filter((reg) => reg.status === 'verified').length
 
   return (
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       <section className="mx-auto w-full max-w-6xl space-y-12">
         <NeuralDashboard
           registrationCount={registrations.length}
-          pendingCount={pendingCount}
+          pendingCount={submittedCount}
           verifiedCount={verifiedCount}
         />
 
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
           {registrations.length > 0 ? (
             <div className="space-y-4">
               {registrations.map((reg) => {
-                const statusInfo = statusConfig[reg.status] || statusConfig.pending
+                const statusInfo = statusConfig[reg.status] || statusConfig.submitted
                 const StatusIcon = statusInfo.icon
                 const isDraftTeam = reg.registration_kind === 'team' && reg.status === 'draft'
                 const submitDisabledReason =
@@ -147,6 +147,14 @@ export default async function DashboardPage() {
                         <p className="mt-1 text-sm text-slate-600">
                           Jenis: <span className="font-semibold">{reg.registration_kind === 'individual' ? 'Individu' : 'Tim'}</span>
                         </p>
+                        {reg.status === 'submitted' && reg.payment_status ? (
+                          <p className="mt-1 text-sm text-slate-600">
+                            Pembayaran:{' '}
+                            <span className="font-semibold capitalize">
+                              {reg.payment_status === 'unpaid' ? 'Belum dibuat' : reg.payment_status}
+                            </span>
+                          </p>
+                        ) : null}
                         {reg.team_uid && (
                           <p className="mt-1 text-sm text-slate-600">
                             UID Tim: <span className="font-mono font-semibold">{reg.team_uid}</span>

@@ -1,6 +1,7 @@
 import { type SupabaseClient } from '@supabase/supabase-js'
+import { getLatestPaymentsByRegistrationIds, getPaymentDisplayStatus, type PaymentSummary } from '@/lib/payments'
 
-export type AdminRegistrationStatus = 'pending' | 'verified' | 'rejected'
+export type AdminRegistrationStatus = 'submitted' | 'verified' | 'rejected'
 export type AdminRegistrationKind = 'individual' | 'team'
 export type AdminCheckInStatus = 'checked_in' | 'not_checked_in'
 
@@ -85,6 +86,8 @@ export type AdminRegistrationItem = {
   members: AdminRegistrationMember[]
   checkedIn: boolean
   checkedInAt: string | null
+  paymentStatus: string
+  payment: PaymentSummary | null
 }
 
 export type AdminRegistrationFilters = {
@@ -247,6 +250,10 @@ export async function listAdminRegistrations(
 
   const profiles = new Map(((profilesResult.data || []) as ProfileRow[]).map((profile) => [profile.id, profile]))
   const tickets = new Map(((ticketsResult.data || []) as TicketRow[]).map((ticket) => [ticket.user_id, ticket]))
+  const payments = await getLatestPaymentsByRegistrationIds(
+    supabase,
+    registrations.map((registration) => registration.id),
+  )
 
   const items = registrations.map((registration) => {
     const competition = competitions.get(registration.competition_id)
@@ -261,6 +268,7 @@ export async function listAdminRegistrations(
         ? sortedTeamMembers.map((member) => makeMemberFromTeamRow(member, tickets.get(member.user_id)))
         : [makeMemberFromProfile(registration.user_id ? profiles.get(registration.user_id) : undefined, registration.user_id ? tickets.get(registration.user_id) : undefined)]
     const primaryContact = mappedMembers.find((member) => member.role === 'leader') || mappedMembers[0] || emptyMember
+    const payment = payments.get(registration.id)
 
     return {
       id: registration.id,
@@ -279,6 +287,8 @@ export async function listAdminRegistrations(
       members: mappedMembers,
       checkedIn: mappedMembers.some((member) => member.checkedIn),
       checkedInAt: mappedMembers.find((member) => member.checkedIn)?.checkedInAt || null,
+      paymentStatus: getPaymentDisplayStatus(payment),
+      payment: payment || null,
     } satisfies AdminRegistrationItem
   })
 
@@ -309,6 +319,11 @@ export function adminRegistrationsToCsv(items: AdminRegistrationItem[]) {
     'competition_slug',
     'registration_type',
     'registration_status',
+    'payment_status',
+    'payment_provider',
+    'payment_amount',
+    'payment_currency',
+    'paid_at',
     'team_name',
     'team_uid',
     'member_role',
@@ -326,6 +341,11 @@ export function adminRegistrationsToCsv(items: AdminRegistrationItem[]) {
       item.competitionSlug,
       item.registrationKind,
       item.status,
+      item.paymentStatus,
+      item.payment?.provider || '',
+      item.payment?.amount || '',
+      item.payment?.currency || '',
+      item.payment?.paid_at || '',
       item.teamName,
       item.teamUid,
       member.role,

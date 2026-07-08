@@ -35,7 +35,12 @@ export default async function AdminRegistrationDetailPage({ params }: { params: 
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {[['Tipe', registration.registrationKind], ['Status', registration.status], ['Check-in', registration.checkedIn ? 'Sudah' : 'Belum']].map(([label, value]) => (
+          {[
+            ['Tipe', registration.registrationKind],
+            ['Status', registration.status],
+            ['Pembayaran', registration.paymentStatus === 'unpaid' ? 'Belum dibuat' : registration.paymentStatus],
+            ['Check-in', registration.checkedIn ? 'Sudah' : 'Belum'],
+          ].map(([label, value]) => (
             <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="text-sm text-slate-500">{label}</p>
               <p className="mt-2 text-xl font-bold capitalize text-slate-900">{value}</p>
@@ -49,12 +54,22 @@ export default async function AdminRegistrationDetailPage({ params }: { params: 
           <form action={updateRegistrationStatus} className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
             <input type="hidden" name="id" value={registration.id} />
             <input name="note" defaultValue={registration.note} placeholder="Catatan wajib untuk rejected" className="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-            {['pending', 'verified', 'rejected'].map((status) => (
+            {['submitted', 'verified', 'rejected'].map((status) => (
               <button key={status} name="status" value={status} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40" disabled={registration.status === status}>
                 {status}
               </button>
             ))}
           </form>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+          <h2 className="text-xl font-bold text-slate-900">Pembayaran</h2>
+          <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div><dt className="text-sm text-slate-500">Status</dt><dd className="font-semibold capitalize text-slate-900">{registration.paymentStatus === 'unpaid' ? 'Belum dibuat' : registration.paymentStatus}</dd></div>
+            <div><dt className="text-sm text-slate-500">Provider</dt><dd className="font-semibold text-slate-900">{registration.payment?.provider || '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Amount</dt><dd className="font-semibold text-slate-900">{registration.payment ? `${registration.payment.currency} ${registration.payment.amount.toLocaleString('id-ID')}` : '-'}</dd></div>
+            <div><dt className="text-sm text-slate-500">Paid at</dt><dd className="font-semibold text-slate-900">{registration.payment?.paid_at ? new Date(registration.payment.paid_at).toLocaleString('id-ID') : '-'}</dd></div>
+          </dl>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6">

@@ -34,7 +34,9 @@ export async function GET(request: NextRequest) {
         totalCheckedInVisitors: checkedInCountResult.count || 0,
         totalRegistrations: registrationsPage.total,
         totalTeams: teamsCountResult.count || 0,
-        pendingRegistrations: registrations.filter((registration) => registration.status === 'pending').length,
+        submittedRegistrations: registrations.filter((registration) => registration.status === 'submitted').length,
+        pendingPayments: registrations.filter((registration) => registration.paymentStatus === 'pending').length,
+        paidPayments: registrations.filter((registration) => registration.paymentStatus === 'paid').length,
         verifiedRegistrations: registrations.filter((registration) => registration.status === 'verified').length,
         rejectedRegistrations: registrations.filter((registration) => registration.status === 'rejected').length,
         perCompetition: Object.values(

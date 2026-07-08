@@ -4,7 +4,7 @@ import { apiError, apiSuccess } from '@/lib/api-response'
 import { getAdminUser } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 
-const allowedStatuses = ['pending', 'verified', 'rejected'] as const
+const allowedStatuses = ['submitted', 'verified', 'rejected'] as const
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   const admin = await getAdminUser(request)

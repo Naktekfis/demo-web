@@ -192,7 +192,7 @@ export function NeuralDashboard({ registrationCount, pendingCount, verifiedCount
               </motion.div>
               <motion.div whileHover={{ scale: 1.04 }} className="rounded-2xl bg-slate-950/50 p-3">
                 <p className="text-2xl font-bold">{pendingCount}</p>
-                <p className="text-xs text-slate-400">Pending</p>
+                <p className="text-xs text-slate-400">Submitted</p>
               </motion.div>
               <motion.div whileHover={{ scale: 1.04 }} className="rounded-2xl bg-slate-950/50 p-3">
                 <p className="text-2xl font-bold">{verifiedCount}</p>

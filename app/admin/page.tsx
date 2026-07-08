@@ -23,9 +23,11 @@ export default async function AdminPage() {
     totalCheckedInVisitors: 0,
     totalRegistrations: 0,
     totalTeams: 0,
-    pendingRegistrations: 0,
+    submittedRegistrations: 0,
     verifiedRegistrations: 0,
     rejectedRegistrations: 0,
+    pendingPayments: 0,
+    paidPayments: 0,
     perCompetition: [] as Array<{ competitionSlug: string; competitionName: string; count: number }>,
   }
   let error = ''
@@ -49,9 +51,11 @@ export default async function AdminPage() {
         totalCheckedInVisitors: (ticketsResult.data || []).filter((ticket) => ticket.checked_in).length,
         totalRegistrations: registrationsPage.total,
         totalTeams: teamsResult.data?.length || 0,
-        pendingRegistrations: registrationsPage.items.filter((registration) => registration.status === 'pending').length,
+        submittedRegistrations: registrationsPage.items.filter((registration) => registration.status === 'submitted').length,
         verifiedRegistrations: registrationsPage.items.filter((registration) => registration.status === 'verified').length,
         rejectedRegistrations: registrationsPage.items.filter((registration) => registration.status === 'rejected').length,
+        pendingPayments: registrationsPage.items.filter((registration) => registration.paymentStatus === 'pending').length,
+        paidPayments: registrationsPage.items.filter((registration) => registration.paymentStatus === 'paid').length,
         perCompetition: Object.values(
           registrationsPage.items.reduce<Record<string, { competitionSlug: string; competitionName: string; count: number }>>((acc, registration) => {
             acc[registration.competitionSlug] ||= {
@@ -104,9 +108,11 @@ export default async function AdminPage() {
             ['Visitors checked-in', metrics.totalCheckedInVisitors],
             ['Registrasi', metrics.totalRegistrations],
             ['Tim dibuat', metrics.totalTeams],
-            ['Pending', metrics.pendingRegistrations],
+            ['Submitted', metrics.submittedRegistrations],
             ['Verified', metrics.verifiedRegistrations],
             ['Rejected', metrics.rejectedRegistrations],
+            ['Pending payments', metrics.pendingPayments],
+            ['Paid payments', metrics.paidPayments],
           ].map(([label, value]) => (
             <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="text-sm font-medium text-slate-500">{label}</p>

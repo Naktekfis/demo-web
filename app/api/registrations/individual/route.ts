@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       competition_id: competition.id,
       registration_kind: 'individual',
       user_id: auth.user.id,
-      status: 'pending',
+      status: 'submitted',
     })
     .select('id, status, submitted_at')
     .single()
