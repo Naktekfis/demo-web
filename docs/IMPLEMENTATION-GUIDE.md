@@ -588,24 +588,24 @@ Files likely affected:
 
 Steps:
 
-1. [ ] Implement `POST /api/payments/create` with provider `mock`.
-2. [ ] Use amount from hardcoded competition data; default IDR 10,000.
-3. [ ] Allow individual participant to pay own registration.
-4. [ ] Allow only team leader to pay team registration.
-5. [ ] Block payment when registration is `verified` or `rejected`.
-6. [ ] Reuse active pending payment instead of creating duplicates.
-7. [ ] Add dashboard `Bayar` button after registration submission.
-8. [ ] Add mock payment page with success/fail/expire demo actions.
-9. [ ] Add retry CTA for `failed`, `expired`, or `cancelled` payments.
-10. [ ] Confirm mock success sets `payment_status = paid` only.
+1. [x] Implement `POST /api/payments/create` with provider `mock`.
+2. [x] Use amount from hardcoded competition data; default IDR 10,000.
+3. [x] Allow individual participant to pay own registration.
+4. [x] Allow only team leader to pay team registration.
+5. [x] Block payment when registration is `verified` or `rejected`.
+6. [x] Reuse active pending payment instead of creating duplicates.
+7. [x] Add dashboard `Bayar` button after registration submission.
+8. [x] Add mock payment page with success/fail/expire demo actions.
+9. [x] Add retry CTA for `failed`, `expired`, or `cancelled` payments.
+10. [x] Confirm mock success sets `payment_status = paid` only.
 
 Acceptance checks:
 
-- [ ] Individual participant can mock-pay.
-- [ ] Team leader can mock-pay.
-- [ ] Team member cannot pay team registration.
-- [ ] Retry works while registration is `submitted`.
-- [ ] Paid payment does not auto-verify registration.
+- [x] Individual participant can mock-pay.
+- [x] Team leader can mock-pay.
+- [x] Team member cannot pay team registration.
+- [x] Retry works while registration is `submitted`.
+- [x] Paid payment does not auto-verify registration.
 
 ## Phase 15: Admin Payment Visibility
 

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight } from 'lucide-react'
 
 import { NeuralDashboard } from '@/components/dashboard/neural-dashboard'
+import { PaymentActionButton } from '@/components/dashboard/payment-action-button'
 import { TeamSubmitButton } from '@/components/dashboard/team-submit-button'
 import { Button } from '@/components/ui/button'
 import { getRegistrations } from '@/lib/registrations'
@@ -121,6 +122,10 @@ export default async function DashboardPage() {
                 const statusInfo = statusConfig[reg.status] || statusConfig.submitted
                 const StatusIcon = statusInfo.icon
                 const isDraftTeam = reg.registration_kind === 'team' && reg.status === 'draft'
+                const canPay =
+                  reg.status === 'submitted' &&
+                  reg.payment_status !== 'paid' &&
+                  (reg.registration_kind === 'individual' || Boolean(reg.is_team_leader))
                 const submitDisabledReason =
                   isDraftTeam && (reg.team_member_count || 0) < (reg.team_min || 1)
                     ? `Minimal ${reg.team_min || 1} anggota sebelum submit.`
@@ -171,6 +176,12 @@ export default async function DashboardPage() {
                       {/* Action */}
                       {isDraftTeam && reg.is_team_leader && reg.team_id ? (
                         <TeamSubmitButton teamId={reg.team_id} disabledReason={submitDisabledReason} />
+                      ) : canPay ? (
+                        <PaymentActionButton
+                          registrationId={reg.id}
+                          paymentId={reg.payment?.id}
+                          paymentStatus={reg.payment_status}
+                        />
                       ) : (
                         <Button asChild variant="ghost" size="sm" className="rounded-full">
                           <Link href="/dashboard">Lihat Detail</Link>
