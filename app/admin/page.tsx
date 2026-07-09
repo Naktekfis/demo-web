@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { AdminBadge, AdminPageHeader, AdminPanel, AdminShell, AdminStatCard, adminStatusTone } from '@/components/admin/admin-chrome'
 import { Button } from '@/components/ui/button'
 import { isAdminUser } from '@/lib/admin'
 import { listAdminRegistrations } from '@/lib/admin-registrations'
@@ -76,60 +77,46 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">
-      <section className="mx-auto w-full max-w-6xl space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Admin</p>
-            <h1 className="mt-2 text-4xl font-bold text-slate-900">Admin Overview</h1>
-            <p className="mt-2 text-slate-600">Ringkasan operasional registrasi kompetisi dan tiket pengunjung.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/admin/registrations">Registrasi</Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/admin/visitors">Pengunjung</Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/admin/check-in">Check-in</Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-full">
-              <Link href="/dashboard">Ke dashboard</Link>
-            </Button>
-          </div>
-        </div>
+    <AdminShell maxWidth="max-w-6xl">
+      <AdminPageHeader
+        title="Admin Overview"
+        description="Ringkasan operasional registrasi kompetisi, pembayaran, dan tiket pengunjung dalam satu command center."
+        activeHref="/admin"
+        actions={(
+          <Button asChild variant="outline" className="rounded-full bg-white/80">
+            <Link href="/dashboard">Ke dashboard</Link>
+          </Button>
+        )}
+      />
 
         {error ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">{error}</div>
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 font-medium text-amber-800">{error}</div>
         ) : null}
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            ['Total visitors', metrics.totalVisitors],
-            ['Visitors checked-in', metrics.totalCheckedInVisitors],
-            ['Registrasi', metrics.totalRegistrations],
-            ['Tim dibuat', metrics.totalTeams],
-            ['Submitted', metrics.submittedRegistrations],
-            ['Verified', metrics.verifiedRegistrations],
-            ['Rejected', metrics.rejectedRegistrations],
-            ['Pending payments', metrics.pendingPayments],
-            ['Paid payments', metrics.paidPayments],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-5">
-              <p className="text-sm font-medium text-slate-500">{label}</p>
-              <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
-            </div>
+            ['Visitors', metrics.totalVisitors, 'sky', 'Tiket QR terbit'],
+            ['Check-in', metrics.totalCheckedInVisitors, 'green', 'Sudah hadir di venue'],
+            ['Registrasi', metrics.totalRegistrations, 'indigo', 'Individual dan tim'],
+            ['Tim', metrics.totalTeams, 'slate', 'Tim yang dibuat'],
+            ['Submitted', metrics.submittedRegistrations, 'amber', 'Menunggu review'],
+            ['Verified', metrics.verifiedRegistrations, 'green', 'Diterima admin'],
+            ['Rejected', metrics.rejectedRegistrations, 'rose', 'Ditolak admin'],
+            ['Payment pending', metrics.pendingPayments, 'amber', 'Menunggu pembayaran'],
+            ['Payment paid', metrics.paidPayments, 'green', 'Pembayaran sukses'],
+          ].map(([label, value, tone, helper]) => (
+            <AdminStatCard key={label} label={String(label)} value={value} tone={tone as Parameters<typeof AdminStatCard>[0]['tone']} helper={String(helper)} />
           ))}
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
-            <p className="text-sm font-semibold text-slate-600">Registrasi terbaru</p>
+        <AdminPanel
+          title="Registrasi terbaru"
+          action={(
             <Link href="/admin/registrations" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
               Lihat semua
             </Link>
-          </div>
+          )}
+        >
           {metrics.recentRegistrations.length === 0 ? (
             <div className="p-8 text-center text-slate-500">Belum ada registrasi.</div>
           ) : (
@@ -144,9 +131,7 @@ export default async function AdminPage() {
                   <p className="text-sm text-slate-500">{registration.primaryContact.email}</p>
                 </div>
                 <div className="flex items-center gap-2 md:col-span-2">
-                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
-                    {registration.status}
-                  </span>
+                  <AdminBadge tone={adminStatusTone(registration.status)}>{registration.status}</AdminBadge>
                 </div>
                 <div className="md:col-span-2 md:text-right">
                   <Link href={`/admin/registrations/${registration.id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
@@ -156,12 +141,9 @@ export default async function AdminPage() {
               </div>
             ))
           )}
-        </div>
+        </AdminPanel>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-600">
-            Registrasi per kompetisi
-          </div>
+        <AdminPanel title="Registrasi per kompetisi">
           {metrics.perCompetition.length === 0 ? (
             <div className="p-8 text-center text-slate-500">Belum ada registrasi.</div>
           ) : (
@@ -175,8 +157,7 @@ export default async function AdminPage() {
               </div>
             ))
           )}
-        </div>
-      </section>
-    </main>
+        </AdminPanel>
+    </AdminShell>
   )
 }

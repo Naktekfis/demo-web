@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { Button } from '@/components/ui/button'
+import { AdminPageHeader, AdminShell } from '@/components/admin/admin-chrome'
 import { CheckInForm } from '@/components/admin/check-in-form'
 import { isAdminUser } from '@/lib/admin'
 import { createClient } from '@/lib/supabase/server'
@@ -19,19 +18,13 @@ export default async function AdminCheckInPage() {
   if (!(await isAdminUser(user))) redirect('/dashboard')
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">
-      <section className="mx-auto w-full max-w-3xl space-y-6">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Admin</p>
-            <h1 className="mt-2 text-4xl font-bold text-slate-900">Check-in Venue</h1>
-          </div>
-          <Button asChild variant="outline" className="rounded-full">
-            <Link href="/admin">Overview</Link>
-          </Button>
-        </div>
+    <AdminShell maxWidth="max-w-3xl">
+        <AdminPageHeader
+          title="Check-in Venue"
+          description="Scan atau paste token QR tiket pengunjung. Check-in tetap admin-only dan tidak membutuhkan geofence untuk MVP."
+          activeHref="/admin/check-in"
+        />
         <CheckInForm />
-      </section>
-    </main>
+    </AdminShell>
   )
 }

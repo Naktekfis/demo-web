@@ -819,6 +819,56 @@ Operational notes:
 - OAuth branding is partly deployment configuration, not purely code. Track exact Supabase and Google Cloud changes in deployment notes.
 - If Supabase custom auth domain is not available, custom Google OAuth consent branding is still required as the minimum professional baseline.
 
+## Phase 20: Protected Logout Redirect And Admin UX Polish
+
+Status: Done
+
+Goal: make logout safe from protected areas and make Admin screens visually consistent with the current theme.
+
+Specs:
+
+- `docs/ADMIN-DASHBOARD.md`
+- `docs/MVP-SCOPE.md`
+- `docs/REGISTRATION-FLOWS.md`
+
+Context from current code audit:
+
+- Header auth state and logout live in `components/header-client.tsx`.
+- Admin pages are server-rendered routes under `app/admin/*` and already keep server-side admin checks.
+- Admin UI previously repeated local page chrome across routes, which made spacing, navigation, and status badges inconsistent.
+
+Files affected:
+
+- `components/header-client.tsx`
+- `components/admin/admin-chrome.tsx`
+- `components/admin/check-in-form.tsx`
+- `app/admin/page.tsx`
+- `app/admin/registrations/page.tsx`
+- `app/admin/registrations/[id]/page.tsx`
+- `app/admin/visitors/page.tsx`
+- `app/admin/check-in/page.tsx`
+
+Implementation steps:
+
+1. [x] Add route-aware logout behavior in the header client.
+2. [x] After Supabase `signOut`, redirect users on `/dashboard*` or `/admin*` to `/`.
+3. [x] Refresh public pages after logout so header auth state is cleared without forcing a route change.
+4. [x] Add a shared admin chrome component for shell background, page header, local admin navigation, panels, stat cards, and status badges.
+5. [x] Apply the shared admin shell to overview, registration list, registration detail, visitors, and check-in pages.
+6. [x] Keep privileged admin data access server-side; use shared UI components only for presentation.
+7. [x] Preserve the existing light slate/indigo theme and `font-heading` typography.
+8. [x] Run `npm run build`.
+
+Acceptance checks:
+
+- [x] Logout from `/dashboard` sends the user to `/`.
+- [x] Logout from `/admin` sends the user to `/`.
+- [x] Logout from nested `/dashboard*` and `/admin*` routes sends the user to `/`.
+- [x] Logout from public routes clears header auth state without an unnecessary forced landing redirect.
+- [x] Admin overview, registrations, registration detail, visitors, and check-in pages use consistent admin navigation.
+- [x] Admin filters and status badges are easier to scan on desktop and mobile.
+- [x] Build passes.
+
 ## Rollback And Safety Notes
 
 - Do not expose `SUPABASE_SERVICE_ROLE_KEY` in client code.
@@ -849,3 +899,4 @@ Operational notes:
 17. Midtrans webhook.
 18. Public navigation and dashboard UX cleanup.
 19. Admin access, header, favicon, and auth branding polish.
+20. Protected logout redirect and admin UX polish.

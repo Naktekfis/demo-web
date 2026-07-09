@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -41,6 +41,7 @@ async function getAdminState() {
 
 export function HeaderClient() {
   const pathname = usePathname()
+  const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -78,6 +79,12 @@ export function HeaderClient() {
     await createClient().auth.signOut()
     setUserEmail(null)
     setIsAdmin(false)
+    if (pathname?.startsWith('/dashboard') || pathname?.startsWith('/admin')) {
+      router.push('/')
+      router.refresh()
+      return
+    }
+    router.refresh()
   }
 
   const authControl = userEmail ? (

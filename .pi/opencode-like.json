@@ -1,0 +1,47 @@
+{
+  "$schemaComment": "OpenCode-like Pi extension config. permission actions: allow | ask | deny. Object rules use wildcard patterns; last matching rule wins.",
+  "permission": {
+    "read": "allow",
+    "grep": "allow",
+    "find": "allow",
+    "ls": "allow",
+    "edit": "allow",
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "npm test*": "allow",
+      "npm run lint*": "allow",
+      "rm *": "deny",
+      "git push*": "deny"
+    },
+    "subagent": "allow"
+  },
+  "modes": {
+    "plan": {
+      "tools": ["read", "bash", "grep", "find", "ls", "subagent"],
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "rg *": "allow",
+          "grep *": "allow",
+          "find *": "allow",
+          "ls *": "allow"
+        }
+      }
+    },
+    "orchestrate": {
+      "tools": ["read", "bash", "edit", "write", "grep", "find", "ls", "subagent"]
+    }
+  },
+  "agents": {
+    "reviewer": {
+      "permission": { "edit": "deny" }
+    }
+  }
+}

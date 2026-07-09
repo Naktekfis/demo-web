@@ -30,7 +30,7 @@ create table public.profiles (
 create table public.visitor_tickets (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.profiles(id) on delete cascade,
-  qr_code text not null unique default encode(gen_random_bytes(32), 'hex'),
+  qr_code text not null unique,
   ticket_type text not null default 'general_gate',
   checked_in boolean not null default false,
   checked_in_at timestamptz,

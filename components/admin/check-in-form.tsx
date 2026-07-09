@@ -122,13 +122,13 @@ export function CheckInForm() {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-[1.75rem] border border-white/70 bg-white/90 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
       <div className="mb-6 space-y-2">
-        <h2 className="text-xl font-bold text-slate-900">QR Check-in</h2>
+        <h2 className="font-heading text-2xl font-black text-slate-950">QR Check-in</h2>
         <p className="text-sm text-slate-600">Scan QR tiket untuk menandai kehadiran. Input manual tetap tersedia.</p>
       </div>
 
-      <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-5 rounded-[1.5rem] border border-slate-200 bg-slate-50/90 p-4">
         <video ref={videoRef} className={scanning ? 'aspect-video w-full rounded-lg bg-black object-cover' : 'hidden'} muted playsInline />
         <div className="mt-3 flex gap-3">
           <Button type="button" onClick={startScanner} disabled={scanning || loading} className="rounded-full bg-indigo-600 hover:bg-indigo-700">
@@ -149,7 +149,7 @@ export function CheckInForm() {
             id="qrCode"
             value={qrCode}
             onChange={(event) => setQrCode(event.target.value)}
-            className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-mono text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
             placeholder="Paste hasil scan QR di sini"
             required
           />

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+import { AdminBadge, AdminPageHeader, AdminPanel, AdminShell, adminStatusTone } from '@/components/admin/admin-chrome'
 import { Button } from '@/components/ui/button'
 import { isAdminUser } from '@/lib/admin'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -107,24 +108,16 @@ export default async function AdminVisitorsPage({ searchParams }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-12 sm:px-10 lg:px-12">
-      <section className="mx-auto w-full max-w-7xl space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">Admin</p>
-            <h1 className="mt-2 text-4xl font-bold text-slate-900">Pengunjung</h1>
-            <p className="mt-2 text-slate-600">Cari pengunjung berdasarkan nama, email, telepon, atau QR token.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline" className="rounded-full"><Link href="/admin">Overview</Link></Button>
-            <Button asChild variant="outline" className="rounded-full"><Link href="/admin/registrations">Registrasi</Link></Button>
-            <Button asChild variant="outline" className="rounded-full"><Link href="/admin/check-in">Check-in</Link></Button>
-          </div>
-        </div>
+    <AdminShell>
+      <AdminPageHeader
+        title="Pengunjung"
+        description="Pantau tiket QR pengunjung, status gate check-in, dan cari data kontak saat operasional venue berlangsung."
+        activeHref="/admin/visitors"
+      />
 
-        <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-6">
-          <input name="q" defaultValue={param(searchParams, 'q')} placeholder="Cari nama, email, telepon, QR..." className="rounded-lg border border-slate-300 px-3 py-2 text-sm lg:col-span-3" />
-          <select name="checkInStatus" defaultValue={param(searchParams, 'checkInStatus')} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <form className="grid gap-3 rounded-[1.5rem] border border-white/70 bg-white/90 p-4 shadow-[0_16px_42px_rgba(15,23,42,0.08)] sm:grid-cols-2 lg:grid-cols-6">
+          <input name="q" defaultValue={param(searchParams, 'q')} placeholder="Cari nama, email, telepon, QR..." className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100 lg:col-span-3" />
+          <select name="checkInStatus" defaultValue={param(searchParams, 'checkInStatus')} className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100">
             <option value="">Semua check-in</option>
             <option value="checked_in">Sudah check-in</option>
             <option value="not_checked_in">Belum check-in</option>
@@ -134,13 +127,12 @@ export default async function AdminVisitorsPage({ searchParams }: Props) {
 
         {error ? <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-800">{error}</div> : null}
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-          <div className="border-b border-slate-200 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-600">{total} pengunjung ditemukan</div>
+        <AdminPanel title={`${total} pengunjung ditemukan`}>
           {items.length === 0 ? (
             <div className="p-8 text-center text-slate-500">Tidak ada pengunjung yang cocok.</div>
           ) : (
             items.map((visitor) => (
-              <div key={visitor.id} className="grid gap-4 border-b border-slate-100 px-5 py-5 last:border-0 lg:grid-cols-12">
+              <div key={visitor.id} className="grid gap-4 border-b border-slate-100 px-5 py-5 last:border-0 lg:grid-cols-12 lg:items-center">
                 <div className="lg:col-span-3">
                   <p className="font-semibold text-slate-900">{visitor.name}</p>
                   <p className="mt-1 text-sm text-slate-500">{visitor.institution}</p>
@@ -155,11 +147,11 @@ export default async function AdminVisitorsPage({ searchParams }: Props) {
                 <div className="lg:col-span-2">
                   {visitor.checkedIn ? (
                     <div>
-                      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Check-in</span>
+                      <AdminBadge tone={adminStatusTone('checked_in')}>Check-in</AdminBadge>
                       <p className="mt-1 text-xs text-slate-500">{visitor.checkedInAt ? new Date(visitor.checkedInAt).toLocaleString('id-ID') : '-'}</p>
                     </div>
                   ) : (
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Belum</span>
+                    <AdminBadge>Belum</AdminBadge>
                   )}
                 </div>
                 <div className="lg:col-span-2 flex justify-end items-center gap-2">
@@ -170,7 +162,7 @@ export default async function AdminVisitorsPage({ searchParams }: Props) {
               </div>
             ))
           )}
-        </div>
+        </AdminPanel>
 
         {totalPages > 1 ? (
           <div className="flex items-center justify-center gap-3">
@@ -185,7 +177,6 @@ export default async function AdminVisitorsPage({ searchParams }: Props) {
             ))}
           </div>
         ) : null}
-      </section>
-    </main>
+    </AdminShell>
   )
 }
