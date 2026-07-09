@@ -31,8 +31,8 @@ export type RegistrationRow = {
 
 const fallbackRegistrations: RegistrationRow[] = [
   {
-    id: 'reg-demo-1',
-    competition_id: 'robotics-demo',
+    id: 'reg-fallback-1',
+    competition_id: 'robotics-challenge',
     team_name: 'Delta Pulse',
     team_members: [
       { name: 'Alya', email: 'alya@example.com', institution: 'ITB', role: 'Leader' },
@@ -42,8 +42,8 @@ const fallbackRegistrations: RegistrationRow[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: 'reg-demo-2',
-    competition_id: 'hackathon-demo',
+    id: 'reg-fallback-2',
+    competition_id: 'hackathon-innovation-sprint',
     team_name: 'Nova Grid',
     team_members: [
       { name: 'Nadya', email: 'nadya@example.com', institution: 'ITB', role: 'Leader' },

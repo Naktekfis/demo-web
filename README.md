@@ -1,9 +1,9 @@
 <!-- prettier-ignore -->
 <div align="center">
 
-<img src="./public/brand/logo-black-text.svg" alt="ITB Insight" width="360" />
+<img src="./public/brand/logo-white-text.svg" alt="ITB Insight" width="360" />
 
-# ITB Insight 2026 Demo Web
+# ITB Insight 2026 Web
 
 _MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, pembayaran tahap awal, dashboard peserta, dashboard admin, dan gate check-in._
 
@@ -19,12 +19,12 @@ _MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, pe
 
 ## Overview
 
-ITB Insight 2026 Demo Web is a production-style MVP for the competition-registration flow. It is not just a static event page: visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, pay through the staged payment flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
+ITB Insight 2026 Web is the production web platform for the competition-registration flow. Visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, pay through the staged payment flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
 
 The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, [Resend](https://resend.com) for future email confirmation paths, Midtrans Sandbox support for the payment phase, and [MapLibre GL JS](https://maplibre.org) for the venue map.
 
 > [!NOTE]
-> Several public pages include fallback demo data, so the app can still be explored before Supabase and Sanity are fully configured.
+> Several public pages include fallback content, so the app can still be explored before Supabase and Sanity are fully configured.
 
 ## Features
 
@@ -95,7 +95,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 > [!TIP]
-> `.npmrc` sets `legacy-peer-deps=true` because this demo uses a few packages with strict peer ranges while staying on Next.js 14 and React 18.
+> `.npmrc` sets `legacy-peer-deps=true` because this project uses a few packages with strict peer ranges while staying on Next.js 14 and React 18.
 
 ### Environment Variables
 
@@ -189,7 +189,7 @@ RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
 ## Project Structure
 
 ```text
-demo-web/
+web/
 ├── app/                    # Next.js routes, pages, API handlers
 ├── components/             # Shared UI, landing, dashboard, map, and admin components
 ├── lib/                    # Supabase, Sanity, competition, registration, payment helpers

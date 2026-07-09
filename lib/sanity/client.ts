@@ -5,7 +5,7 @@ const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || process.env.SANITY_DAT
 const apiVersion = process.env.NEXT_PUBLIC_SANITY_API_VERSION || '2024-01-01'
 
 export const sanityClient = createClient({
-  projectId: projectId || 'demo-project',
+  projectId: projectId || 'placeholder-project',
   dataset,
   apiVersion,
   useCdn: true,

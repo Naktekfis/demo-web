@@ -20,7 +20,7 @@ export type CompetitionSummary = {
 
 const fallbackCompetitions: CompetitionSummary[] = [
   {
-    _id: 'robotics-demo',
+    _id: 'robotics-challenge',
     title: 'Robotika Challenge',
     slug: { current: 'robotika-challenge' },
     description: [{ _type: 'block', children: [{ _type: 'span', text: 'Kompetisi robotika untuk tim mahasiswa yang ingin membangun prototipe cerdas dan kompetitif.' }]}],
@@ -34,7 +34,7 @@ const fallbackCompetitions: CompetitionSummary[] = [
     requirements: ['Kartu mahasiswa', 'Proposal tim', 'Berkas identitas anggota'],
   },
   {
-    _id: 'hackathon-demo',
+    _id: 'hackathon-innovation-sprint',
     title: 'Hackathon Innovation Sprint',
     slug: { current: 'hackathon-innovation-sprint' },
     description: [{ _type: 'block', children: [{ _type: 'span', text: 'Sprint pengembangan produk digital dengan fokus pada solusi nyata untuk kampus dan industri.' }]}],
@@ -48,7 +48,7 @@ const fallbackCompetitions: CompetitionSummary[] = [
     requirements: ['Laptop pribadi', 'GitHub account', 'Pitch deck awal'],
   },
   {
-    _id: 'paper-demo',
+    _id: 'paper-competition',
     title: 'Paper Competition',
     slug: { current: 'paper-competition' },
     description: [{ _type: 'block', children: [{ _type: 'span', text: 'Kompetisi penulisan karya ilmiah individual untuk ide teknologi dan inovasi digital.' }]}],

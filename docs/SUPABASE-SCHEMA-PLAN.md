@@ -12,7 +12,7 @@ Audience: web development team implementing Supabase migrations for MVP.
 
 This document turns the data model into a concrete MVP migration plan.
 
-Because this project is still MVP/demo and production data is not assumed, the recommended path is a clean schema reset rather than preserving the current partial schema.
+Because this project is still MVP and production data is not assumed, the recommended path is a clean schema reset rather than preserving the current partial schema.
 
 ## Recommendation
 
@@ -35,7 +35,7 @@ Current latest migration note: `0004_payment_schema.sql` updates `competition_re
 | Current table | Problem |
 | --- | --- |
 | `rsvp` | Name conflicts with PRD RSVP meaning. It currently means QR ticket/check-in. |
-| `registrations.team_members` JSON | Easy for demo, but cannot support member login + join team by UID cleanly. |
+| `registrations.team_members` JSON | Easy for prototype work, but cannot support member login + join team by UID cleanly. |
 | `registrations` | Mixes team registration and member data in one row. |
 | `competitions` | Missing `registration_type` and team UID prefix config. |
 | Admin access | Currently env allowlist only; acceptable short term, but not ideal. |

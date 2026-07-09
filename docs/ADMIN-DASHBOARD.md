@@ -224,7 +224,7 @@ Admin registration views should show:
 - Expired at.
 - Latest payment attempt.
 
-Mock/demo override:
+Mock override:
 
 - No admin payment override UI is implemented in the current code.
 - Mock status changes are available through the visitor-owned mock payment page/actions.

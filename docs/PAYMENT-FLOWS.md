@@ -84,7 +84,7 @@ Steps:
 1. User clicks `Bayar`.
 2. `POST /api/payments/create` creates payment with provider `mock`.
 3. User is sent to internal mock payment page.
-4. Mock page offers demo actions: success, fail, expire.
+4. Mock page offers test actions: success, fail, expire.
 5. Server updates payment status.
 6. User returns to dashboard.
 
