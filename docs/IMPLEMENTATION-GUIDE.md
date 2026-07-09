@@ -755,6 +755,70 @@ Acceptance checks:
 - [x] Dashboard remains readable on mobile.
 - [x] Build passes.
 
+## Phase 19: Admin Access, Header, Favicon, And Auth Branding Polish
+
+Status: In Progress
+
+Goal: fix launch regressions found after Phase 18 and make auth/admin surfaces look production-ready.
+
+User-reported issues:
+
+- Admin became inaccessible or hard to reach after Phase 18 navigation changes.
+- `/favicon.ico` returns 404 in production.
+- Header should show an admin page button when the logged-in user is admin.
+- Google login currently shows the raw Supabase project reference, which looks unprofessional.
+
+Specs:
+
+- `docs/ADMIN-DASHBOARD.md`
+- `docs/MVP-SCOPE.md`
+- `docs/REGISTRATION-FLOWS.md`
+- `docs/API-CONTRACTS.md`
+
+Files likely affected:
+
+- `components/header-client.tsx`
+- optional: new `app/api/admin/me/route.ts` if client-side header needs a minimal admin-state endpoint
+- `app/admin/page.tsx` and admin layouts/pages only if direct admin access is broken
+- `lib/admin.ts`
+- `lib/supabase/middleware.ts` only if route protection/redirect behavior needs correction
+- `app/favicon.ico`, `app/icon.*`, or `public/favicon.ico`
+- Supabase Auth and Google Cloud OAuth provider configuration outside the repo
+
+Implementation steps:
+
+1. Reproduce direct `/admin` behavior locally and in production with an authorized admin account.
+2. Check whether the break is route access, admin authorization, missing service-role/admin env config, or only missing navigation.
+3. Fix admin route access without weakening server-side admin checks.
+4. Add an admin-only header link to `/admin` for desktop and mobile navigation.
+5. Use the same admin decision logic as privileged admin routes: `admin_roles` first, then `ADMIN_EMAILS` fallback.
+6. If the client header cannot access server admin state directly, add `GET /api/admin/me` returning only `{ "isAdmin": boolean }` for logged-in users.
+7. Ensure non-admin logged-in users do not see `Admin` and still cannot access `/admin` directly.
+8. Add a production favicon/app icon so `/favicon.ico` does not return 404 on Vercel.
+9. Configure custom Google OAuth credentials and consent-screen branding for ITB Insight.
+10. If available for the deployed Supabase project, configure a custom auth domain such as `auth.itbinsight.com` and update allowed redirect/site URLs.
+11. Run `npm run build`.
+12. Deploy and verify the production URL.
+
+Acceptance checks:
+
+- [x] Authorized admin can open `/admin` directly.
+- [x] Authorized admin sees `Admin` in desktop header.
+- [x] Authorized admin sees `Admin` in mobile menu.
+- [x] Logged-in non-admin user does not see `Admin` in desktop or mobile navigation.
+- [x] Logged-in non-admin user cannot access `/admin` directly.
+- [x] Guest does not see `Dashboard` or `Admin`.
+- [x] `/favicon.ico` returns 200 in production.
+- [ ] Google account chooser/consent uses professional ITB Insight branding or approved event domain, not the raw Supabase project reference as the main identity.
+- [x] Build passes.
+
+Operational notes:
+
+- Header visibility is UX only; it is not authorization.
+- Do not expose `SUPABASE_SERVICE_ROLE_KEY` or admin allowlist values to the client.
+- OAuth branding is partly deployment configuration, not purely code. Track exact Supabase and Google Cloud changes in deployment notes.
+- If Supabase custom auth domain is not available, custom Google OAuth consent branding is still required as the minimum professional baseline.
+
 ## Rollback And Safety Notes
 
 - Do not expose `SUPABASE_SERVICE_ROLE_KEY` in client code.
@@ -784,3 +848,4 @@ Acceptance checks:
 16. Midtrans Sandbox Snap.
 17. Midtrans webhook.
 18. Public navigation and dashboard UX cleanup.
+19. Admin access, header, favicon, and auth branding polish.

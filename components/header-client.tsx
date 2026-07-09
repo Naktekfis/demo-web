@@ -7,6 +7,13 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
+type AdminMeResponse = {
+  success: boolean
+  data?: {
+    isAdmin?: boolean
+  } | null
+}
+
 const navLinks = [
   { href: '/about', label: 'Tentang' },
   { href: '/competitions', label: 'Kompetisi' },
@@ -14,17 +21,54 @@ const navLinks = [
 ]
 
 const authenticatedNavLinks = [{ href: '/dashboard', label: 'Dashboard' }]
+const adminNavLinks = [{ href: '/admin', label: 'Admin' }]
+
+async function getAdminState() {
+  try {
+    const response = await fetch('/api/admin/me', {
+      credentials: 'same-origin',
+      cache: 'no-store',
+    })
+
+    if (!response.ok) return false
+
+    const payload = (await response.json()) as AdminMeResponse
+    return Boolean(payload.success && payload.data?.isAdmin)
+  } catch {
+    return false
+  }
+}
 
 export function HeaderClient() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null))
+    let adminCheckId = 0
+
+    const syncAdminState = async (email: string | null) => {
+      const checkId = ++adminCheckId
+      setUserEmail(email)
+
+      if (!email) {
+        setIsAdmin(false)
+        return
+      }
+
+      const nextIsAdmin = await getAdminState()
+      if (checkId === adminCheckId) {
+        setIsAdmin(nextIsAdmin)
+      }
+    }
+
+    supabase.auth.getUser().then(async ({ data }) => {
+      await syncAdminState(data.user?.email ?? null)
+    })
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user.email ?? null)
+      void syncAdminState(session?.user.email ?? null)
     })
 
     return () => listener.subscription.unsubscribe()
@@ -33,6 +77,7 @@ export function HeaderClient() {
   const handleLogout = async () => {
     await createClient().auth.signOut()
     setUserEmail(null)
+    setIsAdmin(false)
   }
 
   const authControl = userEmail ? (
@@ -49,7 +94,9 @@ export function HeaderClient() {
     </Button>
   )
 
-  const visibleNavLinks = userEmail ? [...navLinks, ...authenticatedNavLinks] : navLinks
+  const visibleNavLinks = userEmail
+    ? [...navLinks, ...authenticatedNavLinks, ...(isAdmin ? adminNavLinks : [])]
+    : navLinks
 
   return (
     <>
