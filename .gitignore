@@ -34,6 +34,8 @@ Thumbs.db
 .idea/
 
 # Local agent and AI tooling state
+AGENTS.md
+.opencode/
 .agents/
 .claude/
 
