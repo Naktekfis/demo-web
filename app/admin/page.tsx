@@ -29,6 +29,7 @@ export default async function AdminPage() {
     pendingPayments: 0,
     paidPayments: 0,
     perCompetition: [] as Array<{ competitionSlug: string; competitionName: string; count: number }>,
+    recentRegistrations: [] as Awaited<ReturnType<typeof listAdminRegistrations>>['items'],
   }
   let error = ''
 
@@ -56,6 +57,7 @@ export default async function AdminPage() {
         rejectedRegistrations: registrationsPage.items.filter((registration) => registration.status === 'rejected').length,
         pendingPayments: registrationsPage.items.filter((registration) => registration.paymentStatus === 'pending').length,
         paidPayments: registrationsPage.items.filter((registration) => registration.paymentStatus === 'paid').length,
+        recentRegistrations: registrationsPage.items.slice(0, 5),
         perCompetition: Object.values(
           registrationsPage.items.reduce<Record<string, { competitionSlug: string; competitionName: string; count: number }>>((acc, registration) => {
             acc[registration.competitionSlug] ||= {
@@ -119,6 +121,41 @@ export default async function AdminPage() {
               <p className="mt-2 text-3xl font-bold text-slate-900">{value}</p>
             </div>
           ))}
+        </div>
+
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
+            <p className="text-sm font-semibold text-slate-600">Registrasi terbaru</p>
+            <Link href="/admin/registrations" className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+              Lihat semua
+            </Link>
+          </div>
+          {metrics.recentRegistrations.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">Belum ada registrasi.</div>
+          ) : (
+            metrics.recentRegistrations.map((registration) => (
+              <div key={registration.id} className="grid gap-3 border-b border-slate-100 px-5 py-4 last:border-0 md:grid-cols-12 md:items-center">
+                <div className="md:col-span-4">
+                  <p className="font-semibold text-slate-900">{registration.competitionName}</p>
+                  <p className="text-sm capitalize text-slate-500">{registration.registrationKind}</p>
+                </div>
+                <div className="md:col-span-4">
+                  <p className="font-semibold text-slate-900">{registration.teamName || registration.primaryContact.name}</p>
+                  <p className="text-sm text-slate-500">{registration.primaryContact.email}</p>
+                </div>
+                <div className="flex items-center gap-2 md:col-span-2">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+                    {registration.status}
+                  </span>
+                </div>
+                <div className="md:col-span-2 md:text-right">
+                  <Link href={`/admin/registrations/${registration.id}`} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                    Detail
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">

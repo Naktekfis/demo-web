@@ -12,6 +12,29 @@ type IndividualRegistrationPayload = {
   phoneNumber?: string
 }
 
+function logIndividualRegistrationError(context: string, error: unknown) {
+  console.error('[individual-registration]', context, error)
+}
+
+function individualRegistrationResponse(
+  registration: { id: string; status: string; submitted_at: string },
+  competitionSlug: string,
+  status = 201,
+) {
+  return apiSuccess(
+    {
+      registration: {
+        id: registration.id,
+        competitionSlug,
+        registrationKind: 'individual',
+        status: registration.status,
+        submittedAt: registration.submitted_at,
+      },
+    },
+    status,
+  )
+}
+
 export async function POST(request: NextRequest) {
   const auth = await getAuthenticatedUser(request)
 
@@ -37,6 +60,10 @@ export async function POST(request: NextRequest) {
   const competitionResult = await findOrCreateCompetitionRow(competitionSlug)
 
   if (!competitionResult.ok) {
+    if (competitionResult.status >= 500) {
+      logIndividualRegistrationError('competition lookup failed', competitionResult)
+    }
+
     return apiError(competitionResult.code as ApiErrorCode, competitionResult.message, competitionResult.status)
   }
 
@@ -68,6 +95,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle()
 
   if (existingProfileError) {
+    logIndividualRegistrationError('profile lookup failed', existingProfileError)
     return apiError('PROFILE_REQUIRED', 'Profil pengguna belum siap. Silakan coba lagi.', 500)
   }
 
@@ -84,6 +112,7 @@ export async function POST(request: NextRequest) {
         .single()
 
   if (profileError || !profile) {
+    logIndividualRegistrationError('profile create failed', profileError)
     return apiError('PROFILE_REQUIRED', 'Profil pengguna belum siap. Silakan coba lagi.', 500)
   }
 
@@ -96,6 +125,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (updateProfileError || !updatedProfile?.phone?.trim()) {
+      logIndividualRegistrationError('profile phone update failed', updateProfileError)
       return apiError('PROFILE_UPDATE_FAILED', 'Gagal menyimpan nomor telepon profil.', 500)
     }
   }
@@ -107,23 +137,25 @@ export async function POST(request: NextRequest) {
   const ticketResult = await ensureVisitorTicket(auth.user.id, supabase)
 
   if (!ticketResult.ok) {
+    logIndividualRegistrationError('ticket ensure failed', ticketResult.error)
     return apiError('TICKET_ENSURE_FAILED', 'Gagal memastikan tiket pengunjung.', 500)
   }
 
   const { data: existingRegistration, error: existingError } = await supabase
     .from('competition_registrations')
-    .select('id')
+    .select('id, status, submitted_at')
     .eq('competition_id', competition.id)
     .eq('user_id', auth.user.id)
     .eq('registration_kind', 'individual')
     .maybeSingle()
 
   if (existingError) {
+    logIndividualRegistrationError('registration lookup failed', existingError)
     return apiError('REGISTRATION_LOOKUP_FAILED', 'Gagal memeriksa registrasi sebelumnya.', 500)
   }
 
   if (existingRegistration) {
-    return apiError('DUPLICATE_REGISTRATION', 'Akun ini sudah terdaftar di kompetisi ini.', 409)
+    return individualRegistrationResponse(existingRegistration, competition.slug, 200)
   }
 
   const { data: registration, error: insertError } = await supabase
@@ -139,22 +171,24 @@ export async function POST(request: NextRequest) {
 
   if (insertError || !registration) {
     if (insertError?.code === '23505') {
+      const { data: racedRegistration, error: racedError } = await supabase
+        .from('competition_registrations')
+        .select('id, status, submitted_at')
+        .eq('competition_id', competition.id)
+        .eq('user_id', auth.user.id)
+        .eq('registration_kind', 'individual')
+        .maybeSingle()
+
+      if (!racedError && racedRegistration) {
+        return individualRegistrationResponse(racedRegistration, competition.slug, 200)
+      }
+
       return apiError('DUPLICATE_REGISTRATION', 'Akun ini sudah terdaftar di kompetisi ini.', 409)
     }
 
+    logIndividualRegistrationError('registration create failed', insertError)
     return apiError('REGISTRATION_CREATE_FAILED', 'Gagal menyimpan registrasi kompetisi.', 500)
   }
 
-  return apiSuccess(
-    {
-      registration: {
-        id: registration.id,
-        competitionSlug: competition.slug,
-        registrationKind: 'individual',
-        status: registration.status,
-        submittedAt: registration.submitted_at,
-      },
-    },
-    201,
-  )
+  return individualRegistrationResponse(registration, competition.slug)
 }
