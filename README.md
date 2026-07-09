@@ -5,7 +5,7 @@
 
 # ITB Insight 2026 Demo Web
 
-_MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, dashboard peserta, dashboard admin, dan gate check-in._
+_MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, pembayaran tahap awal, dashboard peserta, dashboard admin, dan gate check-in._
 
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=nextdotjs)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-blue?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -19,9 +19,9 @@ _MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, da
 
 ## Overview
 
-ITB Insight 2026 Demo Web is a production-style MVP for the competition-registration flow. It is not just a static event page: visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
+ITB Insight 2026 Demo Web is a production-style MVP for the competition-registration flow. It is not just a static event page: visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, pay through the staged payment flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
 
-The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, [Resend](https://resend.com) for future email confirmation paths, and [MapLibre GL JS](https://maplibre.org) for the venue map.
+The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, [Resend](https://resend.com) for future email confirmation paths, Midtrans Sandbox support for the payment phase, and [MapLibre GL JS](https://maplibre.org) for the venue map.
 
 > [!NOTE]
 > Several public pages include fallback demo data, so the app can still be explored before Supabase and Sanity are fully configured.
@@ -31,11 +31,12 @@ The project combines a modern [Next.js App Router](https://nextjs.org) frontend 
 - **Event landing page** with branded hero visuals, program highlights, countdown, and clear CTAs.
 - **Supabase Auth** with Google OAuth and email magic link login.
 - **Competition catalog** with hardcoded MVP data and optional Sanity fallback support.
-- **Individual registration flow** with authenticated submission, duplicate checks, and pending status.
+- **Individual registration flow** with authenticated submission, duplicate checks, and submitted status.
 - **Team registration flow** where leaders create teams, receive a team UID, members join by UID, and leaders submit final registration.
 - **Participant dashboard** for individual/team registration summaries, status display, team UID visibility, and QR ticket access.
 - **Visitor QR tickets** created through `visitor_tickets` and reused across sessions.
-- **Admin dashboard** for overview metrics, registration search/review, status updates, visitor list, CSV export, and QR check-in.
+- **Payment flow** with internal mock settlement first and Midtrans Sandbox Snap support after configuration.
+- **Admin dashboard** for overview metrics, registration search/review, payment visibility, status updates, visitor list, CSV export, and QR check-in.
 - **Admin check-in** with browser QR scan or manual token input, no MVP geofence requirement.
 - **Interactive venue map** using MapLibre and OpenStreetMap raster tiles, with filters for competition and exhibition venues.
 - **Content pages** for news, gallery, about, and event metadata with Open Graph support.
@@ -65,12 +66,13 @@ flowchart LR
   app --> middleware[Supabase Middleware]
   middleware --> auth[Supabase Auth]
   api --> db[Supabase PostgreSQL]
+  api --> payment[Mock Payments + Midtrans]
   api --> email[Resend]
   pages --> cms[Sanity CMS]
   pages --> map[MapLibre + OSM Tiles]
 ```
 
-Business logic stays inside the Next.js app. Public pages render hardcoded or fallback content, protected flows use Supabase sessions, registration APIs handle individual/team submissions, and admin APIs handle registration review, CSV export, visitor listing, and QR check-in.
+Business logic stays inside the Next.js app. Public pages render hardcoded or fallback content, protected flows use Supabase sessions, registration APIs handle individual/team submissions, payment APIs handle mock/Midtrans transactions, and admin APIs handle registration review, CSV export, visitor listing, and QR check-in.
 
 ## Getting Started
 
@@ -80,6 +82,7 @@ Business logic stays inside the Next.js app. Public pages render hardcoded or fa
 - npm
 - Supabase project for auth and database-backed flows
 - Sanity project only if CMS-backed competitions/news are needed
+- Midtrans Sandbox keys only if testing Midtrans payment flow
 - Resend API key if registration confirmation email is required
 
 ### Run Locally
@@ -111,14 +114,19 @@ NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
 
 NEXT_PUBLIC_EVENT_DATE=2026-11-15T08:00:00+07:00
 
-RESEND_API_KEY=your-resend-api-key
-RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
+MIDTRANS_SERVER_KEY=your-midtrans-server-key
+MIDTRANS_CLIENT_KEY=your-midtrans-client-key
+MIDTRANS_IS_PRODUCTION=false
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
 
 ADMIN_EMAILS=admin@example.com,staff@example.com
+
+RESEND_API_KEY=your-resend-api-key
+RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
 ```
 
 > [!IMPORTANT]
-> `SUPABASE_SERVICE_ROLE_KEY` is server-only. Never expose it through client components, browser code, or `NEXT_PUBLIC_*` variables.
+> `SUPABASE_SERVICE_ROLE_KEY` and `MIDTRANS_SERVER_KEY` are server-only. Never expose them through client components, browser code, or `NEXT_PUBLIC_*` variables.
 
 ### Useful Scripts
 
@@ -146,6 +154,7 @@ ADMIN_EMAILS=admin@example.com,staff@example.com
 | `/dashboard` | Participant dashboard and registration status |
 | `/dashboard/register-competition` | Individual registration entry point |
 | `/dashboard/my-tickets` | QR ticket page |
+| `/dashboard/payments/[id]/mock` | Internal mock payment action page |
 | `/dashboard/teams/create` | Create a team and receive a team UID |
 | `/dashboard/teams/join` | Join a team with team UID |
 | `/admin` | Admin entry page |
@@ -170,6 +179,12 @@ ADMIN_EMAILS=admin@example.com,staff@example.com
 | `/api/admin/registrations/export` | Admin registration CSV export endpoint |
 | `/api/admin/visitors` | Admin visitor list endpoint |
 | `/api/admin/check-in` | Admin check-in API endpoint |
+| `/api/payments/create` | Create or resume mock/Midtrans payment |
+| `/api/payments/[id]` | Payment detail endpoint |
+| `/api/payments/mock/settle` | Internal mock payment success endpoint |
+| `/api/payments/mock/fail` | Internal mock payment failure endpoint |
+| `/api/payments/mock/expire` | Internal mock payment expiry endpoint |
+| `/api/payments/midtrans/notification` | Midtrans notification webhook endpoint |
 
 ## Project Structure
 
@@ -177,9 +192,9 @@ ADMIN_EMAILS=admin@example.com,staff@example.com
 demo-web/
 ├── app/                    # Next.js routes, pages, API handlers
 ├── components/             # Shared UI, landing, dashboard, map, and admin components
-├── lib/                    # Supabase, Sanity, competition, registration, geofence helpers
+├── lib/                    # Supabase, Sanity, competition, registration, payment helpers
 ├── public/                 # Static assets, brand logo, Open Graph image
-├── docs/                   # PRD, MVP scope, implementation guide, API/schema specs
+├── docs/                   # PRD, MVP scope, planning, runbooks, API/schema specs
 ├── sanity/                 # Sanity schemas
 ├── scripts/                # Local verification scripts
 ├── middleware.ts           # Supabase session refresh middleware
@@ -195,6 +210,7 @@ demo-web/
 - Admin access uses `admin_roles` when available and falls back to `ADMIN_EMAILS`.
 - Admin check-in updates `visitor_tickets` by opaque QR token and does not require geofence for MVP.
 - QR tickets currently mark gate attendance only. Competition registration status is tracked separately.
+- Competition registration status uses `submitted`, `verified`, and `rejected`. Payment status is tracked separately.
 - Map uses MapLibre GL JS with OpenStreetMap raster tiles, so no map API key is required.
 - Supabase Auth redirect URLs must include local and production callback URLs, for example `http://localhost:3000/auth/callback` and `https://your-domain.example/auth/callback`.
 
@@ -204,20 +220,26 @@ demo-web/
 | --- | --- |
 | `docs/prd-itbinsight.md` | Current product source of truth |
 | `docs/MVP-SCOPE.md` | MVP boundary and role definitions |
-| `docs/IMPLEMENTATION-GUIDE.md` | Step-by-step implementation guide |
 | `docs/API-CONTRACTS.md` | MVP endpoint contracts and response envelope |
 | `docs/SUPABASE-SCHEMA-PLAN.md` | Supabase schema and migration plan |
 | `docs/ADMIN-DASHBOARD.md` | Admin dashboard behavior and acceptance criteria |
 | `docs/REGISTRATION-FLOWS.md` | Guest, visitor, individual, team, admin, and check-in flows |
 | `docs/DATA-MODEL.md` | Conceptual data model and RLS expectations |
-| `docs/IMPLEMENTATION-GAP.md` | Gap audit from PRD to implementation |
+| `docs/PAYMENT-FLOWS.md` | Mock and Midtrans Sandbox payment behavior |
+| `docs/BACKLOG.md` | Future work, gaps, and out-of-scope items |
+| `docs/SPRINTS.md` | Active sprint planning |
+| `docs/QA-CHECKLIST.md` | Manual QA checklist |
+| `docs/RELEASES.md` | Release notes |
+| `docs/DECISIONS.md` | Product and technical decisions |
+| `docs/README.md` | Docs map for GitHub and Obsidian navigation |
 
-## Future Payment Notes
+## Payment Notes
 
-- Midtrans is not implemented yet.
-- Keep payment behind API routes/webhooks, not client-only plugins.
-- Minimal future flow: create Midtrans transaction from server, store payment status, receive webhook, then unlock the paid feature.
-- Do not couple current attendance QR with payment unless event entry becomes paid.
+- Payment is separate from registration review. A paid registration still requires admin verification.
+- Internal mock payment is available for MVP testing without external payment dependencies.
+- Midtrans Sandbox Snap is supported when Midtrans environment variables are configured.
+- Keep payment creation and webhook handling behind API routes; do not trust client-only payment state.
+- Do not couple current attendance QR with payment unless event entry becomes paid later.
 
 ## Deployment
 
@@ -239,5 +261,5 @@ This app is ready for Vercel-style deployment.
 
 - Core Next.js app, visual landing, competitions, dashboard, team create/join, QR tickets, map, news, gallery, about, and admin pages are present.
 - Supabase Auth helpers, middleware, MVP schema migration, ticket helpers, registration helpers, team helpers, and admin helpers are wired.
-- Individual registration, team UID flow, team submit, admin registration review, CSV export, visitor list, QR ticket generation, and no-geofence admin check-in are implemented.
-- Payment, booth tracking, RSVP/alumni flows, feedback, sponsor features, and advanced analytics remain out of MVP scope.
+- Individual registration, team UID flow, team submit, mock/Midtrans Sandbox payment flow, admin registration review, CSV export, visitor list, QR ticket generation, and no-geofence admin check-in are implemented.
+- Booth tracking, RSVP/alumni flows, feedback, sponsor features, gamification, heatmap, and advanced analytics remain out of MVP scope.
