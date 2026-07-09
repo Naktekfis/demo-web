@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { ClipboardList, CheckCircle2, Clock, AlertCircle, ArrowRight, CreditCard, Ticket } from 'lucide-react'
 
-import { NeuralDashboard } from '@/components/dashboard/neural-dashboard'
 import { PaymentActionButton } from '@/components/dashboard/payment-action-button'
 import { TeamSubmitButton } from '@/components/dashboard/team-submit-button'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,7 @@ import { getRegistrations } from '@/lib/registrations'
 
 export const dynamic = 'force-dynamic'
 
-const statusConfig: Record<string, { icon: any; color: string; label: string; bg: string }> = {
+const statusConfig: Record<string, { icon: LucideIcon; color: string; label: string; bg: string }> = {
   submitted: {
     icon: Clock,
     color: 'text-amber-700',
@@ -45,15 +45,80 @@ export default async function DashboardPage() {
   const registrations = await getRegistrations()
   const submittedCount = registrations.filter((reg) => reg.status === 'submitted').length
   const verifiedCount = registrations.filter((reg) => reg.status === 'verified').length
+  const payableRegistrations = registrations.filter(
+    (reg) =>
+      reg.status === 'submitted' &&
+      reg.payment_status !== 'paid' &&
+      (reg.registration_kind === 'individual' || Boolean(reg.is_team_leader)),
+  )
+  const draftTeams = registrations.filter((reg) => reg.registration_kind === 'team' && reg.status === 'draft')
+  const nextAction = payableRegistrations.length
+    ? 'Selesaikan pembayaran pendaftaran yang masih pending.'
+    : draftTeams.length
+      ? 'Lengkapi anggota tim lalu submit pendaftaran.'
+      : registrations.length
+        ? 'Pantau status verifikasi dari panitia.'
+        : 'Pilih kompetisi dan mulai registrasi.'
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-16 sm:px-10 lg:px-12">
       <section className="mx-auto w-full max-w-6xl space-y-12">
-        <NeuralDashboard
-          registrationCount={registrations.length}
-          pendingCount={submittedCount}
-          verifiedCount={verifiedCount}
-        />
+        <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+          <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="bg-slate-950 p-6 text-white sm:p-8 lg:p-10">
+              <p className="inline-flex rounded-full bg-[#FFE343] px-3 py-1 text-xs font-bold uppercase tracking-[0.22em] text-slate-950">
+                Dashboard Peserta
+              </p>
+              <h1 className="mt-6 max-w-2xl font-heading text-4xl font-black tracking-tight sm:text-5xl">
+                Semua langkah penting ada di sini.
+              </h1>
+              <p className="mt-4 max-w-xl text-base leading-7 text-slate-300">
+                Akses tiket QR, cek status registrasi, dan selesaikan pembayaran kompetisi tanpa animasi yang mengganggu.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg" className="rounded-full bg-[#E43636] px-6 text-white hover:bg-[#C91111]">
+                  <Link href="/dashboard/my-tickets">
+                    Buka Tiket Saya
+                    <Ticket className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="rounded-full border-white/30 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white">
+                  <Link href="/competitions">Lihat Kompetisi</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-5 p-6 sm:p-8 lg:p-10">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold uppercase tracking-widest text-slate-500">Langkah Berikutnya</p>
+                <p className="mt-3 text-xl font-bold text-slate-950">{nextAction}</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <ClipboardList className="h-5 w-5 text-indigo-600" />
+                  <p className="mt-4 text-3xl font-black text-slate-950">{registrations.length}</p>
+                  <p className="text-sm text-slate-600">Registrasi aktif</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <Clock className="h-5 w-5 text-amber-600" />
+                  <p className="mt-4 text-3xl font-black text-slate-950">{submittedCount}</p>
+                  <p className="text-sm text-slate-600">Menunggu review</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                  <p className="mt-4 text-3xl font-black text-slate-950">{verifiedCount}</p>
+                  <p className="text-sm text-slate-600">Terverifikasi</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <CreditCard className="h-5 w-5 text-rose-600" />
+                  <p className="mt-4 text-3xl font-black text-slate-950">{payableRegistrations.length}</p>
+                  <p className="text-sm text-slate-600">Perlu pembayaran</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Quick Steps */}
         <div className="grid gap-4 md:grid-cols-3">

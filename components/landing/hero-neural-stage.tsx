@@ -156,7 +156,7 @@ export function HeroNeuralStage() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-full border-[#95B6FD]/50 bg-white/5 px-8 text-white hover:bg-white/10 hover:text-white">
-              <Link href="/dashboard">Buka Dashboard</Link>
+              <Link href="/auth/login?next=/dashboard">Masuk ke Dashboard</Link>
             </Button>
           </div>
         </motion.div>

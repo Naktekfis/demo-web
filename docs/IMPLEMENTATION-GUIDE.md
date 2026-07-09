@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/IMPLEMENTATION-GAP.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`
+Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/IMPLEMENTATION-GAP.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`, `docs/DOCS-MAINTENANCE-PROMPTS.md`
 
 Audience: web development team implementing the MVP under a tight timeline.
 
@@ -27,6 +27,8 @@ The core MVP is competition registration, with visitor QR creation, team registr
 - Lock team membership after team registration submission.
 - Use the shared API response envelope from `docs/API-CONTRACTS.md`.
 - Run `npm run build` after each major phase.
+- Keep inactive content routes out of primary navigation until their content is ready.
+- Keep authenticated dashboard entry points visible only after login; direct dashboard access must still be protected server-side.
 
 ## Phase 0: Baseline And Branch Check
 
@@ -564,7 +566,7 @@ Acceptance checks:
 
 ## Phase 14: Internal Mock Payment
 
-Status: Next
+Status: Done
 
 Goal: prove payment UX and state transitions before Midtrans integration.
 
@@ -708,6 +710,51 @@ Acceptance checks:
 - [x] `expire` marks payment `expired`.
 - [x] Registration status remains separate.
 
+## Phase 18: Public Navigation And Dashboard UX Cleanup
+
+Status: Done
+
+Goal: remove premature public links and make the participant dashboard easier to understand before launch.
+
+Context from current code audit:
+
+- Primary navigation is defined in `components/header-client.tsx`.
+- `app/news/page.tsx` and `app/gallery/page.tsx` exist, but content is not launch-ready.
+- `/dashboard*` is already protected in `lib/supabase/middleware.ts`; header visibility should match that access rule.
+- The participant dashboard hero currently uses `components/dashboard/neural-dashboard.tsx`, including Three.js canvas and decorative motion that does not help users understand registration/payment status.
+
+Files likely affected:
+
+- `components/header-client.tsx`
+- `components/landing/hero-neural-stage.tsx`
+- `app/dashboard/page.tsx`
+- `components/dashboard/neural-dashboard.tsx` or a simpler replacement dashboard summary component
+- optional: `app/news/page.tsx` and `app/gallery/page.tsx` only if direct route behavior needs a temporary placeholder or redirect
+
+Steps:
+
+1. [x] Hide `Berita` and `Galeri` from desktop and mobile header navigation for now.
+2. [x] Keep `/news` and `/gallery` routes untouched unless product decides they should redirect or return not-found while dormant.
+3. [x] Hide the `Dashboard` header link when no user is logged in.
+4. [x] Show the `Dashboard` header link only after Supabase auth state confirms a logged-in user.
+5. [x] Keep middleware protection for `/dashboard*` so direct guest access redirects to `/auth/login?next=...`.
+6. [x] Remove guest-facing dashboard CTAs outside the header, including landing CTAs, or route them to login with an explicit return path.
+7. [x] Remove the decorative dashboard canvas/neural animation and motion-heavy interactions.
+8. [x] Replace the dashboard opening section with a readable status summary: ticket access, active registrations, payment status, and next recommended action.
+9. [x] Keep the dashboard usable on mobile without horizontal overflow or hidden primary actions.
+10. [x] Run `npm run build`.
+
+Acceptance checks:
+
+- [x] Guest header does not show `Berita`, `Galeri`, or `Dashboard`.
+- [x] Logged-in Visitor header shows `Dashboard`.
+- [x] Guest opening `/dashboard` directly is redirected to login with the original path preserved.
+- [x] Logged-in Visitor can open `/dashboard` directly.
+- [x] Landing page does not expose a guest-visible `Buka Dashboard` action unless it sends the user to login first.
+- [x] Dashboard first screen shows clear user tasks and statuses without decorative animation.
+- [x] Dashboard remains readable on mobile.
+- [x] Build passes.
+
 ## Rollback And Safety Notes
 
 - Do not expose `SUPABASE_SERVICE_ROLE_KEY` in client code.
@@ -736,3 +783,4 @@ Acceptance checks:
 15. Admin payment visibility.
 16. Midtrans Sandbox Snap.
 17. Midtrans webhook.
+18. Public navigation and dashboard UX cleanup.

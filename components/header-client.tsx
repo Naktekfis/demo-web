@@ -9,12 +9,11 @@ import { createClient } from '@/lib/supabase/client'
 
 const navLinks = [
   { href: '/about', label: 'Tentang' },
-  { href: '/news', label: 'Berita' },
   { href: '/competitions', label: 'Kompetisi' },
   { href: '/map', label: 'Peta Venue' },
-  { href: '/gallery', label: 'Galeri' },
-  { href: '/dashboard', label: 'Dashboard' },
 ]
+
+const authenticatedNavLinks = [{ href: '/dashboard', label: 'Dashboard' }]
 
 export function HeaderClient() {
   const pathname = usePathname()
@@ -50,11 +49,13 @@ export function HeaderClient() {
     </Button>
   )
 
+  const visibleNavLinks = userEmail ? [...navLinks, ...authenticatedNavLinks] : navLinks
+
   return (
     <>
       {/* Desktop Nav */}
       <div className="hidden items-center gap-1 sm:flex">
-        {navLinks.map((link) => {
+        {visibleNavLinks.map((link) => {
           const isActive = pathname === link.href || pathname?.startsWith(link.href + '/')
           return (
             <Link
@@ -86,7 +87,7 @@ export function HeaderClient() {
       {menuOpen && (
         <div className="absolute left-0 right-0 top-full border-b border-slate-200 bg-white p-4 shadow-lg sm:hidden">
           <div className="flex flex-col gap-2">
-            {navLinks.map((link) => {
+            {visibleNavLinks.map((link) => {
               const isActive = pathname === link.href || pathname?.startsWith(link.href + '/')
               return (
                 <Link
