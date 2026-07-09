@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/IMPLEMENTATION-GUIDE.md`, `docs/IMPLEMENTATION-GAP.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`
+Related docs: `docs/README.md`, `docs/BACKLOG.md`, `docs/SPRINTS.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-FLOWS.md`, `docs/runbooks/PAYMENT-MIDTRANS.md`
 
 Audience: web development team and internal stakeholders deciding what is included in the first usable release.
 

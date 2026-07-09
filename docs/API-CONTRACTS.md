@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/IMPLEMENTATION-GUIDE.md`, `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`
+Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/REGISTRATION-FLOWS.md`, `docs/ADMIN-DASHBOARD.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-FLOWS.md`, `docs/QA-CHECKLIST.md`
 
 Audience: frontend and backend developers implementing the MVP API surface.
 

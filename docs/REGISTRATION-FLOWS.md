@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/IMPLEMENTATION-GUIDE.md`, `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/IMPLEMENTATION-GAP.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/PAYMENT-FLOWS.md`
+Related docs: `docs/MVP-SCOPE.md`, `docs/DATA-MODEL.md`, `docs/ADMIN-DASHBOARD.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/PAYMENT-FLOWS.md`, `docs/QA-CHECKLIST.md`
 
 Audience: web development team implementing the MVP user and admin flows.
 

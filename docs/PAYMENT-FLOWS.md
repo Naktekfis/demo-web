@@ -4,7 +4,7 @@ schema_version: 1
 
 Source of truth: `docs/prd-itbinsight.md`
 
-Related docs: `docs/PAYMENT-MIDTRANS-PLAN.md`, `docs/IMPLEMENTATION-GUIDE.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/ADMIN-DASHBOARD.md`, `docs/REGISTRATION-FLOWS.md`
+Related docs: `docs/runbooks/PAYMENT-MIDTRANS.md`, `docs/API-CONTRACTS.md`, `docs/SUPABASE-SCHEMA-PLAN.md`, `docs/ADMIN-DASHBOARD.md`, `docs/REGISTRATION-FLOWS.md`, `docs/DECISIONS.md`, `docs/QA-CHECKLIST.md`
 
 Audience: web development team implementing the payment user experience.
 
