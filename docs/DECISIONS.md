@@ -37,3 +37,7 @@ Audience: project owner and contributors who need decision history.
 | Program/content ownership | Event pages, sponsor wall, gallery, and map hotspots need final assets and owners before publication. |
 | Admin roles beyond `admin` | Future RSVP, feedback, partner, or analytics work may need narrower permissions. |
 | PII retention and deletion policy | Required before production scale and before broader data exports/deletion requests. |
+| Midtrans registration KTP owner | KTP owner name must match bank account holder name exactly. |
+| Midtrans business contact number | Phone number displayed on website for customer inquiries. |
+| Midtrans finance manager email | Email for financial contact (suggested: Shilla/Rachel/Chaca). |
+| Midtrans bank account for payout | Single bank account where settlement funds are disbursed. |

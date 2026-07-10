@@ -3,6 +3,7 @@ import React from 'react'
 import { Gabarito, Roboto_Mono } from "next/font/google"
 import { cn } from "@/lib/utils"
 import { Header } from '@/components/header'
+import { Footer } from '@/components/footer'
 
 const gabarito = Gabarito({ subsets: ['latin'], variable: '--font-heading' })
 const robotoMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-sans' })
@@ -38,8 +39,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={cn('font-sans', gabarito.variable, robotoMono.variable)}>
       <body className="bg-slate-50 text-slate-800">
-        <Header />
-        {children}
+        <div className="flex min-h-screen flex-col">
+          <Header />
+          {children}
+          <Footer />
+        </div>
       </body>
     </html>
   )
