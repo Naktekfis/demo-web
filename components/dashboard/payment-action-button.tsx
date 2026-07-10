@@ -42,7 +42,7 @@ export function PaymentActionButton({ registrationId, paymentProvider, paymentSt
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ registrationId, provider: paymentProvider || 'midtrans' }),
+        body: JSON.stringify({ registrationId, provider: paymentProvider || 'mock' }),
       })
 
       const payload = (await response.json()) as ApiEnvelope<{ redirectUrl: string }>
