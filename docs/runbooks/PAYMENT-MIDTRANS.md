@@ -59,6 +59,8 @@ Rules:
 
 ## Production Go-Live Checklist
 
+Do not start this checklist until the owner separately approves production Midtrans go-live. This approval is outside the environment separation hardening work.
+
 - Confirm production Midtrans account is approved.
 - Add production server/client keys to deployment secrets.
 - Set `MIDTRANS_IS_PRODUCTION=true` only for production.

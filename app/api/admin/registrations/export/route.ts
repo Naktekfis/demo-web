@@ -3,11 +3,20 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { apiError } from '@/lib/api-response'
 import { getAdminUser } from '@/lib/admin'
 import { adminRegistrationsToCsv, listAdminRegistrations } from '@/lib/admin-registrations'
+import { adminHeavyRateLimit, checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createServiceClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const admin = await getAdminUser(request)
   if (!admin.ok) return apiError(admin.code, admin.message, admin.status)
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'admin-registration-export',
+    identity: admin.user.id,
+    ...adminHeavyRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return apiError('SERVER_CONFIG_MISSING', 'Konfigurasi server admin belum lengkap.', 500)

@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server'
 
 import { apiError, apiSuccess, unauthorizedResponse } from '@/lib/api-response'
 import { getAuthenticatedUser } from '@/lib/auth'
+import { checkRateLimit, rateLimitResponse, sensitiveMutationRateLimit } from '@/lib/rate-limit'
 import { createServiceClient } from '@/lib/supabase/server'
 
 type RouteContext = {
@@ -12,6 +13,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const auth = await getAuthenticatedUser(request)
 
   if (!auth.ok) return unauthorizedResponse()
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'team-leave',
+    identity: auth.user.id,
+    ...sensitiveMutationRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   const { teamId } = await context.params
   const supabase = createServiceClient()

@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server'
 
 import { apiError, apiSuccess, unauthorizedResponse, type ApiErrorCode } from '@/lib/api-response'
 import { getAuthenticatedUser } from '@/lib/auth'
+import { checkRateLimit, rateLimitResponse, sensitiveMutationRateLimit } from '@/lib/rate-limit'
 import { findOrCreateCompetitionRow } from '@/lib/registrations'
 import { createServiceClient } from '@/lib/supabase/server'
 import { isRegistrationOpen } from '@/lib/team-registration'
@@ -41,6 +42,14 @@ export async function POST(request: NextRequest) {
   if (!auth.ok) {
     return unauthorizedResponse()
   }
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'registration-individual',
+    identity: auth.user.id,
+    ...sensitiveMutationRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   let payload: IndividualRegistrationPayload
 

@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server'
 
 import { apiError, apiSuccess, unauthorizedResponse } from '@/lib/api-response'
 import { getAuthenticatedUser } from '@/lib/auth'
+import { checkRateLimit, rateLimitResponse, sensitiveMutationRateLimit } from '@/lib/rate-limit'
 import { ensureTeamProfile, findUserTeamForCompetition, getTeamCompetition } from '@/lib/team-registration'
 import { createServiceClient } from '@/lib/supabase/server'
 import { generateTeamUid } from '@/lib/teams'
@@ -18,6 +19,14 @@ export async function POST(request: NextRequest) {
   const auth = await getAuthenticatedUser(request)
 
   if (!auth.ok) return unauthorizedResponse()
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'team-create',
+    identity: auth.user.id,
+    ...sensitiveMutationRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   let payload: TeamCreatePayload
 

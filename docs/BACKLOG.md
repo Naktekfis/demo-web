@@ -11,7 +11,7 @@ Audience: project owner and contributors deciding what to build next.
 | Item | Source | Notes |
 | --- | --- | --- |
 | Verify Google OAuth branding | Launch readiness review | Account chooser/consent should identify ITB Insight or approved event domain, not the raw Supabase project reference. |
-| Confirm Midtrans production go-live | Payment launch review | Production keys, callback URL, settlement testing, and go-live approval are not confirmed in repo. |
+| Confirm Midtrans production go-live | Payment launch review | Keep `MIDTRANS_IS_PRODUCTION=false` or unset until the owner approves live keys, callback URL, settlement test, rollback plan, and release note. |
 | Confirm final registration verification policy | Payment and admin review policy | `paid` and `verified` are intentionally separate; owner must define final acceptance/rejection rules. |
 | Confirm competition content source | Content launch review | Code supports hardcoded data and optional Sanity fallback; launch ownership/source needs confirmation. |
 | Add final competition content | Content launch review | Guidebooks, fees, timeline, prize pool, contact, FAQ, and robot sketch upload decision. |
@@ -21,11 +21,11 @@ Audience: project owner and contributors deciding what to build next.
 
 | Item | Source | Notes |
 | --- | --- | --- |
-| Add rate limiting | Security launch review | Auth-sensitive, registration, payment, and admin endpoints. |
+| Upgrade distributed rate limiting | Security launch review | MVP baseline rate limiting exists for registration, team create/join/edit, payment creation, admin status update, admin CSV export, and admin check-in. Before high-traffic production use, replace the in-memory per-instance guard with environment-specific distributed credentials/namespaces. |
 | Add admin audit logs | Security launch review | Track sensitive admin actions and status changes. |
-| Define backup and monitoring plan | Reliability launch review | Include uptime alerts and incident response. |
+| Fill owner-run backup and monitoring evidence labels | Reliability launch review | Runbook exists in `docs/runbooks/ENVIRONMENTS.md`. Owner still must fill backup owner, restore path, alert destination, incident owner/contact, and restore approval labels before release. |
 | Add file upload validation path | Future upload scope review | Needed if robot sketch upload returns to scope. |
-| Run production RLS smoke tests | Security launch review | Verify users cannot read other users' tickets, registrations, teams, or payments. |
+| Run production-safe RLS smoke evidence | Security launch review | Use policy/config evidence plus approved smoke-only access checks. Do not create dummy production records. |
 
 ## Future Product Scope
 

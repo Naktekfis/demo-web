@@ -19,6 +19,10 @@ Audience: project owner and contributors who need decision history.
 | Payment and registration status stay separate | Accepted | `paid` does not automatically set registration status to `verified`; admin review remains explicit. |
 | Team payment is leader-only | Accepted | Simplifies ownership and customer details for team payments. |
 | Admin payment override is not implemented | Accepted | Mock status changes stay in the visitor mock payment page/actions; production paid state comes from server routes or verified webhook. |
+| Current internal Supabase becomes staging | Accepted | Current data is internal/test only, so it stays available for dummy QA in Preview/Staging instead of becoming launch Production. |
+| Production starts clean and separate | Accepted | Production uses a different Supabase project ref with real user data only, no copied tester users, registrations, teams, payments, or QR tickets. |
+| Production QA is smoke-only | Accepted | Dummy registration, team, payment, admin, RLS, and load-test checks belong in Preview/Staging. Production gets small smoke checks and policy/config evidence. |
+| Production Midtrans go-live needs separate approval | Accepted | Payment remains mock or sandbox by default, and `MIDTRANS_IS_PRODUCTION=true` needs a separate owner-approved go-live. |
 
 ## Open Decisions
 

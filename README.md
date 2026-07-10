@@ -99,14 +99,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Environment Variables
 
-Create `.env.local` in the project root:
+Create `.env.local` in the project root for local development. Local values must point to the staging or disposable development Supabase project, not the clean production project used for real users.
 
 ```bash
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
 NEXT_PUBLIC_SANITY_PROJECT_ID=your-sanity-project-id
 NEXT_PUBLIC_SANITY_DATASET=production
@@ -114,10 +114,10 @@ NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
 
 NEXT_PUBLIC_EVENT_DATE=2026-11-15T08:00:00+07:00
 
-MIDTRANS_SERVER_KEY=your-midtrans-server-key
-MIDTRANS_CLIENT_KEY=your-midtrans-client-key
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
 MIDTRANS_IS_PRODUCTION=false
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-midtrans-client-key
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=
 
 ADMIN_EMAILS=admin@example.com,staff@example.com
 
@@ -127,6 +127,16 @@ RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
 
 > [!IMPORTANT]
 > `SUPABASE_SERVICE_ROLE_KEY` and `MIDTRANS_SERVER_KEY` are server-only. Never expose them through client components, browser code, or `NEXT_PUBLIC_*` variables.
+
+Use different values for each deployment scope:
+
+| Scope | Where values live | Supabase target | Site URL rule | Payment rule |
+| --- | --- | --- | --- | --- |
+| Local | `.env.local` only | Staging or disposable development Supabase | `NEXT_PUBLIC_SITE_URL=http://localhost:3000` | Mock or Midtrans Sandbox only |
+| Preview/Staging | Vercel Preview or staging env settings | Staging Supabase project with internal tester data | `NEXT_PUBLIC_SITE_URL=<staging-domain>` | Mock or Midtrans Sandbox only |
+| Production | Vercel Production env settings | Clean production Supabase project | `NEXT_PUBLIC_SITE_URL=<production-domain>` | `MIDTRANS_IS_PRODUCTION=false` or unset unless separate go-live approval exists |
+
+Don't paste real keys, tokens, project secrets, Auth exports, backup URLs, or PII into docs. Real values belong only in `.env.local`, Vercel Environment Variables, Supabase dashboard settings, or the owning service dashboard. Vercel Preview/Staging and Vercel Production must use different Supabase project refs. `SUPABASE_SERVICE_ROLE_KEY` is server-only and must never be renamed into any `NEXT_PUBLIC_*` variable.
 
 ### Useful Scripts
 
@@ -232,6 +242,7 @@ web/
 | `docs/RELEASES.md` | Release notes |
 | `docs/DECISIONS.md` | Product and technical decisions |
 | `docs/README.md` | Docs map for GitHub and Obsidian navigation |
+| `docs/runbooks/ENVIRONMENTS.md` | Local, Preview/Staging, and Production environment rules |
 
 ## Payment Notes
 
@@ -247,9 +258,12 @@ This app is ready for Vercel-style deployment.
 
 1. Push the repository to GitHub.
 2. Import the repository into Vercel.
-3. Add the same environment variables from `.env.local` to Vercel project settings.
+3. Add environment variables per Vercel scope. Preview/Staging uses staging Supabase. Production uses clean production Supabase.
 4. Use `npm run build` as the build command.
-5. Set Supabase OAuth redirect URLs for the production domain.
+5. Set Supabase OAuth Site URL and redirect URLs for local, staging, and production callback domains in the matching Supabase projects.
+6. Keep production Midtrans live mode off unless the separate payment go-live checklist is approved.
+
+Production is for real user data only. Run dummy registration, team, payment, admin, and RLS checks in Preview/Staging. Don't run load tests, sandbox payment tests, or fake data drills against Production.
 
 > [!WARNING]
 > Google OAuth and magic links will fail in production if Supabase redirect URLs are not configured for the deployed domain.

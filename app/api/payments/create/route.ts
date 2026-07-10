@@ -3,6 +3,7 @@ import { type NextRequest } from 'next/server'
 import { apiError, apiSuccess, unauthorizedResponse, type ApiErrorCode } from '@/lib/api-response'
 import { getAuthenticatedUser } from '@/lib/auth'
 import { createMidtransSnapTransaction, hasMidtransConfig } from '@/lib/midtrans'
+import { checkRateLimit, rateLimitResponse, sensitiveMutationRateLimit } from '@/lib/rate-limit'
 import {
   getAuthorizedPaymentRegistration,
   getRegistrationPaymentAmount,
@@ -68,6 +69,14 @@ export async function POST(request: NextRequest) {
   const auth = await getAuthenticatedUser(request)
 
   if (!auth.ok) return unauthorizedResponse()
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'payment-create',
+    identity: auth.user.id,
+    ...sensitiveMutationRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return apiError('SERVER_CONFIG_MISSING', 'Konfigurasi server pembayaran belum lengkap.', 500)

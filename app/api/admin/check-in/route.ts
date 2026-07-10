@@ -2,6 +2,7 @@ import { type NextRequest } from 'next/server'
 
 import { apiError, apiSuccess } from '@/lib/api-response'
 import { getAdminUser } from '@/lib/admin'
+import { adminHeavyRateLimit, checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { createServiceClient } from '@/lib/supabase/server'
 
 type Payload = {
@@ -11,6 +12,14 @@ type Payload = {
 export async function POST(request: NextRequest) {
   const admin = await getAdminUser(request)
   if (!admin.ok) return apiError(admin.code, admin.message, admin.status)
+
+  const rateLimit = checkRateLimit(request, {
+    scope: 'admin-check-in',
+    identity: admin.user.id,
+    ...adminHeavyRateLimit,
+  })
+
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit.retryAfterSeconds)
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return apiError('SERVER_CONFIG_MISSING', 'Konfigurasi server admin belum lengkap.', 500)
