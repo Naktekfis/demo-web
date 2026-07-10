@@ -148,7 +148,7 @@ export async function createMidtransSnapTransaction(input: CreateMidtransSnapTra
       ok: false as const,
       code: 'MIDTRANS_NETWORK_ERROR',
       message,
-      status: 502,
+      status: 503,
       rawResponse: null,
     }
   }
@@ -165,7 +165,7 @@ export async function createMidtransSnapTransaction(input: CreateMidtransSnapTra
       ok: false as const,
       code: 'MIDTRANS_CREATE_FAILED',
       message: midtransErrors || 'Gagal membuat transaksi Midtrans.',
-      status: 502,
+      status: 503,
       rawResponse,
     }
   }

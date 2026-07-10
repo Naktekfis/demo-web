@@ -67,6 +67,16 @@ function createMidtransOrderId(paymentId: string) {
   return `INSIGHT-${paymentId}`
 }
 
+function isMidtransEnabled() {
+  return process.env.PAYMENT_ENABLE_MIDTRANS === 'true' && hasMidtransConfig()
+}
+
+async function failPayment(supabase: ReturnType<typeof createServiceClient>, paymentId: string) {
+  const { error } = await supabase.from('payments').update({ status: 'failed' }).eq('id', paymentId)
+
+  return !error
+}
+
 export async function POST(request: NextRequest) {
   const auth = await getAuthenticatedUser(request)
 
@@ -93,15 +103,12 @@ export async function POST(request: NextRequest) {
   }
 
   const registrationId = payload.registrationId?.trim()
-  const provider = payload.provider?.trim() || 'mock'
+  const requestedProvider = payload.provider?.trim() || 'mock'
+  const provider = requestedProvider === 'midtrans' && isMidtransEnabled() ? 'midtrans' : 'mock'
 
   if (!registrationId) return apiError('REGISTRATION_REQUIRED', 'Registrasi wajib dipilih.', 400)
-  if (provider !== 'mock' && provider !== 'midtrans') {
+  if (requestedProvider !== 'mock' && requestedProvider !== 'midtrans') {
     return apiError('INVALID_PROVIDER', 'Provider pembayaran tidak valid.', 400)
-  }
-
-  if (provider === 'midtrans' && !hasMidtransConfig()) {
-    return apiError('MIDTRANS_CONFIG_MISSING', 'Konfigurasi Midtrans belum lengkap.', 500)
   }
 
   const supabase = createServiceClient()
@@ -126,11 +133,27 @@ export async function POST(request: NextRequest) {
 
   if (pendingError) return apiError('PAYMENT_LOOKUP_FAILED', 'Gagal memeriksa pembayaran aktif.', 500)
   if (pendingPayment) {
-    const response = await paymentResponse(supabase, pendingPayment as PaymentSummary)
+    const existingPayment = pendingPayment as PaymentSummary
 
-    if (!response) return apiError('PAYMENT_RESUME_FAILED', 'Gagal melanjutkan pembayaran aktif.', 500)
+    if (existingPayment.provider === 'midtrans' && provider === 'mock') {
+      const failed = await failPayment(supabase, existingPayment.id)
 
-    return apiSuccess(response)
+      if (!failed) return apiError('PAYMENT_RECOVERY_FAILED', 'Gagal memulihkan pembayaran aktif.', 500)
+    } else {
+      const response = await paymentResponse(supabase, existingPayment)
+
+      if (!response) {
+        if (existingPayment.provider === 'midtrans') {
+          const failed = await failPayment(supabase, existingPayment.id)
+
+          if (!failed) return apiError('PAYMENT_RECOVERY_FAILED', 'Gagal memulihkan pembayaran aktif.', 500)
+        } else {
+          return apiError('PAYMENT_RESUME_FAILED', 'Gagal melanjutkan pembayaran aktif.', 500)
+        }
+      } else {
+        return apiSuccess(response)
+      }
+    }
   }
 
   const amount = await getRegistrationPaymentAmount(authorized.registration.competitionSlug)
