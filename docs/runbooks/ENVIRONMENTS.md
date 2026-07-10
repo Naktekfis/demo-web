@@ -51,6 +51,7 @@ Use separate owner-managed values for Local, Preview/Staging, and Production. Do
 | `MIDTRANS_SERVER_KEY` | Sandbox key or unset | Sandbox key or unset | Unset or sandbox unless separate go-live approval exists | Server-side only. |
 | `MIDTRANS_CLIENT_KEY` | Sandbox key or unset | Sandbox key or unset | Unset or sandbox unless separate go-live approval exists | Keep real values in the service dashboard or env manager. |
 | `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | Sandbox public client key or unset | Sandbox public client key or unset | Unset or sandbox unless separate go-live approval exists | Public by name, but don't paste real values into docs. |
+| `PAYMENT_ENABLE_MIDTRANS` | `true` only when testing Midtrans; otherwise unset/false | `true` only for approved sandbox checks | `false` or unset unless separate Midtrans go-live approval exists | Enables the Midtrans provider path in `/api/payments/create`; missing/false falls back to mock payments. |
 | `MIDTRANS_IS_PRODUCTION` | `false` | `false` | `false` or unset | Production payment must not become live without separate approval. |
 
 Owner-run acceptance checks:
@@ -163,7 +164,7 @@ Required order:
 1. Confirm `.omo/evidence/env-separation-hardening/backup-receipt.md` and `.omo/evidence/env-separation-hardening/staging-smoke.md` are complete with owner labels.
 2. Record the staging project ref, production project ref, project names, and Supabase API domains in `.omo/evidence/env-separation-hardening/production-cleanliness.md` using placeholders or owner evidence labels only.
 3. Confirm Production and Staging use different Supabase project refs before any migration, seed, Vercel Production switch, or reset.
-4. If a new project is used, apply migrations in order: `0001_initial_schema.sql`, `0002_mvp_schema.sql`, `0003_submit_team_registration.sql`, and `0004_payment_schema.sql`.
+4. If a new project is used, apply migrations in order: `0001_initial_schema.sql`, `0002_mvp_schema.sql`, `0003_submit_team_registration.sql`, `0004_payment_schema.sql`, and `0005_rls_initplan_optimization.sql`.
 5. If an existing project is reset, require immediate owner confirmation of the target project ref, project name, API domain, and intended Production role before reset. Stop if any value is unclear.
 6. Seed only approved launch data: final competition config if needed, approved admin account profile rows if needed, and intentional `admin_roles` rows.
 7. Verify forbidden tester data counts are zero for `visitor_tickets`, `competition_registrations`, `competition_teams`, `competition_team_members`, `payments`, and `midtrans_transactions` when those tables exist.

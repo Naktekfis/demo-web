@@ -16,7 +16,7 @@ The model should stay minimal enough to ship quickly, but flexible enough to add
 
 ## Current Schema In Repo
 
-Current effective schema is built by the migration chain through `supabase/migrations/0004_payment_schema.sql`.
+Current effective schema is built by the migration chain through `supabase/migrations/0005_rls_initplan_optimization.sql`.
 
 Migration inventory:
 
@@ -25,7 +25,8 @@ Migration inventory:
 | `0001_initial_schema.sql` | Legacy proof-of-concept schema with `registrations` and `rsvp`. Superseded by the clean MVP reset in `0002`. |
 | `0002_mvp_schema.sql` | Clean MVP schema reset with `profiles`, `visitor_tickets`, competition/team tables, registration table, and `admin_roles`. |
 | `0003_submit_team_registration.sql` | Adds team submission RPC, later replaced by `0004` to use `submitted` status. |
-| `0004_payment_schema.sql` | Current latest migration. Converts registration status from `pending` to `submitted`, adds payment tables, and updates team submission RPC. |
+| `0004_payment_schema.sql` | Converts registration status from `pending` to `submitted`, adds payment tables, and updates team submission RPC. |
+| `0005_rls_initplan_optimization.sql` | Current latest migration. Recreates RLS policies with `(select auth.uid())` wrappers to avoid per-row auth function re-evaluation. |
 
 | Table | Current purpose | MVP fit |
 | --- | --- | --- |

@@ -113,9 +113,12 @@ Request:
 
 ```json
 {
-  "competitionSlug": "paper-competition"
+  "competitionSlug": "paper-competition",
+  "phoneNumber": "08123456789"
 }
 ```
+
+`phoneNumber` is optional when the profile already has a phone number, but the current API blocks submission until a phone number is available.
 
 Success `201`:
 
@@ -140,10 +143,11 @@ Errors:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 400 | `INVALID_COMPETITION_TYPE` | Competition is not individual. |
+| 400 | `PHONE_REQUIRED` | Profile does not have a phone number and request did not provide one. |
 | 400 | `REGISTRATION_CLOSED` | Registration is not open. |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 404 | `COMPETITION_NOT_FOUND` | Competition slug is invalid. |
-| 409 | `DUPLICATE_REGISTRATION` | User already registered for this competition. |
+| 409 | `DUPLICATE_REGISTRATION` | Race-condition fallback when the unique constraint rejects a duplicate registration. Normal duplicate lookups return the existing registration with `200`. |
 
 ## POST `/api/teams`
 
@@ -154,9 +158,14 @@ Request:
 ```json
 {
   "competitionSlug": "robotika-challenge",
-  "teamName": "Delta Pulse"
+  "teamName": "Delta Pulse",
+  "name": "Nama Leader",
+  "phoneNumber": "08123456789",
+  "institution": "Institut Teknologi Bandung"
 }
 ```
+
+`name`, `phoneNumber`, and `institution` are used to create/update the leader profile snapshot. Phone and institution are required before creating a team.
 
 Success `201`:
 
@@ -167,7 +176,7 @@ Success `201`:
     "team": {
       "id": "uuid",
       "teamName": "Delta Pulse",
-      "teamUid": "ROBO-A7K2QD",
+      "teamUid": "RBT-A7K2QD",
       "competitionSlug": "robotika-challenge",
       "status": "draft"
     }
@@ -179,7 +188,7 @@ Success `201`:
 Team UID rule:
 
 - Format: competition prefix + hyphen + random 6-character uppercase code.
-- Example: `ROBO-A7K2QD`.
+- Example: `RBT-A7K2QD`.
 - The prefix should come from competition config.
 
 Errors:
@@ -187,11 +196,13 @@ Errors:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 400 | `INVALID_COMPETITION_TYPE` | Competition is not team-based. |
-| 400 | `INVALID_TEAM_NAME` | Team name is missing or invalid. |
+| 400 | `TEAM_NAME_REQUIRED` | Team name is missing or invalid. |
+| 400 | `PHONE_REQUIRED` | Profile does not have a phone number and request did not provide one. |
+| 400 | `INSTITUTION_REQUIRED` | Profile does not have an institution and request did not provide one. |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 404 | `COMPETITION_NOT_FOUND` | Competition slug is invalid. |
-| 409 | `TEAM_NAME_TAKEN` | Team name already exists for this competition. |
-| 409 | `ALREADY_IN_TEAM` | User already joined or leads a team in this competition. |
+| 409 | `TEAM_ALREADY_EXISTS` | Team name or generated UID already exists for this competition. |
+| 409 | `USER_ALREADY_IN_TEAM` | User already joined or leads a team in this competition. |
 
 ## POST `/api/teams/join`
 
@@ -202,9 +213,14 @@ Request:
 ```json
 {
   "competitionSlug": "robotika-challenge",
-  "teamUid": "ROBO-A7K2QD"
+  "teamUid": "RBT-A7K2QD",
+  "name": "Nama Anggota",
+  "phoneNumber": "08123456789",
+  "institution": "Institut Teknologi Bandung"
 }
 ```
+
+`name`, `phoneNumber`, and `institution` are used to create/update the member profile snapshot. Phone and institution are required before joining a team.
 
 Success `200`:
 
@@ -215,7 +231,7 @@ Success `200`:
     "team": {
       "id": "uuid",
       "teamName": "Delta Pulse",
-      "teamUid": "ROBO-A7K2QD",
+      "teamUid": "RBT-A7K2QD",
       "memberCount": 3,
       "status": "draft"
     }
@@ -229,11 +245,13 @@ Errors:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 400 | `INVALID_TEAM_UID` | Team UID format is invalid. |
-| 400 | `TEAM_ALREADY_SUBMITTED` | Team registration has already been submitted. |
+| 400 | `PHONE_REQUIRED` | Profile does not have a phone number and request did not provide one. |
+| 400 | `INSTITUTION_REQUIRED` | Profile does not have an institution and request did not provide one. |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 404 | `TEAM_NOT_FOUND` | Team UID is invalid for this competition. |
+| 409 | `TEAM_LOCKED` | Team registration has already been submitted or membership is locked. |
 | 409 | `TEAM_FULL` | Team has reached max members. |
-| 409 | `ALREADY_IN_TEAM` | User already joined a team in this competition. |
+| 409 | `USER_ALREADY_IN_TEAM` | User already joined a team in this competition. |
 
 ## DELETE `/api/teams/[teamId]/members/[memberId]`
 
@@ -262,9 +280,10 @@ Errors:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
-| 403 | `NOT_TEAM_LEADER` | User is not the team leader. |
+| 403 | `TEAM_LEADER_ONLY` | User is not the team leader. |
 | 404 | `MEMBER_NOT_FOUND` | Member row does not exist. |
-| 409 | `TEAM_ALREADY_SUBMITTED` | Team membership is locked. |
+| 409 | `LEADER_REMOVE_BLOCKED` | Leader cannot be removed through this endpoint. |
+| 409 | `TEAM_LOCKED` | Team membership is locked. |
 
 ## POST `/api/teams/[teamId]/leave`
 
@@ -293,9 +312,9 @@ Errors:
 | HTTP | Code | Meaning |
 | --- | --- | --- |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
-| 403 | `LEADER_CANNOT_LEAVE` | Leader must delete/cancel team or ask admin later. |
+| 409 | `LEADER_LEAVE_BLOCKED` | Leader must delete/cancel team or ask admin later. |
 | 404 | `TEAM_NOT_FOUND` | Team does not exist. |
-| 409 | `TEAM_ALREADY_SUBMITTED` | Team membership is locked. |
+| 409 | `TEAM_LOCKED` | Team membership is locked. |
 
 ## POST `/api/registrations/team`
 
@@ -331,9 +350,10 @@ Errors:
 
 | HTTP | Code | Meaning |
 | --- | --- | --- |
-| 400 | `TEAM_SIZE_INVALID` | Team member count is below min or above max. |
+| 400 | `TEAM_BELOW_MINIMUM` | Team member count is below minimum size. |
+| 400 | `TEAM_ABOVE_MAXIMUM` | Team member count is above maximum size. |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
-| 403 | `NOT_TEAM_LEADER` | Only leader can submit team registration. |
+| 403 | `TEAM_LEADER_ONLY` | Only leader can submit team registration. |
 | 404 | `TEAM_NOT_FOUND` | Team does not exist. |
 | 409 | `TEAM_ALREADY_SUBMITTED` | Registration already exists. |
 
@@ -604,7 +624,7 @@ Errors:
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 403 | `PAYMENT_FORBIDDEN` | User is not allowed to manage payment for this registration. |
 | 404 | `REGISTRATION_NOT_FOUND` | Registration does not exist. |
-| 500 | `MIDTRANS_CONFIG_MISSING` | Midtrans provider was requested but required env vars are missing. |
+| 500 | `MIDTRANS_CONFIG_MISSING` | Midtrans provider path is enabled, but required server env vars are missing. If `PAYMENT_ENABLE_MIDTRANS` is unset/false, requested `midtrans` payments fall back to mock provider instead. |
 
 ## GET `/api/payments/[id]`
 
@@ -769,7 +789,7 @@ Errors:
 
 | HTTP | Code | Meaning |
 | --- | --- | --- |
-| 400 | `QR_REQUIRED` | QR token is missing. |
+| 400 | `MISSING_QR_CODE` | QR token is missing. |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 403 | `ADMIN_ONLY` | User is not admin. |
 | 404 | `TICKET_NOT_FOUND` | QR token is unknown. |

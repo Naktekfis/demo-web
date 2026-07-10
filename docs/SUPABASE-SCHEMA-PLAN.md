@@ -28,7 +28,7 @@ Recommended direction:
 
 Add payment tables now for the post-registration payment phase. Implement internal mock first, then Midtrans Sandbox Snap.
 
-Current latest migration note: `0004_payment_schema.sql` updates `competition_registrations.status` from legacy `pending` to `submitted` and adds `payments` plus `midtrans_transactions`.
+Current latest migration note: `0005_rls_initplan_optimization.sql` keeps the `0004_payment_schema.sql` payment/status model and optimizes RLS policies by wrapping auth helper calls such as `auth.uid()` with `select` in policy expressions.
 
 ## Current Schema Problems
 
@@ -143,7 +143,7 @@ Required fields:
 Constraints:
 
 - Unique `(competition_id, team_name)`.
-- `team_uid` format should be generated server-side, for example `ROBO-A7K2QD`.
+- `team_uid` format should be generated server-side, for example `RBT-A7K2QD`.
 
 ### `competition_team_members`
 

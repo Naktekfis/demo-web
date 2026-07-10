@@ -347,6 +347,9 @@ Status model:
 | --- | --- |
 | `/auth/login` | Visitor login/sign-up. |
 | `/auth/callback` | Auth callback and post-login redirect. |
+| `/about` | Public event/about page linked from the primary header. |
+| `/map` | Public venue map page linked from the primary header. |
+| `/terms` | Public terms/refund policy page linked from the footer. |
 | `/dashboard` | Protected Visitor dashboard and registration status. Header link is visible only after login. |
 | `/dashboard/my-tickets` | Visitor QR ticket. |
 | `/competitions` | Public competition list. |

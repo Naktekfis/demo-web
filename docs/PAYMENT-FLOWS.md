@@ -104,6 +104,10 @@ Rules:
 
 Goal: use Midtrans Sandbox after mock flow is stable.
 
+Configuration rule:
+
+- The Midtrans provider path is used only when `PAYMENT_ENABLE_MIDTRANS=true` and the server Midtrans config is available. Otherwise, a requested `midtrans` payment falls back to the internal mock provider.
+
 Steps:
 
 1. User clicks `Bayar`.

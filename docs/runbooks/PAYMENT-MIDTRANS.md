@@ -23,6 +23,7 @@ Use sandbox keys until production go-live is approved.
 ```bash
 MIDTRANS_SERVER_KEY=your-sandbox-server-key
 MIDTRANS_CLIENT_KEY=your-sandbox-client-key
+PAYMENT_ENABLE_MIDTRANS=true
 MIDTRANS_IS_PRODUCTION=false
 NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-sandbox-client-key
 ```
@@ -31,6 +32,7 @@ Rules:
 
 - Keep `MIDTRANS_SERVER_KEY` server-only.
 - Never expose the server key through `NEXT_PUBLIC_*`.
+- Set `PAYMENT_ENABLE_MIDTRANS=true` only when the Midtrans provider path should be used. If it is unset or false, `/api/payments/create` falls back to mock payments even when `provider` is `midtrans`.
 - Set `MIDTRANS_IS_PRODUCTION=false` for sandbox.
 
 ## Important Routes
