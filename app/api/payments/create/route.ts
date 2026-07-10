@@ -1,6 +1,8 @@
 import { type NextRequest } from 'next/server'
 
 import { apiError, apiSuccess, unauthorizedResponse, type ApiErrorCode } from '@/lib/api-response'
+
+export const maxDuration = 30
 import { getAuthenticatedUser } from '@/lib/auth'
 import { createMidtransSnapTransaction, hasMidtransConfig } from '@/lib/midtrans'
 import { checkRateLimit, rateLimitResponse, sensitiveMutationRateLimit } from '@/lib/rate-limit'

@@ -103,44 +103,68 @@ export async function createMidtransSnapTransaction(input: CreateMidtransSnapTra
   }
 
   const grossAmount = Math.round(input.amount)
-  const response = await fetch(getMidtransSnapUrl(), {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString('base64')}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      transaction_details: {
-        order_id: input.orderId,
-        gross_amount: grossAmount,
+
+  let response: Response
+
+  try {
+    response = await fetch(getMidtransSnapUrl(), {
+      signal: AbortSignal.timeout(10_000),
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString('base64')}`,
+        'Content-Type': 'application/json',
       },
-      customer_details: {
-        first_name: truncate(input.customer.first_name || 'Visitor', 255),
-        email: input.customer.email || undefined,
-        phone: input.customer.phone || undefined,
-      },
-      item_details: [
-        {
-          id: truncate(input.item.id, 50),
-          price: grossAmount,
-          quantity: 1,
-          name: truncate(input.item.name, 50),
+      body: JSON.stringify({
+        transaction_details: {
+          order_id: input.orderId,
+          gross_amount: grossAmount,
         },
-      ],
-      callbacks: {
-        finish: input.finishUrl,
-      },
-    }),
-  })
+        customer_details: {
+          first_name: truncate(input.customer.first_name || 'Visitor', 255),
+          email: input.customer.email || undefined,
+          phone: input.customer.phone || undefined,
+        },
+        item_details: [
+          {
+            id: truncate(input.item.id, 50),
+            price: grossAmount,
+            quantity: 1,
+            name: truncate(input.item.name, 50),
+          },
+        ],
+        callbacks: {
+          finish: input.finishUrl,
+        },
+      }),
+    })
+  } catch (err) {
+    const message =
+      err instanceof DOMException && err.name === 'TimeoutError'
+        ? 'Midtrans tidak merespon. Silakan coba lagi.'
+        : 'Gagal terhubung ke server pembayaran.'
+
+    return {
+      ok: false as const,
+      code: 'MIDTRANS_NETWORK_ERROR',
+      message,
+      status: 502,
+      rawResponse: null,
+    }
+  }
 
   const rawResponse = (await response.json().catch(() => null)) as MidtransSnapTransaction | { error_messages?: string[] } | null
 
   if (!response.ok || !rawResponse || !('token' in rawResponse) || !rawResponse.token || !rawResponse.redirect_url) {
+    const midtransErrors =
+      rawResponse && 'error_messages' in rawResponse
+        ? (rawResponse as { error_messages: string[] }).error_messages?.join('; ')
+        : undefined
+
     return {
       ok: false as const,
       code: 'MIDTRANS_CREATE_FAILED',
-      message: 'Gagal membuat transaksi Midtrans.',
+      message: midtransErrors || 'Gagal membuat transaksi Midtrans.',
       status: 502,
       rawResponse,
     }
