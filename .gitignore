@@ -46,6 +46,9 @@ AGENTS.md
 docs/.obsolete/
 docs/archive/
 
+# Local/generated diagrams
+docs/erd/
+
 # Supabase local runtime state
 supabase/.branches/
 supabase/.temp/
@@ -56,3 +59,6 @@ tmp/
 temp/
 
 AGENTS.md
+
+.vercel
+.env*

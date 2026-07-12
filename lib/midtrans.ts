@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from 'crypto'
+import { env } from '@/lib/env'
 
 type MidtransCustomerDetails = {
   first_name: string
@@ -37,11 +38,11 @@ export type MidtransNotificationPayload = {
 export type MappedMidtransPaymentStatus = 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'
 
 function getMidtransServerKey() {
-  return process.env.MIDTRANS_SERVER_KEY?.trim()
+  return env.MIDTRANS_SERVER_KEY?.trim()
 }
 
 function getMidtransSnapUrl() {
-  const isProduction = process.env.MIDTRANS_IS_PRODUCTION === 'true'
+  const isProduction = env.MIDTRANS_IS_PRODUCTION === 'true'
   return isProduction
     ? 'https://app.midtrans.com/snap/v1/transactions'
     : 'https://app.sandbox.midtrans.com/snap/v1/transactions'

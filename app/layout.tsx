@@ -1,15 +1,18 @@
 import './globals.css'
 import React from 'react'
-import { Gabarito, Roboto_Mono } from "next/font/google"
-import { cn } from "@/lib/utils"
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Gabarito, Roboto_Mono } from 'next/font/google'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
+import { env } from '@/lib/env'
+import { cn } from '@/lib/utils'
 
 const gabarito = Gabarito({ subsets: ['latin'], variable: '--font-heading' })
 const robotoMono = Roboto_Mono({ subsets: ['latin'], variable: '--font-sans' })
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'ITB Insight 2026 - Tech Exhibition',
   description: 'Platform kompetisi, workshop, dan pameran teknologi terbesar di Institut Teknologi Bandung.',
   openGraph: {
@@ -44,6 +47,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <Footer />
         </div>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
