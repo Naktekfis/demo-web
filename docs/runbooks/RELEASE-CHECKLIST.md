@@ -21,18 +21,19 @@ Audience: release owner.
 - Confirm Midtrans env/callback setup if payment is enabled.
 - Confirm Production Midtrans live mode is off unless a separate payment go-live approval exists.
 - Confirm OAuth branding and support URLs are production-ready.
-- Confirm `.omo/evidence/env-separation-hardening/ops-baseline.md` has owner-run labels for backup owner, restore path, alert destination, incident owner, incident contact channel, and restore approval.
+- Confirm owner-managed `ops-baseline` release evidence has labels for backup owner, restore path, alert destination, incident owner, incident contact channel, and restore approval. The legacy label `.omo/evidence/env-separation-hardening/ops-baseline.md` is not tracked in this repo.
 - Block release if backup owner, restore path, alert destination, incident owner, incident contact channel, or restore approval label is missing.
 - Block release if any backup URL, signed URL, database URL, token, secret, private phone number, personal email, Auth export, or PII appears in release evidence.
 
 ## Verification
 
 - Run `npm run build`.
+- Optional focused check: run `npx tsc --noEmit` when you need TypeScript-only feedback. Do not use `npm run lint` as a blocking non-interactive gate until an ESLint config exists; see `docs/QA-CHECKLIST.md`.
 - Run `node scripts/verify-supabase.js` when Supabase env vars are available.
 - Run `node scripts/test-supabase-client.js` only in a trusted environment with service-role key.
 - Complete `docs/QA-CHECKLIST.md` manual checks against the correct environment. Dummy visitor, registration, team, payment, and admin flows run in Preview/Staging only. Production receives smoke-only checks.
 - Complete `docs/runbooks/PAYMENT-MIDTRANS.md` sandbox or production checks if payment changed.
-- Review `.omo/evidence/env-separation-hardening/ops-baseline.md` and confirm backup, alert, incident, freeze, rollback, and restore approval sections are present before release sign-off.
+- Review owner-managed `ops-baseline` release evidence and confirm backup, alert, incident, freeze, rollback, and restore approval sections are present before release sign-off.
 - Block release if Production and Preview/Staging use the same Supabase project ref, if the project ref is unknown, or if release evidence implies dummy data was created in Production.
 
 ## After Release

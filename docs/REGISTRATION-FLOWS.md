@@ -12,7 +12,7 @@ Audience: web development team implementing the MVP user and admin flows.
 
 This document defines the MVP registration flows for ITB Insight. The MVP is competition registration only, with visitor QR creation and admin-operated gate check-in.
 
-Payment is added after the core registration MVP through mock payment and Midtrans Sandbox. Booth tracking, RSVP, feedback, sponsor features, and advanced analytics are not part of this MVP.
+Payment is implemented as a separate post-registration flow through mock payment and optional Midtrans Sandbox. Booth tracking, RSVP, feedback, sponsor features, and advanced analytics are not part of this MVP.
 
 ## Flow Summary
 
@@ -128,9 +128,9 @@ Steps:
 5. System validates required data.
 6. System creates `competition_registrations` row with `registration_kind = individual`.
 7. System sets registration status to `submitted`.
-8. System sets initial payment status to `pending` when payment is required.
+8. System does not create a payment row during registration.
 9. System shows success state.
-10. Visitor can see registration and payment status in dashboard.
+10. Visitor can create or resume payment from the dashboard. Until a payment row exists, the UI may display `unpaid` as a derived state.
 
 Minimal data:
 
@@ -222,9 +222,9 @@ Steps:
 4. Leader submits final registration.
 5. System creates `competition_registrations` row with `registration_kind = team`.
 6. System sets registration status to `submitted`.
-7. System sets initial payment status to `pending` when payment is required.
+7. System does not create a payment row during team submission.
 8. System sets team status to `submitted`.
-9. Dashboard shows submitted registration and payment CTA.
+9. Dashboard shows submitted registration and payment CTA. Until a payment row exists, the UI may display `unpaid` as a derived state.
 
 Failure states:
 
@@ -373,7 +373,7 @@ Status model:
 | `/api/teams/[teamId]/members/[memberId]` | Leader removes a member before submission. |
 | `/api/teams/[teamId]/leave` | Member leaves before submission. |
 | `/api/admin/overview` | Admin overview metrics. |
-| `/api/admin/me` | Optional minimal endpoint for client header admin state if server-rendered header state is not used. |
+| `/api/admin/me` | Minimal endpoint for client header admin state; unauthenticated requests return `isAdmin: false`. |
 | `/api/admin/registrations` | Admin list/search/filter endpoint. |
 | `/api/admin/registrations/[id]/status` | Admin status update endpoint. |
 | `/api/admin/registrations/export` | Admin CSV export endpoint. |

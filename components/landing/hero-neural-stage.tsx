@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { ArrowRight, CircuitBoard, MousePointer2 } from 'lucide-react'
 import { useEffect, useRef } from 'react'
@@ -131,7 +132,7 @@ export function HeroNeuralStage() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="space-y-7"
         >
-          <img src="/brand/logo-white-text.svg" alt="ITB Insight" className="h-24 w-auto sm:h-32" />
+          <Image src="/brand/logo-white-text.svg" alt="ITB Insight" width={384} height={128} className="h-24 w-auto sm:h-32" priority />
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#8AF275]/40 bg-[#8AF275]/10 px-4 py-2 text-sm text-[#8AF275]">
             <CircuitBoard className="h-4 w-4" />
             Neural registration interface

@@ -21,7 +21,7 @@ _MVP platform ITB Insight untuk registrasi kompetisi, akun visitor, tiket QR, pe
 
 ITB Insight 2026 Web is the production web platform for the competition-registration flow. Visitors can authenticate, receive a QR ticket, browse competitions, register individually or through a team UID flow, pay through the staged payment flow, view their participant dashboard, and let admins review registrations or scan QR tickets at the gate.
 
-The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, [Resend](https://resend.com) for future email confirmation paths, Midtrans Sandbox support for the payment phase, and [MapLibre GL JS](https://maplibre.org) for the venue map.
+The project combines a modern [Next.js App Router](https://nextjs.org) frontend with [Supabase](https://supabase.com) for auth/database, optional [Sanity](https://www.sanity.io) content fallback support, Midtrans Sandbox support for the payment phase, and [MapLibre GL JS](https://maplibre.org) for the venue map. The `resend` package is installed for future email paths, but no active route reads Resend environment variables yet.
 
 > [!NOTE]
 > Several public pages include fallback content, so the app can still be explored before Supabase and Sanity are fully configured.
@@ -30,7 +30,7 @@ The project combines a modern [Next.js App Router](https://nextjs.org) frontend 
 
 - **Event landing page** with branded hero visuals, program highlights, countdown, and clear CTAs.
 - **Supabase Auth** with Google OAuth and email magic link login.
-- **Competition catalog** with hardcoded MVP data and optional Sanity fallback support.
+- **Competition catalog** with hardcoded MVP fallback data and optional Sanity integration when configured.
 - **Individual registration flow** with authenticated submission, duplicate checks, and submitted status.
 - **Team registration flow** where leaders create teams, receive a team UID, members join by UID, and leaders submit final registration.
 - **Participant dashboard** for individual/team registration summaries, status display, team UID visibility, and QR ticket access.
@@ -83,7 +83,7 @@ Business logic stays inside the Next.js app. Public pages render hardcoded or fa
 - Supabase project for auth and database-backed flows
 - Sanity project only if CMS-backed competitions/news are needed
 - Midtrans Sandbox keys only if testing Midtrans payment flow
-- Resend API key if registration confirmation email is required
+- Resend is reserved for future email confirmation paths; current code does not require Resend env vars
 
 ### Run Locally
 
@@ -115,18 +115,14 @@ NEXT_PUBLIC_SANITY_API_VERSION=2024-01-01
 NEXT_PUBLIC_EVENT_DATE=2026-11-15T08:00:00+07:00
 
 MIDTRANS_SERVER_KEY=
-MIDTRANS_CLIENT_KEY=
 MIDTRANS_IS_PRODUCTION=false
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=
+PAYMENT_ENABLE_MIDTRANS=false
 
 ADMIN_EMAILS=admin@example.com,staff@example.com
-
-RESEND_API_KEY=your-resend-api-key
-RESEND_FROM_EMAIL="ITB Insight <noreply@example.com>"
 ```
 
 > [!IMPORTANT]
-> `SUPABASE_SERVICE_ROLE_KEY` and `MIDTRANS_SERVER_KEY` are server-only. Never expose them through client components, browser code, or `NEXT_PUBLIC_*` variables.
+> `SUPABASE_SERVICE_ROLE_KEY` and `MIDTRANS_SERVER_KEY` are server-only. Never expose them through client components, browser code, or `NEXT_PUBLIC_*` variables. Current code does not read `MIDTRANS_CLIENT_KEY`, `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`, `RESEND_API_KEY`, or `RESEND_FROM_EMAIL`.
 
 Use different values for each deployment scope:
 
@@ -184,6 +180,7 @@ Don't paste real keys, tokens, project secrets, Auth exports, backup URLs, or PI
 | `/api/teams/[teamId]/leave` | Leave team before submission |
 | `/api/teams/[teamId]/members/[memberId]` | Leader removes member before submission |
 | `/api/admin/overview` | Admin overview metrics endpoint |
+| `/api/admin/me` | Minimal admin-state endpoint for header UI |
 | `/api/admin/registrations` | Admin registration list/search endpoint |
 | `/api/admin/registrations/[id]/status` | Admin registration status update endpoint |
 | `/api/admin/registrations/export` | Admin registration CSV export endpoint |

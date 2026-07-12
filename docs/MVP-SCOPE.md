@@ -136,7 +136,7 @@ The following PRD areas are out of MVP scope for now:
 ### Competition Participant
 
 - Has registration status visible as `submitted`, `verified`, or `rejected`.
-- Has payment status visible as `pending`, `paid`, `failed`, `expired`, or `cancelled` when payment is required.
+- Has payment status visible as display-only `unpaid` when no payment row exists, then `pending`, `paid`, `failed`, `expired`, or `cancelled` after payment is created.
 - Cannot see another participant's private registration data.
 - Cannot join a team without logging in.
 - Cannot join a team with an invalid team UID.

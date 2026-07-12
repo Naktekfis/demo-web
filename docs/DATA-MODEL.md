@@ -12,7 +12,7 @@ Audience: web development team implementing the MVP backend and Supabase schema.
 
 This document defines the current and recommended data model for the MVP. The MVP is competition registration only, plus visitor QR and admin-operated gate check-in.
 
-The model should stay minimal enough to ship quickly, but flexible enough to add payment, booth tracking, RSVP, feedback, and analytics later.
+The model should stay minimal enough to ship quickly, with active payment tables already included and booth tracking, RSVP, feedback, and analytics still deferred.
 
 ## Current Schema In Repo
 
@@ -119,6 +119,7 @@ Recommended fields:
 | `description` | `text` | Optional. |
 | `category` | `text` | Optional. |
 | `registration_type` | `text` | `individual` or `team`. |
+| `team_uid_prefix` | `text` | Optional prefix for generated team UID, for example `RBT`. |
 | `team_min` | `integer` | For team competitions. Use `1` for individual. |
 | `team_max` | `integer` | For team competitions. Use `1` for individual. |
 | `registration_open` | `timestamptz` | Optional. |
@@ -168,6 +169,7 @@ Recommended fields:
 | `user_id` | `uuid` | References `profiles(id)`. |
 | `name` | `text` | Snapshot at join/submit time. |
 | `email` | `text` | Snapshot at join/submit time. |
+| `phone` | `text` | Required by current team create/join API. |
 | `institution` | `text` | Required by current minimal data decision. |
 | `member_role` | `text` | `leader` or `member`. |
 | `joined_at` | `timestamptz` | Default `now()`. |
@@ -229,10 +231,10 @@ Recommended fields:
 | `role` | `text` | MVP can use `admin`. Future can add `competition_admin`, `gate_staff`, etc. |
 | `created_at` | `timestamptz` | Default `now()`. |
 
-MVP alternative:
+Fallback behavior:
 
-- If a DB role table is too much for first pass, keep `ADMIN_EMAILS` env var as a temporary allowlist.
-- Document it as temporary because role management through env vars does not scale.
+- Current code checks `admin_roles` first.
+- `ADMIN_EMAILS` remains an approved temporary fallback only when intentionally configured because role management through env vars does not scale.
 
 ### `payments`
 

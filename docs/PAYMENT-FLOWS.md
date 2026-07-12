@@ -171,7 +171,7 @@ Admin rules:
 
 | Failure | Expected response |
 | --- | --- |
-| Non-leader tries to pay team registration | Return `NOT_TEAM_LEADER`. |
+| Non-leader tries to pay team registration | Return `PAYMENT_FORBIDDEN`. |
 | Registration is verified/rejected | Block payment creation. |
 | Already paid | Show paid state and do not create new payment. |
 | Active pending payment exists | Reuse it instead of creating duplicate. |
@@ -182,6 +182,7 @@ Admin rules:
 
 | Registration status | Payment status | Dashboard CTA |
 | --- | --- | --- |
+| `submitted` | `unpaid` | `Bayar` |
 | `submitted` | `pending` | `Lanjutkan pembayaran` |
 | `submitted` | `paid` | `Menunggu verifikasi admin` |
 | `submitted` | `failed` | `Coba bayar lagi` |

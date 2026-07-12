@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export function Footer() {
   return (
@@ -8,7 +9,7 @@ export function Footer() {
           {/* Logo & Copyright */}
           <div className="flex flex-col items-center gap-2 sm:items-start">
             <Link href="/" className="flex items-center gap-2">
-              <img src="/brand/logo-black-text.svg" alt="ITB Insight" className="h-8 w-auto" />
+              <Image src="/brand/logo-black-text.svg" alt="ITB Insight" width={128} height={32} className="h-8 w-auto" />
             </Link>
             <p className="text-xs text-slate-400">
               &copy; {new Date().getFullYear()} ITB Insight. Seluruh hak cipta dilindungi.

@@ -25,6 +25,8 @@ Use this runbook to record which deployment points at which Supabase project wit
 - Keep `SUPABASE_SERVICE_ROLE_KEY` and `MIDTRANS_SERVER_KEY` server-only.
 - Store real values only in approved local env files, Vercel environment settings, or the owning service dashboard.
 
+Evidence labels such as `.omo/evidence/env-separation-hardening/*.md` are owner-managed release evidence locations and are not part of the current tracked repo. If the owner wants these files inside the repo later, add redacted templates only and keep screenshots, exports, URLs, tokens, keys, and PII outside git.
+
 ## Non-Negotiable Production Restrictions
 
 Production is for real user data only. It must stay separate from staging data, staging credentials, dummy flows, and sandbox-only payment checks.
@@ -49,10 +51,15 @@ Use separate owner-managed values for Local, Preview/Staging, and Production. Do
 | `SUPABASE_SERVICE_ROLE_KEY` | Staging or dev service-role key for trusted local scripts only | Staging service-role key, server-side only | Production service-role key, server-side only | Never expose as `NEXT_PUBLIC_*`, never use in browser code, and never paste into docs. |
 | `ADMIN_EMAILS` | Local fallback if `admin_roles` is not seeded | Staging fallback if needed | Production fallback only if approved | Prefer `admin_roles`; don't paste private emails into docs. |
 | `MIDTRANS_SERVER_KEY` | Sandbox key or unset | Sandbox key or unset | Unset or sandbox unless separate go-live approval exists | Server-side only. |
-| `MIDTRANS_CLIENT_KEY` | Sandbox key or unset | Sandbox key or unset | Unset or sandbox unless separate go-live approval exists | Keep real values in the service dashboard or env manager. |
-| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | Sandbox public client key or unset | Sandbox public client key or unset | Unset or sandbox unless separate go-live approval exists | Public by name, but don't paste real values into docs. |
 | `PAYMENT_ENABLE_MIDTRANS` | `true` only when testing Midtrans; otherwise unset/false | `true` only for approved sandbox checks | `false` or unset unless separate Midtrans go-live approval exists | Enables the Midtrans provider path in `/api/payments/create`; missing/false falls back to mock payments. |
 | `MIDTRANS_IS_PRODUCTION` | `false` | `false` | `false` or unset | Production payment must not become live without separate approval. |
+| `NEXT_PUBLIC_EVENT_DATE` | Optional event date override | Optional event date override | Approved launch date | Used by the landing countdown timer. |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` / `SANITY_PROJECT_ID` | Optional | Optional | Optional | Enables Sanity-backed news/competition content when configured; hardcoded competition fallback still exists. |
+| `NEXT_PUBLIC_SANITY_DATASET` / `SANITY_DATASET` | Optional | Optional | Optional | Required only when Sanity project is enabled. |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | Optional | Optional | Optional | Optional Sanity API version override. |
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` | Optional legacy script fallbacks | Usually unset | Usually unset | Used by local smoke scripts only when `NEXT_PUBLIC_*` equivalents are absent. |
+
+Current code does not read `MIDTRANS_CLIENT_KEY` or `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`; do not configure or document real client-key values unless a future client-side Midtrans integration adds those variables.
 
 Owner-run acceptance checks:
 
@@ -71,7 +78,7 @@ No destructive Supabase or Vercel environment operation may occur before backup 
 Required gate:
 
 1. Keep the current internal-data project frozen for testing writes.
-2. Fill `.omo/evidence/env-separation-hardening/backup-receipt.md` with owner-run labels for backup timestamp, source project ref, private storage label, and restore owner.
+2. Fill owner-managed `backup-receipt` evidence with labels for backup timestamp, source project ref, private storage label, and restore owner.
 3. Confirm the backup covers `profiles`, `visitor_tickets`, `competitions`, `competition_teams`, `competition_team_members`, `competition_registrations`, `admin_roles`, plus `payments` and `midtrans_transactions` when present.
 4. Confirm Auth evidence exists outside git and proves current users are internal/test users only.
 5. Confirm the restore owner can access the private backup location.
@@ -90,7 +97,7 @@ Never place raw backups, Auth exports, database URLs with credentials, signed UR
 
 This baseline is owner-run. It records who owns each production safety check and where evidence lives, without recording private backup URLs, alert hooks, phone numbers, emails, keys, tokens, or personal data.
 
-Evidence path: `.omo/evidence/env-separation-hardening/ops-baseline.md`.
+Owner evidence label: `ops-baseline`.
 
 Docs do not configure dashboards, alerts, backups, restore jobs, incident channels, or owner access. The owner must configure those systems outside git and record only non-secret labels in the evidence file.
 
@@ -126,7 +133,7 @@ Incident procedure:
 3. Freeze writes if data integrity, payment state, admin review, QR tickets, or registration records may be affected.
 4. Roll back the app deployment first when the failure is caused by the latest deploy.
 5. Restore database state only after the restore decision owner approves the target project ref, backup label, and restore executor.
-6. Record non-secret evidence labels in `.omo/evidence/env-separation-hardening/ops-baseline.md` and keep screenshots, exports, hooks, backup objects, and user data outside git.
+6. Record non-secret evidence labels in owner-managed `ops-baseline` evidence and keep screenshots, exports, hooks, backup objects, and user data outside git.
 
 Stop before release if backup owner, restore path, alert destination, incident owner/contact, or restore approval label is missing.
 
@@ -140,7 +147,7 @@ Required staging configuration:
 
 | Area | Required staging setting | Evidence path |
 | --- | --- | --- |
-| Supabase project role | Current internal-only project is labeled and treated as Staging. | `.omo/evidence/env-separation-hardening/staging-smoke.md` |
+| Supabase project role | Current internal-only project is labeled and treated as Staging. | Owner-managed `staging-smoke` evidence label. |
 | Auth Site URL | Staging app domain, for example `<staging-domain>`. | Owner dashboard evidence label only. |
 | Auth redirect URLs | `http://localhost:3000/auth/callback` and `<staging-domain>/auth/callback`. | Owner dashboard evidence label only. |
 | Vercel Preview/Staging env | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY` point to staging Supabase. | Owner env-scope evidence label only. |
@@ -153,7 +160,7 @@ Operator rules:
 - Keep `.env.local` mapped to staging or a disposable development project, never the clean production project for dummy QA.
 - Keep staging clearly labeled non-production in owner-facing dashboard notes, deployment names, and release evidence.
 - Stop before production setup if the staging and production project refs are the same or unclear.
-- Do not claim dashboard changes are complete until the owner fills `.omo/evidence/env-separation-hardening/staging-smoke.md`.
+- Do not claim dashboard changes are complete until the owner fills `staging-smoke` evidence.
 
 ## Clean Production Setup
 
@@ -161,8 +168,8 @@ Production starts from a clean Supabase project. Prefer creating a new Supabase 
 
 Required order:
 
-1. Confirm `.omo/evidence/env-separation-hardening/backup-receipt.md` and `.omo/evidence/env-separation-hardening/staging-smoke.md` are complete with owner labels.
-2. Record the staging project ref, production project ref, project names, and Supabase API domains in `.omo/evidence/env-separation-hardening/production-cleanliness.md` using placeholders or owner evidence labels only.
+1. Confirm owner-managed `backup-receipt` and `staging-smoke` evidence are complete with owner labels.
+2. Record the staging project ref, production project ref, project names, and Supabase API domains in owner-managed `production-cleanliness` evidence using placeholders or owner evidence labels only.
 3. Confirm Production and Staging use different Supabase project refs before any migration, seed, Vercel Production switch, or reset.
 4. If a new project is used, apply migrations in order: `0001_initial_schema.sql`, `0002_mvp_schema.sql`, `0003_submit_team_registration.sql`, `0004_payment_schema.sql`, and `0005_rls_initplan_optimization.sql`.
 5. If an existing project is reset, require immediate owner confirmation of the target project ref, project name, API domain, and intended Production role before reset. Stop if any value is unclear.
@@ -174,7 +181,7 @@ Required production evidence:
 
 | Check | Required result | Evidence path |
 | --- | --- | --- |
-| Target project | Production project ref differs from staging. | `.omo/evidence/env-separation-hardening/production-cleanliness.md` |
+| Target project | Production project ref differs from staging. | Owner-managed `production-cleanliness` evidence label. |
 | Schema | Required MVP tables exist after migrations. | Owner query or dashboard label only. |
 | Clean data | No internal tester registrations, tickets, teams, team members, payments, or Midtrans rows. | Owner count labels only. |
 | Admin seed | Admin access seed is intentional and recorded. | Owner seed label only. |
@@ -186,7 +193,7 @@ Stop before switching Vercel Production if any Production table contains tester 
 
 Run RLS and access-control smoke checks after the environment split is configured and before release readiness sign-off. This is an owner-run procedure because it needs environment credentials, controlled test accounts, and Supabase dashboard access. Do not paste account emails, session tokens, JWTs, QR tokens, service-role output, or rows with PII into repo files.
 
-Evidence path: `.omo/evidence/env-separation-hardening/rls-smoke.md`.
+Owner evidence label: `rls-smoke`.
 
 Environment rules:
 
@@ -229,10 +236,10 @@ Stop conditions:
 ## Owner Checkpoints
 
 1. Confirm the current internal-data Supabase project is staging or is being preserved as staging.
-2. Confirm `.omo/evidence/env-separation-hardening/backup-receipt.md` exists and is filled with owner-run labels before any destructive operation.
+2. Confirm owner-managed `backup-receipt` evidence exists and is filled with owner-run labels before any destructive operation.
 3. Confirm production Supabase uses a different project ref from staging before production setup or switching.
-4. Confirm `.omo/evidence/env-separation-hardening/production-cleanliness.md` records schema, seed, clean table counts, admin seed, and payment mode evidence before any Production switch.
+4. Confirm owner-managed `production-cleanliness` evidence records schema, seed, clean table counts, admin seed, and payment mode evidence before any Production switch.
 5. Confirm Vercel Preview/Staging points to staging Supabase.
 6. Confirm Vercel Production points to clean production Supabase only after backup, production setup, and smoke checks finish.
 7. Keep Midtrans production mode off until the separate payment go-live procedure is approved.
-8. Complete `.omo/evidence/env-separation-hardening/rls-smoke.md` before release readiness sign-off. Staging needs executable User A/User B and admin denial evidence. Production needs policy/config evidence plus approved smoke-only access checks.
+8. Complete owner-managed `rls-smoke` evidence before release readiness sign-off. Staging needs executable User A/User B and admin denial evidence. Production needs policy/config evidence plus approved smoke-only access checks.

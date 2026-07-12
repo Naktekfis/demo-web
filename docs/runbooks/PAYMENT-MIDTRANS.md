@@ -22,10 +22,8 @@ Use sandbox keys until production go-live is approved.
 
 ```bash
 MIDTRANS_SERVER_KEY=your-sandbox-server-key
-MIDTRANS_CLIENT_KEY=your-sandbox-client-key
 PAYMENT_ENABLE_MIDTRANS=true
 MIDTRANS_IS_PRODUCTION=false
-NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=your-sandbox-client-key
 ```
 
 Rules:
@@ -34,6 +32,7 @@ Rules:
 - Never expose the server key through `NEXT_PUBLIC_*`.
 - Set `PAYMENT_ENABLE_MIDTRANS=true` only when the Midtrans provider path should be used. If it is unset or false, `/api/payments/create` falls back to mock payments even when `provider` is `midtrans`.
 - Set `MIDTRANS_IS_PRODUCTION=false` for sandbox.
+- Current code uses server-side Snap redirect creation and does not read `MIDTRANS_CLIENT_KEY` or `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY`.
 
 ## Important Routes
 
@@ -64,7 +63,7 @@ Rules:
 Do not start this checklist until the owner separately approves production Midtrans go-live. This approval is outside the environment separation hardening work.
 
 - Confirm production Midtrans account is approved.
-- Add production server/client keys to deployment secrets.
+- Add production server key to deployment secrets. Add client keys only if a future client-side Midtrans integration requires them.
 - Set `MIDTRANS_IS_PRODUCTION=true` only for production.
 - Configure deployed notification URL in Midtrans: `https://<domain>/api/payments/midtrans/notification`.
 - Run a settlement test with approved production procedure.

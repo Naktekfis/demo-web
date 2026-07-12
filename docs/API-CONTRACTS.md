@@ -10,7 +10,7 @@ Audience: frontend and backend developers implementing the MVP API surface.
 
 ## Purpose
 
-This document defines stable MVP API contracts for competition registration, teams, visitor tickets, admin registration review, CSV export, and gate check-in.
+This document defines stable MVP API contracts for competition registration, teams, visitor tickets, payments, admin registration review, CSV export, and gate check-in.
 
 The MVP uses hardcoded competition content, Supabase Auth, Supabase database tables, and server route handlers for privileged operations.
 
@@ -58,7 +58,7 @@ Rules:
 | Payment endpoints | Logged-in Visitor or team leader. |
 | Admin endpoints | Logged-in Admin. |
 | Check-in endpoint | Logged-in Admin. |
-| Admin identity endpoint | Logged-in user; returns only whether user is admin. |
+| Admin identity endpoint | Public-safe minimal check; unauthenticated users receive `isAdmin: false`. |
 
 Admin authorization:
 
@@ -126,13 +126,13 @@ Success `201`:
 {
   "success": true,
   "data": {
-      "registration": {
-        "id": "uuid",
-        "competitionSlug": "paper-competition",
-        "registrationKind": "individual",
-        "status": "submitted",
-        "paymentStatus": "unpaid"
-      }
+    "registration": {
+      "id": "uuid",
+      "competitionSlug": "paper-competition",
+      "registrationKind": "individual",
+      "status": "submitted",
+      "submittedAt": "2026-07-07T10:00:00.000Z"
+    }
   },
   "error": null
 }
@@ -175,10 +175,19 @@ Success `201`:
   "data": {
     "team": {
       "id": "uuid",
-      "teamName": "Delta Pulse",
-      "teamUid": "RBT-A7K2QD",
+      "team_uid": "RBT-A7K2QD",
+      "team_name": "Delta Pulse",
+      "status": "draft",
       "competitionSlug": "robotika-challenge",
-      "status": "draft"
+      "member": {
+        "id": "uuid",
+        "name": "Nama Leader",
+        "email": "leader@example.com",
+        "phone": "08123456789",
+        "institution": "Institut Teknologi Bandung",
+        "member_role": "leader",
+        "joined_at": "2026-07-07T10:00:00.000Z"
+      }
     }
   },
   "error": null
@@ -222,7 +231,7 @@ Request:
 
 `name`, `phoneNumber`, and `institution` are used to create/update the member profile snapshot. Phone and institution are required before joining a team.
 
-Success `200`:
+Success `201`:
 
 ```json
 {
@@ -230,10 +239,18 @@ Success `200`:
   "data": {
     "team": {
       "id": "uuid",
-      "teamName": "Delta Pulse",
-      "teamUid": "RBT-A7K2QD",
-      "memberCount": 3,
+      "team_uid": "RBT-A7K2QD",
+      "team_name": "Delta Pulse",
       "status": "draft"
+    },
+    "member": {
+      "id": "uuid",
+      "name": "Nama Anggota",
+      "email": "anggota@example.com",
+      "phone": "08123456789",
+      "institution": "Institut Teknologi Bandung",
+      "member_role": "member",
+      "joined_at": "2026-07-07T10:00:00.000Z"
     }
   },
   "error": null
@@ -269,7 +286,7 @@ Success `200`:
 {
   "success": true,
   "data": {
-    "removed": true
+    "removedMemberId": "uuid"
   },
   "error": null
 }
@@ -281,7 +298,7 @@ Errors:
 | --- | --- | --- |
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 403 | `TEAM_LEADER_ONLY` | User is not the team leader. |
-| 404 | `MEMBER_NOT_FOUND` | Member row does not exist. |
+| 404 | `TEAM_MEMBER_NOT_FOUND` | Member row does not exist. |
 | 409 | `LEADER_REMOVE_BLOCKED` | Leader cannot be removed through this endpoint. |
 | 409 | `TEAM_LOCKED` | Team membership is locked. |
 
@@ -301,7 +318,7 @@ Success `200`:
 {
   "success": true,
   "data": {
-    "left": true
+    "leftTeamId": "uuid"
   },
   "error": null
 }
@@ -314,6 +331,7 @@ Errors:
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 409 | `LEADER_LEAVE_BLOCKED` | Leader must delete/cancel team or ask admin later. |
 | 404 | `TEAM_NOT_FOUND` | Team does not exist. |
+| 404 | `TEAM_MEMBER_NOT_FOUND` | Current user is not a member of the team. |
 | 409 | `TEAM_LOCKED` | Team membership is locked. |
 
 ## POST `/api/registrations/team`
@@ -338,8 +356,15 @@ Success `201`:
       "id": "uuid",
       "registrationKind": "team",
       "teamId": "uuid",
+      "competitionSlug": "robotika-challenge",
       "status": "submitted",
-      "paymentStatus": "pending"
+      "submittedAt": "2026-07-07T10:00:00.000Z"
+    },
+    "team": {
+      "id": "uuid",
+      "teamUid": "RBT-A7K2QD",
+      "teamName": "Delta Pulse",
+      "status": "submitted"
     }
   },
   "error": null
@@ -371,10 +396,12 @@ Success `200` data:
     "totalRegistrations": 45,
     "totalTeams": 12,
     "submittedRegistrations": 20,
+    "pendingPayments": 8,
+    "paidPayments": 14,
     "verifiedRegistrations": 22,
     "rejectedRegistrations": 3,
     "perCompetition": [
-      { "competitionSlug": "robotika-challenge", "count": 10 }
+      { "competitionSlug": "robotika-challenge", "competitionName": "Robotika Challenge", "count": 10 }
     ]
   }
 }
@@ -405,7 +432,7 @@ Success `200` data for a logged-in admin:
 }
 ```
 
-Success `200` data for a logged-in non-admin:
+Success `200` data for a logged-in non-admin or unauthenticated request:
 
 ```json
 {
@@ -416,12 +443,6 @@ Success `200` data for a logged-in non-admin:
   "error": null
 }
 ```
-
-Errors:
-
-| HTTP | Code | Meaning |
-| --- | --- | --- |
-| 401 | `UNAUTHORIZED` | User is not logged in. |
 
 Security rules:
 
@@ -596,7 +617,7 @@ Success `201` for Midtrans Sandbox:
       "status": "pending",
       "amount": 10000,
       "currency": "IDR",
-      "orderId": "INSIGHT-uuid-short",
+      "orderId": "INSIGHT-uuid",
       "snapToken": "snap-token",
       "redirectUrl": "https://app.sandbox.midtrans.com/snap/v2/vtweb/..."
     },
@@ -624,7 +645,7 @@ Errors:
 | 401 | `UNAUTHORIZED` | User is not logged in. |
 | 403 | `PAYMENT_FORBIDDEN` | User is not allowed to manage payment for this registration. |
 | 404 | `REGISTRATION_NOT_FOUND` | Registration does not exist. |
-| 500 | `MIDTRANS_CONFIG_MISSING` | Midtrans provider path is enabled, but required server env vars are missing. If `PAYMENT_ENABLE_MIDTRANS` is unset/false, requested `midtrans` payments fall back to mock provider instead. |
+| 500 | `MIDTRANS_CONFIG_MISSING` | Midtrans transaction creation found missing server config after the provider path was selected. In normal `/api/payments/create` selection, `provider: "midtrans"` falls back to mock unless `PAYMENT_ENABLE_MIDTRANS=true` and `MIDTRANS_SERVER_KEY` exists. |
 
 ## GET `/api/payments/[id]`
 
@@ -729,7 +750,10 @@ Internal status mapping:
 
 | Midtrans status | Internal payment status |
 | --- | --- |
-| `settlement`, `capture` | `paid` |
+| `settlement` | `paid` |
+| `capture` + `fraud_status=deny` | `failed` |
+| `capture` + `fraud_status=challenge` | `pending` |
+| other `capture` | `paid` |
 | `pending` | `pending` |
 | `deny`, `failure` | `failed` |
 | `expire` | `expired` |
@@ -771,15 +795,8 @@ Success `200`:
 {
   "success": true,
   "data": {
-    "ticket": {
-      "id": "uuid",
-      "checked_in": true,
-      "checked_in_at": "2026-07-07T10:00:00.000Z"
-    },
-    "visitor": {
-      "name": "Nama Peserta",
-      "email": "peserta@example.com"
-    }
+    "qrCode": "opaque-token",
+    "checkedInAt": "2026-07-07T10:00:00.000Z"
   },
   "error": null
 }

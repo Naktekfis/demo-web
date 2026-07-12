@@ -41,7 +41,7 @@ Audience: contributors handling auth, data, admin, payment, or production setup.
 
 ### RLS And Access Smoke Procedure
 
-Use `.omo/evidence/env-separation-hardening/rls-smoke.md` as the evidence template. Owner-run evidence is required before production release sign-off. This checklist documents the procedure only; don't mark it passed until the owner records safe evidence.
+Use owner-managed release evidence for `rls-smoke` (currently referenced by the label `.omo/evidence/env-separation-hardening/rls-smoke.md`; not tracked in this repo). Owner-run evidence is required before production release sign-off. This checklist documents the procedure only; don't mark it passed until the owner records safe evidence.
 
 Required environments:
 
@@ -117,6 +117,6 @@ Final state for launch hardening:
 
 - Upgrade the MVP baseline rate limiter to a distributed, environment-specific limiter before high-traffic production use.
 - Admin audit logs for sensitive changes.
-- Owner-run backup, restore, monitoring, and incident baseline is documented in `docs/runbooks/ENVIRONMENTS.md` and `.omo/evidence/env-separation-hardening/ops-baseline.md`; owner evidence labels must still be filled before release.
+- Owner-run backup, restore, monitoring, and incident baseline is documented in `docs/runbooks/ENVIRONMENTS.md`; owner evidence labels must still be filled before release.
 - Uptime alerting and error monitoring integrations remain owner-run follow-ups until dashboard evidence labels are filled.
 - File upload validation and storage rules if upload features return to scope.

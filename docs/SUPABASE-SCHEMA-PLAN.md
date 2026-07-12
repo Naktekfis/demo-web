@@ -12,33 +12,33 @@ Audience: web development team implementing Supabase migrations for MVP.
 
 This document turns the data model into a concrete MVP migration plan.
 
-Because this project is still MVP and production data is not assumed, the recommended path is a clean schema reset rather than preserving the current partial schema.
+Because this project is still MVP and production data is not assumed, the implemented path uses a clean MVP schema reset in `0002_mvp_schema.sql`, then payment and RLS optimization migrations through `0005_rls_initplan_optimization.sql`.
 
 ## Recommendation
 
-Use a new clean migration that creates the MVP schema directly.
+Use the current migration chain as the source of truth for new environments.
 
 Recommended direction:
 
-- Replace `rsvp` with `visitor_tickets`.
-- Replace JSON-heavy `registrations.team_members` with normalized team and registration tables.
+- Current MVP migrations replace `rsvp` with `visitor_tickets`.
+- Current MVP migrations replace JSON-heavy `registrations.team_members` with normalized team and registration tables.
 - Keep `profiles`.
 - Keep or recreate `competitions` as a DB mirror of hardcoded competition data.
-- Add `admin_roles` if time allows; otherwise keep `ADMIN_EMAILS` temporarily.
+- Use `admin_roles` as the preferred admin source, with `ADMIN_EMAILS` only as an intentional temporary fallback.
 
 Add payment tables now for the post-registration payment phase. Implement internal mock first, then Midtrans Sandbox Snap.
 
 Current latest migration note: `0005_rls_initplan_optimization.sql` keeps the `0004_payment_schema.sql` payment/status model and optimizes RLS policies by wrapping auth helper calls such as `auth.uid()` with `select` in policy expressions.
 
-## Current Schema Problems
+## Legacy Schema Problems Solved By `0002` And Later
 
-| Current table | Problem |
+| Legacy surface | Problem solved in current schema |
 | --- | --- |
 | `rsvp` | Name conflicts with PRD RSVP meaning. It currently means QR ticket/check-in. |
 | `registrations.team_members` JSON | Easy for prototype work, but cannot support member login + join team by UID cleanly. |
 | `registrations` | Mixes team registration and member data in one row. |
 | `competitions` | Missing `registration_type` and team UID prefix config. |
-| Admin access | Currently env allowlist only; acceptable short term, but not ideal. |
+| Admin access | Env allowlist alone does not scale; current code checks `admin_roles` first and falls back to `ADMIN_EMAILS` only when configured. |
 
 ## Target Tables
 
@@ -91,7 +91,7 @@ Required fields:
 
 - `id uuid primary key default gen_random_uuid()`
 - `user_id uuid unique references profiles(id) on delete cascade`
-- `qr_code text unique not null default generated random token`
+- `qr_code text unique not null`
 - `ticket_type text not null default 'general_gate'`
 - `checked_in boolean not null default false`
 - `checked_in_at timestamptz`
@@ -102,6 +102,7 @@ Required fields:
 QR rule:
 
 - Use an opaque random token.
+- Generate the token in server code before insert; the current migration does not define a database default for `qr_code`.
 - Do not encode user metadata in QR.
 
 ### `competitions`
@@ -294,7 +295,8 @@ Enable RLS on all public tables.
 
 ### `payments` and `midtrans_transactions`
 
-- User can select payments linked to own registration or own team leader payment.
+- User can select payments linked to own individual registration.
+- Team members can select payments linked to their team registration; only the team leader can create/manage the payment in server route logic.
 - User cannot directly update payment status.
 - Payment creation and status changes should go through server routes.
 - Admin can read payment data through service routes.
